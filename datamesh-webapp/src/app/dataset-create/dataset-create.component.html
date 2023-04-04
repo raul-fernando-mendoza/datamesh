@@ -1,0 +1,21 @@
+<p>Revisión</p>
+
+<div [formGroup]="FG">
+    
+    <p>
+        <mat-form-field class="name" appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="label" required>
+        </mat-form-field>
+    <p>
+    <p>
+        <mat-form-field class="description" appearance="fill">
+            <mat-label>sql</mat-label>
+            <textarea class="sql" matInput maxlength="10000" rows="3" formControlName="sql" ></textarea>
+        </mat-form-field>         
+    </p>
+
+    <button mat-raised-button mat-dialog-close>Cancelar</button>     
+    <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
+    <br/>
+</div>

@@ -1,0 +1,104 @@
+Child Edit
+
+<div [formGroup]="FG">
+    
+  <p>
+      <mat-form-field appearance="fill">
+          <mat-label>Name</mat-label>
+          <input matInput formControlName="label" required (change)="onPropertyChange($event)" required>
+      </mat-form-field>
+  <p>
+  <p>    
+      <mat-form-field appearance="fill">
+        <mat-label>Left dataset</mat-label>
+        <mat-select  formControlName="leftDatasetId" name="leftDatasetId" (selectionChange)="onSelectChange($event)" required>
+          <mat-option *ngFor="let item of datasets" [value]="item.id" >
+            {{item.label}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>   
+      <mat-form-field appearance="fill">
+        <mat-label>Right dataset</mat-label>
+        <mat-select  formControlName="rightDatasetId" (selectionChange)="onSelectChange($event)" required>
+          <mat-option *ngFor="let item of datasets" [value]="item.id">
+            {{item.label}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>    
+  </p>   
+  <div *ngIf="!data.id">
+    <button mat-raised-button mat-dialog-close>Cancelar</button>     
+    <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
+  </div>       
+</div>
+
+  <button mat-button (click)="onRefreshPorts()">refresh</button>
+
+  <div *ngIf="child">
+    <button mat-raised-button [disabled]="submmiting" (click)="onRefreshPorts()">Reload Fields</button>
+    <mat-tab-group>
+      <mat-tab label="Ports">
+        <table mat-table *ngIf="submmiting == false; else elseBlock" [dataSource]="portsDataSource"  matSort aria-label="Elements" [hidden]="submmiting" class="mat-elevation-z8">
+          <ng-container matColumnDef="idx">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>idx</th>
+            <td mat-cell *matCellDef="let row; let i = index;">
+              <span>{{ i }}</span>
+            </td>
+          </ng-container>  
+          <ng-container matColumnDef="source">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>source</th>
+            <td mat-cell *matCellDef="let row; let i = index;">
+              <span>{{ row.side }}</span>
+            </td>
+          </ng-container>          
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>name</th>
+            <td mat-cell *matCellDef="let row; let i = index;">
+              <span>{{ row.port.name }}</span>
+            </td>
+          </ng-container> 
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>type</th>
+            <td mat-cell *matCellDef="let row; let i = index;">
+              <span>{{ row.port.datatype }}</span>
+            </td>
+          </ng-container>   
+          <ng-container matColumnDef="alias">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>alias</th>
+            <td mat-cell *matCellDef="let row; let i = index;">
+              <span>{{ row.port.alias }}</span>
+            </td>
+          </ng-container>       
+          <ng-container matColumnDef="selected">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>selected</th>
+            <td mat-cell *matCellDef="let row; let i = index;">
+              <mat-checkbox (click)="onSelectPort(row)" [(ngModel)]="row.port.selected"></mat-checkbox>
+            </td>
+          </ng-container>          
+            
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns; " ></tr>
+        </table>
+        
+        <mat-paginator #paginator
+            [length]="portsDataSource.length"
+            [pageIndex]="0"
+            [pageSize]="5"
+            [pageSizeOptions]="[25, 50, 100, 250]">
+        </mat-paginator>
+      </mat-tab>
+      <mat-tab label="Keys"> 
+        Join conditions
+        <div *ngFor="let condition of child.joinConditions">
+          {{condition.leftExpresion}} {{condition.rightExpresion}} {{condition.selected}}
+        </div>
+      </mat-tab>  
+  </mat-tab-group>
+
+  <button mat-raised-button mat-dialog-close>Close</button>     
+  </div>
+  <ng-template #elseBlock>
+    loading.
+    <mat-spinner></mat-spinner>
+  </ng-template>
+  

@@ -1,0 +1,3 @@
+{
+    "qry":"select * from da_dw.dim_club"
+}
