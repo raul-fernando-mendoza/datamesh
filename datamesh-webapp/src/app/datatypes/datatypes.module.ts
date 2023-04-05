@@ -30,22 +30,15 @@ export interface Port{
   selected:boolean
 }
 
-export interface ConditionJoin{
-  leftExpresion:string
-  rightExpresion:string
-  selected:boolean
-}
-
-
-
 export interface Comparison{
   id:string 
   label:string
+  leftFile:string
   leftDatasetId:string
   rightDatasetId:string
   leftPorts:Port[]
   rightPorts:Port[]
-  joinConditions:ConditionJoin[]
+  joinColumns:string[]
   filter:string
 }
 
@@ -65,7 +58,7 @@ export interface Child{
   rightDatasetId:string
   leftPorts:Port[]
   rightPorts:Port[]
-  joinConditions:ConditionJoin[]  
+  joinColumns:string[]  
 }
 
 export interface PortListRequest{

@@ -8,7 +8,7 @@ Comparison Edit
       <p>
       <mat-form-field class="dataset" appearance="fill">
         <mat-label>Main dataset</mat-label>
-        <mat-select  formControlName="leftDatasetId" name="leftDatasetId" (selectionChange)="onSelectChange($event)" required>
+        <mat-select  formControlName="leftDatasetId" name="leftDatasetId" (selectionChange)="onSelectChange($event)">
           <mat-option *ngFor="let item of datasets" [value]="item.id" >
             {{item.label}}
           </mat-option>
@@ -22,6 +22,12 @@ Comparison Edit
           </mat-option>
         </mat-select>
       </mat-form-field>  
+  </p>
+  <p>
+    <mat-form-field appearance="fill">
+      <mat-label>left File</mat-label>
+      <input matInput formControlName="leftFile" required (change)="onPropertyChange($event)">
+    </mat-form-field>
   </p>
   <p>      
       <mat-form-field class="filter" appearance="fill">
@@ -90,8 +96,8 @@ Comparison Edit
     </mat-tab>
     <mat-tab label="Keys"> 
       Join conditions
-      <div *ngFor="let condition of comparison.joinConditions">
-        {{condition.leftExpresion}} {{condition.rightExpresion}} {{condition.selected}}
+      <div *ngFor="let column of comparison.joinColumns">
+        {{column}}
       </div>
     </mat-tab>  
 </mat-tab-group>

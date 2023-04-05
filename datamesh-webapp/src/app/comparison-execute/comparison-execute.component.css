@@ -31,28 +31,32 @@
   .cell{
     overflow-wrap: break-word;
   }
-  .StringType{
+  .index{
+    min-width:3em;
+    max-width:3em;
+    width:3em;
+    overflow: hidden;
+    text-align: left;
+  }  
+  .StringType, .object{
     min-width:10em;
     max-width:10em;
     width:10em;
     overflow: hidden;
-    border-color:1px solid green;
     text-align: left;
   }
-  .DecimalType{
+  .DecimalType, .float64{
     min-width:5em;
     max-width:5em;
     width:5em;
     overflow: hidden;
-    border-color:1px solid blue;
     text-align: right;
   }
-  .LongType{
+  .LongType, .int64{
     min-width:5em;
     max-width:5em;
     width:5em;
     overflow: hidden;
-    border-color:1px solid grey;
     text-align: right;
   }  
   .TimestampType{
@@ -60,7 +64,6 @@
     max-width:10em;
     width:10em;
     overflow: hidden;
-    border-color:1px solid rebeccapurple;
     text-align: left;
   }
   .BooleanType{
@@ -68,6 +71,5 @@
     max-width:5em;
     width:5em;
     overflow: hidden;
-    border-color:1px solid coral;
     text-align: right;
   }   

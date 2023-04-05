@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, Query, ViewChild } from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
 import { TreeNestedDataSource, TreeNode, TREENODE_EXAMPLE_DATA } from '../tree-nested-data-source';
@@ -12,22 +12,12 @@ import { SelectionChange } from '@angular/cdk/collections';
 import { Call, splitNsName } from '@angular/compiler';
 import { DatasetCreateComponent } from '../dataset-create/dataset-create.component';
 import { firstValueFrom } from 'rxjs';
-/*
-interface Column{
-  name:string,
-  alias:string,
-  type:string
-}
-*/
-interface CompareExecuteRequest{
-  "leftQry":string,
-  "rightQry":string,
-  "leftColumns":Port[],
-  "rightColumns":Port[],
-  "joinColumns":string[],
-  "filter":string 
-}
 
+
+interface ComparisonRequest extends Comparison{
+  leftQry:string,
+  rightQry:string
+}
 
 @Component({
   selector: 'app-comparison-execute',
@@ -49,14 +39,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
 
   
 
-  req:CompareExecuteRequest = {
-    leftQry: '',
-    rightQry: '',
-    leftColumns: [],
-    rightColumns: [],
-    joinColumns: [],
-    filter:""
-  }
+  req!:ComparisonRequest 
 
   comparisonChilds:TreeNode[] = []
 
@@ -160,18 +143,9 @@ export class ComparisonExecuteComponent implements AfterViewInit{
 
   update(){
 
-    this.req = {
-      leftQry: '',
-      rightQry: '',
-      leftColumns: [],
-      rightColumns: [],
-      joinColumns: [],
-      filter:""
-    }
-
-    getDoc( doc( db,"Comparison", this.id! )).then( docSnap =>{
+      getDoc( doc( db,"Comparison", this.id! )).then( docSnap =>{
       this.comparison = docSnap.data() as Comparison
-
+      this.req = docSnap.data() as ComparisonRequest
       //add the first node 
       var node:TreeNode = {
         obj:this.comparison,
@@ -183,26 +157,24 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         isLoading:false
       }
 
-      this.comparison.leftPorts.map( port =>{
-        this.req.leftColumns.push( port )
-      })
-      this.comparison.rightPorts.map( port =>{
-        this.req.rightColumns.push( port )
-      })      
-      this.req["filter"] = this.comparison.filter
       this.comparisonList.length=0
       this.comparisonList.push( node )
     })
     .then( ()=>{
-      return getDoc( doc( db,"Dataset", this.comparison!.leftDatasetId )).then( docSnap =>{
-        let dataset = docSnap.data() as Dataset
-        this.req["leftQry"] = this.stringUtilService.removeNonPrintable((dataset.sql!))
-      })
+      if( this.comparison?.leftDatasetId ){
+        return getDoc( doc( db,"Dataset", this.comparison!.leftDatasetId )).then( docSnap =>{
+          let dataset = docSnap.data() as Dataset
+          this.req.leftQry = this.stringUtilService.removeNonPrintable((dataset.sql!))
+        })
+      }
+      else{
+        return null
+      }
     })
     .then( ()=>{
       return getDoc( doc( db,"Dataset", this.comparison!.rightDatasetId )).then( docSnap =>{
         let dataset = docSnap.data() as Dataset
-        this.req["rightQry"] = this.stringUtilService.removeNonPrintable((dataset.sql!))
+        this.req.rightQry = this.stringUtilService.removeNonPrintable((dataset.sql!))
       })
     })
     .then( ()=>{
@@ -211,13 +183,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     .then( ()=>{
       this.submmiting = true
 
-      this.req.joinColumns = []
-      this.comparison!.joinConditions.map( condition =>{
-        if( condition.selected ){
-          this.req.joinColumns.push( condition.leftExpresion )
-        }
-      })
-      this.urlService.post("executeJoin",this.req).subscribe({ 
+       this.urlService.post("executeJoin",this.req).subscribe({ 
         'next':(result)=>{
           this.submmiting = false
           console.log( result )
@@ -396,5 +362,8 @@ export class ComparisonExecuteComponent implements AfterViewInit{
       }
     }) 
     return allPorts
+  }
+  getChildrenIndex( node:TreeNode ):number{
+    return node.parentNode!.children!.findIndex(x => x == node )
   }
 }

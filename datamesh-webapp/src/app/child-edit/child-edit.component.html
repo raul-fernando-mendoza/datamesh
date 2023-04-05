@@ -89,8 +89,8 @@ Child Edit
       </mat-tab>
       <mat-tab label="Keys"> 
         Join conditions
-        <div *ngFor="let condition of child.joinConditions">
-          {{condition.leftExpresion}} {{condition.rightExpresion}} {{condition.selected}}
+        <div *ngFor="let column of child.joinColumns">
+          {{column}} 
         </div>
       </mat-tab>  
   </mat-tab-group>

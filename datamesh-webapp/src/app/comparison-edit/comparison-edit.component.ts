@@ -6,7 +6,7 @@ import { db } from '../../environments/environment'
 
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
 import { MatDialog } from '@angular/material/dialog';
-import { Comparison, Child, PortListRequest, Dataset, Port, ConditionJoin } from '../datatypes/datatypes.module';
+import { Comparison, Child, PortListRequest, Dataset, Port } from '../datatypes/datatypes.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as uuid from 'uuid';
 import { ChildEditComponent } from '../child-edit/child-edit.component';
@@ -55,6 +55,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   FG = this.fb.group({
     id:[''],
     label:[''],
+    leftFile:[''],
     leftDatasetId:[''],
     rightDatasetId:[''],
     filter:['']
@@ -162,6 +163,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
                 this.comparison=docRef.data() as Comparison
 
                 this.FG.controls.label.setValue( this.comparison.label!)
+                this.FG.controls.leftFile.setValue( this.comparison.leftFile)
                 this.FG.controls.leftDatasetId.setValue( this.comparison.leftDatasetId! )
                 this.FG.controls.rightDatasetId.setValue( this.comparison.rightDatasetId! )
                 this.FG.controls.filter.setValue( this.comparison.filter! )
@@ -307,11 +309,12 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     var comparison:Comparison={
       id:uuid.v4(),
       label:this.FG.controls.label.value!,
+      leftFile:this.FG.controls.leftFile.value!,
       leftDatasetId:this.FG.controls.leftDatasetId.value!,
       rightDatasetId:this.FG.controls.rightDatasetId.value!,
       leftPorts:[],
       rightPorts:[],
-      joinConditions:[],
+      joinColumns:[],
       filter:""
     }
     
@@ -376,15 +379,21 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     })
     return selectedDataset
   } 
-
-  getPorts( side:"left"|"right",itemPorts:ItemPort[], datasetId:string|null ):Promise<void>{
+  getPorts( side:"left"|"right",itemPorts:ItemPort[], datasetId:string|null, csvfile:string|null ):Promise<void>{
     return new Promise<void>((resolve,reject)=>{
+      let param:any
       if( datasetId ){
         let dataSet = this.getDataset( datasetId )
         if( dataSet && dataSet.sql ){
           var qry = this.stringUtilService.removeNonPrintable(dataSet.sql)
+          param = {"qry":qry}
+        }
           
-          this.urlService.post("getFielsForQuery",{"qry":qry}).subscribe({ 
+      }//finish left dataset qry    
+      else{
+        param = {"csvfile":csvfile}
+      }    
+      this.urlService.post("getFielsForQuery",param).subscribe({ 
             'next':(result)=>{
              
               var tempItemPorts:ItemPort[] = []
@@ -428,8 +437,6 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
               reject(reason)
             }
           })
-        }//finish left dataset qry  
-      }  
     })
   }
 
@@ -437,12 +444,13 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     return new Promise<void>((resolve, reject) =>{
       let leftDatasetId:string|null = this.FG.controls.leftDatasetId.value
       let rightDatasetId:string|null = this.FG.controls.rightDatasetId.value
+      let leftFile:string|null = this.FG.controls.leftFile.value
 
       this.submmiting = true
-      this.getPorts("left", this.leftItemPorts, leftDatasetId ).then( ()=>{
+      this.getPorts("left", this.leftItemPorts, leftDatasetId, leftFile ).then( ()=>{
       })
       .then( ()=>{
-        return this.getPorts("right", this.rightItemPorts, rightDatasetId )
+        return this.getPorts("right", this.rightItemPorts, rightDatasetId, leftFile )
       })
       .then( ()=>{
         this.submmiting = false
@@ -452,19 +460,17 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
         this.portsDataSource.length = 0
         allItemPorts.map( item => this.portsDataSource.push(item))
 
-        //update joinConditions 
+        //update joinColumns
         //1.-first read all fields with the same name 
         //2.-save the newOnes
-        this.comparison.joinConditions.length = 0
+        if( !this.comparison.joinColumns ){
+          this.comparison.joinColumns = []
+        }
+        this.comparison.joinColumns.length = 0
         this.comparison.leftPorts.map( lPort =>{
           this.comparison.rightPorts.map( rPort =>{
             if( lPort.name == rPort.name ){
-              let joinCondition:ConditionJoin = {
-                leftExpresion:lPort.name,
-                rightExpresion:rPort.name,
-                selected:true
-              }
-              this.comparison.joinConditions.push( joinCondition )
+              this.comparison.joinColumns.push( lPort.name )
             }
           })
         })
@@ -472,7 +478,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
         var obj ={ 
           "leftPorts":this.comparison.leftPorts,
           "rightPorts":this.comparison.rightPorts,
-          "joinConditions":this.comparison.joinConditions
+          "joinColumns":this.comparison.joinColumns
         }
         updateDoc( doc(db,"Comparison",this.comparison.id), obj).then( ()=>{
           console.log("ports has been updated")

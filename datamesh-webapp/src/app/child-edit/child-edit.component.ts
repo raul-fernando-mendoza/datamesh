@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
 import { DatasetCreateComponent } from '../dataset-create/dataset-create.component';
 import { MatDialog, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { Child, JoinType, Dataset, Port, ConditionJoin, PortListRequest } from '../datatypes/datatypes.module';
+import { Child, JoinType, Dataset, Port, PortListRequest } from '../datatypes/datatypes.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as uuid from 'uuid';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
@@ -40,6 +40,7 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
   FG = this.fb.group({
     id:[''],
     label:[''],
+    leftFile:[''],
     leftDatasetId:[''],
     rightDatasetId:[''],
     ports:this.fb.array([
@@ -233,7 +234,7 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
       rightDatasetId:this.FG.controls.rightDatasetId.value!,
       leftPorts:[],
       rightPorts:[],
-      joinConditions:[]
+      joinColumns:[]
     }
     
     setDoc( doc(db, this.data.parentCollection + "/Child", child.id), child).then( () =>{
@@ -258,59 +259,64 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
     })
     return selectedDataset
   } 
-  getPorts( side:"left"|"right",itemPorts:ItemPort[], datasetId:string|null ):Promise<void>{
+  getPorts( side:"left"|"right",itemPorts:ItemPort[], datasetId:string|null, csvfile:string|null ):Promise<void>{
     return new Promise<void>((resolve,reject)=>{
+      let param:any
       if( datasetId ){
         let dataSet = this.getDataset( datasetId )
         if( dataSet && dataSet.sql ){
           var qry = this.stringUtilService.removeNonPrintable(dataSet.sql)
+          param = {"qry":qry}
+        }
+        
+      }//finish left dataset qry    
+      else{
+        param = {"csvfile":csvfile}
+      }    
+      this.urlService.post("getFielsForQuery",param).subscribe({ 
+        'next':(result)=>{
           
-          this.urlService.post("getFielsForQuery",{"qry":qry}).subscribe({ 
-            'next':(result)=>{
-             
-              var tempItemPorts:ItemPort[] = []
-              var data:PortListRequest = result as PortListRequest 
-    
-              var fields = data["fields"]
-              fields.map( field =>{
-                var itemPort:ItemPort = {
-                  side:side,
-                  port:field
-                }
-                tempItemPorts.push( itemPort )
-              })
-              itemPorts.map( oldItemPort =>{
-                tempItemPorts.filter( p => p.port.name == oldItemPort.port.name && oldItemPort.port.selected == true).map( p=>{
-                  p.port.selected = true
-                  if( oldItemPort.port.alias != null ){
-                    p.port.alias = oldItemPort.port.alias
-                  }
-                })
-              })
-              itemPorts.length=0
-              if( side == "left"){
-                this.child!.leftPorts!.length = 0
-              }
-              else{
-                this.child!.rightPorts!.length = 0
-              }
-              tempItemPorts.map( item => {
-                itemPorts.push(item)
-                if( side == "left"){
-                  this.child.leftPorts!.push( item.port )
-                }
-                else{
-                  this.child!.rightPorts!.push( item.port )
-                }                
-              })
-              resolve()
-            },
-            'error':(reason)=>{
-              reject(reason)
+          var tempItemPorts:ItemPort[] = []
+          var data:PortListRequest = result as PortListRequest 
+
+          var fields = data["fields"]
+          fields.map( field =>{
+            var itemPort:ItemPort = {
+              side:side,
+              port:field
             }
+            tempItemPorts.push( itemPort )
           })
-        }//finish left dataset qry  
-      }  
+          itemPorts.map( oldItemPort =>{
+            tempItemPorts.filter( p => p.port.name == oldItemPort.port.name && oldItemPort.port.selected == true).map( p=>{
+              p.port.selected = true
+              if( oldItemPort.port.alias != null ){
+                p.port.alias = oldItemPort.port.alias
+              }
+            })
+          })
+          itemPorts.length=0
+          if( side == "left"){
+            this.child!.leftPorts!.length = 0
+          }
+          else{
+            this.child!.rightPorts!.length = 0
+          }
+          tempItemPorts.map( item => {
+            itemPorts.push(item)
+            if( side == "left"){
+              this.child.leftPorts!.push( item.port )
+            }
+            else{
+              this.child!.rightPorts!.push( item.port )
+            }                
+          })
+          resolve()
+        },
+        'error':(reason)=>{
+          reject(reason)
+        }
+      })
     })
   }
 
@@ -318,12 +324,13 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
     return new Promise<void>((resolve, reject) =>{
       let leftDatasetId:string|null = this.FG.controls.leftDatasetId.value
       let rightDatasetId:string|null = this.FG.controls.rightDatasetId.value
+      let leftFile:string|null = this.FG.controls.leftFile.value
 
       this.submmiting = true
-      this.getPorts("left", this.leftItemPorts, leftDatasetId ).then( ()=>{
+      this.getPorts("left", this.leftItemPorts, leftDatasetId, leftFile ).then( ()=>{
       })
       .then( ()=>{
-        return this.getPorts("right", this.rightItemPorts, rightDatasetId )
+        return this.getPorts("right", this.rightItemPorts, rightDatasetId, leftFile )
       })
       .then( ()=>{
         this.submmiting = false
@@ -333,19 +340,14 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
         this.portsDataSource.length = 0
         allItemPorts.map( item => this.portsDataSource.push(item))
 
-        //update joinConditions 
+        //update joincolumns 
         //1.-first read all fields with the same name 
         //2.-save the newOnes
-        this.child.joinConditions.length = 0
+        this.child.joinColumns.length = 0
         this.child.leftPorts.map( lPort =>{
           this.child.rightPorts.map( rPort =>{
             if( lPort.name == rPort.name ){
-              let joinCondition:ConditionJoin = {
-                leftExpresion:lPort.name,
-                rightExpresion:rPort.name,
-                selected:true
-              }
-              this.child.joinConditions.push( joinCondition )
+              this.child.joinColumns.push( lPort.name )
             }
           })
         })
@@ -353,7 +355,7 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
         var obj ={ 
           "leftPorts":this.child.leftPorts,
           "rightPorts":this.child.rightPorts,
-          "joinConditions":this.child.joinConditions
+          "joinColumns ":this.child.joinColumns
         }
         updateDoc( doc(db,this.data.parentCollection + "/Child",this.child.id), obj).then( ()=>{
           console.log("ports has been updated")

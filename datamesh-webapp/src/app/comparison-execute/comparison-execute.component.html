@@ -9,23 +9,24 @@
         {{node.obj.label}} nochilds:{{node.nodeClass}}
       </div>  
       <div *ngIf="node.nodeClass == 'Data'">
-        <tr >
+        <tr *ngIf="getChildrenIndex(node) == 0">
+          <td class="index">
+            {{getChildrenIndex(node)}}
+          </td>           
           <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
-            <div *ngIf="node.obj == node.parentNode.children[0].obj">
+            <div >
               <div class="cell">{{port.name}}</div>
               <div class="cell">{{port.datatype}}</div>
              </div> 
+          </td>
+        </tr>         
+        <tr >
+          <td class="index">
+            {{ getChildrenIndex(node) + 1}}
+          </td>           
+          <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
              <div class="cell">{{node.obj[port.name]}}</div>   
           </td>
-          <!--
-          <td *ngFor="let port of node.parentNode.obj.rightPorts" [class]="port.datatype.split('(')[0]">
-            <div *ngIf="node.obj == node.parentNode.children[0].obj">
-              <div>{{port.name}}</div>
-              <div>{{port.datatype}}</div>
-             </div> 
-             <div>{{node.obj[port.name]}}</div>            
-          </td>
-          -->         
         </tr>                                  
       </div> 
     </mat-tree-node>
@@ -46,27 +47,29 @@
           </div>
           
           <div *ngIf="node.nodeClass == 'Data'">
-            <tr >
-              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts,node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
-                <div *ngIf="node.obj == node.parentNode.children[0].obj">
+            <tr *ngIf="getChildrenIndex(node) == 0">
+              <td class="index">
+                {{getChildrenIndex(node)}}
+              </td>           
+              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
+                <div >
                   <div class="cell">{{port.name}}</div>
                   <div class="cell">{{port.datatype}}</div>
                  </div> 
+              </td>
+            </tr>         
+            <tr >
+              <td class="index">
+                {{ getChildrenIndex(node) + 1}}
+              </td>           
+              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
                  <div class="cell">{{node.obj[port.name]}}</div>   
               </td>
-              <!--
-              <td *ngFor="let port of node.parentNode.obj.rightPorts" [class]="port.datatype.split('(')[0]">
-                <div *ngIf="node.obj == node.parentNode.children[0].obj">
-                  <div>{{port.name}}</div>
-                  <div>{{port.datatype}}</div>
-                 </div> 
-                 <div>{{node.obj[port.name]}}</div>            
-              </td>
-              -->         
-            </tr>            
+            </tr>                                  
             <mat-progress-bar *ngIf="node.isLoading"
             mode="indeterminate"
             class="example-tree-progress-bar"></mat-progress-bar>                        
+
           </div> 
         </div>
         <!-- There is inline padding applied to this div using styles.

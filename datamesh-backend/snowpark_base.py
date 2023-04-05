@@ -30,66 +30,125 @@ def database():
 def getFielsForQuery(req):
     print("getFielsForQuery called")
     print(json.dumps(req))
-    qry = req["qry"]
-    r = sess.sql(qry)
-    
+    qry = req["qry"] if "qry" in req else None
+    csvfile:str = req["csvfile"] if "csvfile" in req else None
     fields = []
-
-    for field in r.schema.fields:
-        fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} ) 
-    return {"fields":fields}
+    
+    if qry: 
+        r = sess.sql(qry)
+        for field in r.schema.fields:
+            fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} ) 
+        return {"fields":fields}
+    else:
+        print("run query left")
+        leftDF = pd.read_csv(csvfile, sep = ',')
+        print( leftDF.head(10) ) 
+        types = leftDF.dtypes
+        for columnName in leftDF.columns.tolist():
+            fields.append( { "name":str(columnName) , "datatype":str(types[columnName].name)} ) 
+        return {"fields":fields}               
 
 
 def executeJoin( req):
     print("executeJoin called")
     print(json.dumps(req,indent=4))
 
-    leftQry:str = req["leftQry"]
-    rightQry:str = req["rightQry"]
-    leftCols=req["leftColumns"]
-    rightCols=req["rightColumns"]
+    leftQry:str = req["leftQry"] if "leftQry" in req else None
+    rightQry:str = req["rightQry"] if "rightQry" in req else None
+    
+    leftFile:str = req["leftFile"] if "leftFile" in req else None
+    righFile:str = req["rightFile"] if "rightFile" in req else None
+    
+    leftCols=req["leftPorts"]
+    rightCols=req["rightPorts"]
     joinColumns=req["joinColumns"]
     filter=req["filter"] if "filter" in req and len(req["filter"]) > 0 else None
     
-    print("run query left")
-    leftDF = sess.sql(leftQry)
-    leftDF.show()
-    print("run query right")
-    rightDF = sess.sql(rightQry)
-    rightDF.show()
-    
-    columnsArray = []
-    for ct in leftCols:
-        fn:str = ct["name"] 
-        fa:str = ct["alias"] if "alias" in ct else ct["name"]
-        columnsArray.append( leftDF[fn].alias(fa) )
-    for ct in rightCols:
-        fn:str = ct["name"] 
-        fa:str = ct["alias"] if "alias" in ct else ct["name"]
-        firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
-        if firstOcurr == None:
-            columnsArray.append( rightDF[fn].alias(fa) )
-     
-    print("left join right")   
-    df = leftDF \
-        .join( right=rightDF, 
-              using_columns=joinColumns,
-          join_type= "leftouter") \
-         .select( columnsArray )\
-         .sort( joinColumns )
-         
-    #now apply filters if there is any
-    print("apply filter")
-    if filter and len(filter.strip())>0:
-        df = df.filter(filter)
-         
-    df.show()
-    collected = df.limit(2000).collect()
-    p_df = pd.DataFrame(data=collected)
-    obj = p_df.to_json(orient = "records")   
-    print(json.dumps({"result":obj},indent=4))
-    print("executeJoin END")
-    return obj 
+    if leftQry and rightQry:
+        print("run query left")
+        leftDF = sess.sql(leftQry)
+        leftDF.show()
+        print("run query right")
+        rightDF = sess.sql(rightQry)
+        rightDF.show()
+        
+        columnsArray = []
+        for ct in leftCols:
+            fn:str = ct["name"] 
+            fa:str = ct["alias"] if "alias" in ct else ct["name"]
+            columnsArray.append( leftDF[fn].alias(fa) )
+        for ct in rightCols:
+            fn:str = ct["name"] 
+            fa:str = ct["alias"] if "alias" in ct else ct["name"]
+            firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
+            if firstOcurr == None:
+                columnsArray.append( rightDF[fn].alias(fa) )
+        
+        print("left join right")   
+        df = leftDF \
+            .join( right=rightDF, 
+                using_columns=joinColumns,
+            join_type= "leftouter") \
+            .select( columnsArray )\
+            .sort( joinColumns )
+            
+        #now apply filters if there is any
+        print("apply filter")
+        if filter and len(filter.strip())>0:
+            df = df.filter(filter)
+            
+        df.show()
+        collected = df.limit(2000).collect()
+        p_df = pd.DataFrame(data=collected)
+        obj = p_df.to_json(orient = "records")   
+        print(json.dumps({"result":obj},indent=4))
+        print("executeJoin END")
+        return obj 
+    else: #we have to do the join using pandas
+        print("run query left")
+        leftDF = pd.read_csv(leftFile, sep = ',')
+        print( leftDF.head(10) )
+        print("run query right")
+        r_Dataframe = sess.sql(rightQry)
+        r_Dataframe.show()
+        rightDF = pd.DataFrame(data=r_Dataframe.collect())
+        
+        
+        columnsArray = []
+        for ct in leftCols:
+            fn:str = ct["name"] 
+            fa:str = ct["alias"] if "alias" in ct else ct["name"]
+            columnsArray.append( fn )
+        for ct in rightCols:
+            fn:str = ct["name"] 
+            fa:str = ct["alias"] if "alias" in ct else ct["name"]
+            firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
+            if firstOcurr == None:
+                columnsArray.append( fn )
+        
+        print("left join right")   
+        df = pd.merge( leftDF, 
+                rightDF, 
+                on=joinColumns,
+            how = "outer")
+        #    .sort_values( joinColumns )
+        
+        df = df[ columnsArray ]
+            
+        #now apply filters if there is any
+        print("apply filter")
+        if filter and len(filter.strip())>0:
+            print("apply filter:" + filter)
+            df = df.query(filter)
+            
+        df = df.sort_values(by = joinColumns)    
+            
+        print( df.head() )
+        obj = df.iloc[:2000].to_json(orient = "records")   
+        print(json.dumps({"result":obj},indent=4))
+        print("executeJoin END")
+        return obj         
+        
 
 def executeChildJoin( req ):
     print("executeChildJoin: called")
