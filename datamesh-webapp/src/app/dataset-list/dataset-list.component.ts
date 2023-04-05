@@ -84,6 +84,7 @@ export class DatasetListComponent implements AfterViewInit, OnInit, OnDestroy{
               var dataset=doc.data() as Dataset
               this.dataSource.push( dataset )
             })
+            this.dataSource.sort( (a,b)=>( (a as Dataset).label! > (b as Dataset).label! ) ? 1:-1)
             this.sort.active = 'title'
             this.sort.direction = 'asc'     
             this.table.dataSource = this.dataSource;              

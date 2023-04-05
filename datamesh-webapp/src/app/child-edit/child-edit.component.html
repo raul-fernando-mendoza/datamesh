@@ -9,7 +9,7 @@ Child Edit
       </mat-form-field>
   <p>
   <p>    
-      <mat-form-field appearance="fill">
+      <mat-form-field class="datasetId" appearance="fill">
         <mat-label>Left dataset</mat-label>
         <mat-select  formControlName="leftDatasetId" name="leftDatasetId" (selectionChange)="onSelectChange($event)" required>
           <mat-option *ngFor="let item of datasets" [value]="item.id" >
@@ -17,7 +17,7 @@ Child Edit
           </mat-option>
         </mat-select>
       </mat-form-field>   
-      <mat-form-field appearance="fill">
+      <mat-form-field class="datasetId" appearance="fill">
         <mat-label>Right dataset</mat-label>
         <mat-select  formControlName="rightDatasetId" (selectionChange)="onSelectChange($event)" required>
           <mat-option *ngFor="let item of datasets" [value]="item.id">

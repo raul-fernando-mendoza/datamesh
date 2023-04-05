@@ -35,3 +35,6 @@ td{
 .dataset{
   min-width:25em;
 }
+.filter{
+  width:90%;
+}

@@ -165,65 +165,48 @@ class TestFireStore(unittest.TestCase):
         print(json.dumps({"result":[]}))
         
         leftqry = """
-select month_id, club_src_num, ad.account as account_id, customer_src_num, subscription_src_num, effective_date, ad.access, ad.product_rp_name, ad.master_addon_flag, ad.retail_corp_flag, ad.subscription_type_desc, value as value_im 
-from im_prd.dw_24hr.memstats_account_detail ad
-join im_prd.dw_24hr.dim_club using(club_id)        
+select * from im_prd.dw_24hr.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')     
         """
         
         rightQry = """
-select distinct month_id, subscription_src_num,club_src_num, ad.account as account_id, customer_src_num,  effective_date, ad.access, ad.product_rp_name, ad.master_addon_flag, ad.retail_corp_flag, ad.subscription_type_desc, IS_3DAY_CANCEL_FLAG,is_excludable_promo_flag, value as value_v1  
-from da_mem.memstats_account_detail ad
-join da_dw.dim_club using(club_id)
-join da_mem.memstats_account_list al on al.account_num = ad.account
-join da_dw.dim_subscription_new ds using(subscription_id)
-where  ds.is_current_record = true         
+select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')        
         """
        
         request:Request = {
             "parentData":{
-                "ACCOUNT_ID":901367,
-                "CLUB_SRC_NUM":"00219",
-                "MONTH_ID":"20220200.0000",
-                "VALUE":2
+                "ACCOUNT_ID":901231,
+                "ACCOUNT_SHORT_DESC":"NS/AGV/Basic/Region/M/Ret$",
+                "Owner":"Brian"
             },
             "leftQry":leftqry,
             "rightQry":rightQry,
             "leftColumns":[
                 {
-                    "name":'ACCOUNT_ID'
+                    "name":'ACCOUNT_NUM'
+                    ,"alias":"ACCOUNT_ID"
                 },
                 {
-                    "name":'CLUB_SRC_NUM'
+                    "name":'ACCOUNT_SHORT_DESC'
                     #,'alias':'CLUB_SRC_NUM'
-                },
-                {
-                    "name":'MONTH_ID',
-                    #,'alias':'MONTH_ID'
-                },
-                {
-                    "name":'VALUE_IM',
-                    #,'alias':'VALUE'
                 }
             ],
             "rightColumns":[
                 {
-                    "name":"MONTH_ID"                    
+                    "name":'ACCOUNT_NUM'
+                    ,"alias":"ACCOUNT_ID"
                 },
                 {
-                    "name":"CLUB_SRC_NUM"
-                    #,"alias":"CLUB_SRC_NUM_DETAIL"
-                },
-                {
-                    "name":"ACCOUNT_ID"
-                    #,"alias":"ACCOUNT_ID_DETAIL"
-                },
-                {
-                    "name":"IS_3DAY_CANCEL_FLAG"
-                    #,"alias":"IS_3DAY_CANCEL_FLAG"
+                    "name":'ACCOUNT_SHORT_DESC'
+                    ,'alias':'ACCOUNT_SHORT_DESC_1'
                 }
             ],
-            "joinColumns":["ACCOUNT_ID","MONTH_ID","CLUB_SRC_NUM"]
+            "joinColumns":["ACCOUNT_ID"]
         }
+        print( list(map( lambda x: x + x, ["a","b"])) )
+        
+        leftCols = request["leftColumns"]
+        print( list(map( lambda column: ( column['alias'] if 'alias' in column else column['name'] ),leftCols)) )
+        
         data = snowpark_base.executeChildJoin(qry2) 
         
         #print(json.dumps({"result":data}, indent=1))

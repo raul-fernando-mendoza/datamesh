@@ -42,11 +42,14 @@ def getFielsForQuery(req):
 
 def executeJoin( req):
     print("executeJoin called")
+    print(json.dumps(req,indent=4))
+
     leftQry:str = req["leftQry"]
     rightQry:str = req["rightQry"]
     leftCols=req["leftColumns"]
     rightCols=req["rightColumns"]
     joinColumns=req["joinColumns"]
+    filter=req["filter"] if "filter" in req and len(req["filter"]) > 0 else None
     
     print("run query left")
     leftDF = sess.sql(leftQry)
@@ -72,10 +75,16 @@ def executeJoin( req):
         .join( right=rightDF, 
               using_columns=joinColumns,
           join_type= "leftouter") \
-         .select( columnsArray )
+         .select( columnsArray )\
+         .sort( joinColumns )
+         
+    #now apply filters if there is any
+    print("apply filter")
+    if filter and len(filter.strip())>0:
+        df = df.filter(filter)
          
     df.show()
-    collected = df.limit(100).collect()
+    collected = df.limit(2000).collect()
     p_df = pd.DataFrame(data=collected)
     obj = p_df.to_json(orient = "records")   
     print(json.dumps({"result":obj},indent=4))
@@ -88,9 +97,9 @@ def executeChildJoin( req ):
     parentData = req["parentData"]
     leftQry:str = req["leftQry"]
     rightQry:str = req["rightQry"]
-    leftCols=req["leftColumns"]
-    rightCols=req["rightColumns"]
-    joinCols=req["joinColumns"]
+    leftColumns=req["leftColumns"]
+    rightColumns=req["rightColumns"]
+    joinColumns=req["joinColumns"]
     
     #create query from parent data
     print("creating parent cte")
@@ -110,22 +119,25 @@ def executeChildJoin( req ):
     parentDF.show()
     
     print("left query")
-    leftOnlyDF = sess.sql(leftQry)
+    leftOnlyDF = sess.sql(leftQry)\
+        .select( list(map( lambda column: col(column["name"]).alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) ) 
     leftOnlyDF.show()
     print("right query")
-    rightOnlyDF = sess.sql(rightQry)
+    rightOnlyDF = sess.sql(rightQry)\
+        .select( list(map( lambda column: col(column["name"]).alias( column['alias'] if 'alias' in column else column['name'] ), rightColumns)) ) 
     rightOnlyDF.show()
+        
     
     print("prepare the names fot the inner join")
     
-    leftJoinColumns = []
-    leftColumnsAliasArray = []
-    for ct in leftCols:
+    leftJoinColumns = [] #join columns vs parent
+    leftColumnsAliasArray = [] #names overwritten to the parent join
+    for ct in leftColumns:
         fn:str = ct["name"] 
         fa:str = ct["alias"] if "alias" in ct  else ct["name"] 
         firstOcurr = next( (parentColumn for parentColumn in parentDF.columns if parentColumn == fa), None)
         if firstOcurr != None:
-            leftJoinColumns.append( fn )
+            leftJoinColumns.append( fa )
         else: 
             leftColumnsAliasArray.append( fa )
         
@@ -135,65 +147,57 @@ def executeChildJoin( req ):
         .join( right=leftOnlyDF,
               using_columns=leftJoinColumns,
           join_type= "inner")\
-        .select( parentDF.columns + leftColumnsAliasArray ) 
-    
+        .select( list(map( lambda column: leftOnlyDF[ column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) ) 
+
     print("left Dataframe")    
     leftDF.show()  
     
-                 
-        
     rightJoinColumns = []   
     rightColumnsAliasArray = [] 
-    for ct in rightCols:
+    for ct in rightColumns:
         fn:str = ct["name"] 
         fa:str = ct["alias"] if "alias" in ct else ct["name"] 
         firstOcurr = next( (parentColumn for parentColumn in parentDF.columns if parentColumn == fa), None)
         if firstOcurr != None:
-            rightJoinColumns.append( fn )
+            rightJoinColumns.append( fa )
         else: 
             rightColumnsAliasArray.append( fa )
-        
+            
     print("parent join right")
     rightDF = parentDF \
         .join( right=rightOnlyDF
-        ,using_columns=leftJoinColumns,
+        ,using_columns=rightJoinColumns,
           join_type= "inner")\
-        .select( parentDF.columns + rightColumnsAliasArray ) 
+        .select( list(map( lambda column: rightOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ),rightColumns)) ) 
     
     print("right data")
     rightDF.show()
     
     #prepare the names of the outerjoin
-    JoinColumnsArray = []
-    joinColumnsAliasArray = []
+    joinColumnsRigh = [] #pick from right only those that does not exist in left 
     
-    for ct in leftCols:
-        fn:str = ct["name"] 
-        fa:str = ct["alias"] if "alias" in ct else ct["name"] 
-        joinColumnsAliasArray.append( fa )
-        
-   
-    for ct in rightCols:
+    for ct in rightColumns:
         fn:str = ct["name"] 
         fa:str = ct["alias"] if "alias" in ct else ct["name"]
 
-        firstOcurr = next( (jc for jc in joinColumnsAliasArray if jc == fa), None)
-        if firstOcurr != None:
-            JoinColumnsArray.append( fa )
-        else:            
-            joinColumnsAliasArray.append( fa )
+        firstOcurr = next( (jc for jc in leftOnlyDF.columns if jc == fa), None)
+        if firstOcurr == None:
+            joinColumnsRigh.append( ct )
         
     #now do an ounter join between both resulting columns
     print("left join right")
     df = leftDF \
         .join( right=rightDF 
-        ,using_columns=JoinColumnsArray
+        ,using_columns=joinColumns
           ,join_type= "leftouter") \
-         .select( joinColumnsAliasArray )
+         .select( 
+                 list(map( lambda    column: leftOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) 
+                 + list(map( lambda column: rightOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ),joinColumnsRigh))  
+                )
              
     df.show()
     print("export to json")
-    collected = df.limit(100).collect()
+    collected = df.limit(2000).collect()
     p_df = pd.DataFrame(data=collected)
     obj = p_df.to_json(orient = "records")   
     print(json.dumps({"result":obj},indent=4))

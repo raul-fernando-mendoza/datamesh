@@ -26,31 +26,33 @@ class TestFireStore(unittest.TestCase):
         print(json.dumps({"result":[]}))
        
         request:Request = {
-            "leftQry":"select ACCOUNT_NUM, ACCOUNT_SHORT_DESC from im_prd.dw_24hr.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
-            "rightQry":"select  ACCOUNT_NUM, ACCOUNT_SHORT_DESC from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
+            "leftQry":"select * from im_prd.dw_24hr.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
+            "rightQry":"select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
             "leftColumns":[
                 {
-                    'fieldName':'ACCOUNT_NUM',
+                    'name':'ACCOUNT_NUM',
                     'alias':'ACCOUNT_NUM'
                 },
                 {
-                    'fieldName':'ACCOUNT_SHORT_DESC',
+                    'name':'ACCOUNT_SHORT_DESC',
                     'alias':'ACCOUNT_SHORT_DESC'
                 }
             ],
             "rightColumns":[
                 {
-                    "fieldName":"ACCOUNT_NUM"
+                    "name":"ACCOUNT_NUM"
                     ,"alias":"ACCOUNT_NUM_1"
                 },
                 {
-                    "fieldName":"ACCOUNT_SHORT_DESC"
+                    "name":"ACCOUNT_SHORT_DESC"
                     ,"alias":"DA_ACCOUNT_SHORT_DESC_1"
                 }
             ],
-            "joinColumns":["ACCOUNT_NUM"]
+            "joinColumns":["ACCOUNT_NUM"],
+            "filter":"nvl(ACCOUNT_SHORT_DESC,'') != nvl(DA_ACCOUNT_SHORT_DESC_1,'')"
+            
         }
-        f = request["leftColumns"][0]["fieldName"]
+        f = request["leftColumns"][0]["name"]
         data = snowpark_base.executeJoin(request) 
         
         #print(json.dumps({"result":data}, indent=1))

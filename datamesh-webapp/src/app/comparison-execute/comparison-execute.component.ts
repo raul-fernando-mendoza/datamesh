@@ -9,7 +9,7 @@ import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDo
 import { ChiildJoinRequest, Child, Comparison, Dataset, Port, PortListRequest } from '../datatypes/datatypes.module';
 import { StringUtilService } from '../string-util.service';
 import { SelectionChange } from '@angular/cdk/collections';
-import { Call } from '@angular/compiler';
+import { Call, splitNsName } from '@angular/compiler';
 import { DatasetCreateComponent } from '../dataset-create/dataset-create.component';
 import { firstValueFrom } from 'rxjs';
 /*
@@ -24,7 +24,8 @@ interface CompareExecuteRequest{
   "rightQry":string,
   "leftColumns":Port[],
   "rightColumns":Port[],
-  "joinColumns":string[]  
+  "joinColumns":string[],
+  "filter":string 
 }
 
 
@@ -53,7 +54,8 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     rightQry: '',
     leftColumns: [],
     rightColumns: [],
-    joinColumns: []
+    joinColumns: [],
+    filter:""
   }
 
   comparisonChilds:TreeNode[] = []
@@ -126,6 +128,9 @@ export class ComparisonExecuteComponent implements AfterViewInit{
 
     treeNodePath.map( treeNode =>{
       if( treeNode.nodeClass == 'Comparison' || treeNode.nodeClass == 'Child'){
+        if( collectionPath != ""){
+          collectionPath +="/"
+        }
         collectionPath += treeNode.nodeClass + "/" + treeNode.obj.id
       }
     }) 
@@ -137,8 +142,12 @@ export class ComparisonExecuteComponent implements AfterViewInit{
       b = true
     }
     else if( node.nodeClass == 'Data'){
+      
       if( node.children == null){
         var collectionPath = this.getNodeChildPath( node )
+        if( collectionPath.split("/").length > 2){
+          console.log("collectionPath:" + collectionPath)
+        }
         var b:boolean = this.hasPathChilds.get(collectionPath);
         return b
       }
@@ -156,7 +165,8 @@ export class ComparisonExecuteComponent implements AfterViewInit{
       rightQry: '',
       leftColumns: [],
       rightColumns: [],
-      joinColumns: []
+      joinColumns: [],
+      filter:""
     }
 
     getDoc( doc( db,"Comparison", this.id! )).then( docSnap =>{
@@ -179,6 +189,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
       this.comparison.rightPorts.map( port =>{
         this.req.rightColumns.push( port )
       })      
+      this.req["filter"] = this.comparison.filter
       this.comparisonList.length=0
       this.comparisonList.push( node )
     })
@@ -368,7 +379,22 @@ export class ComparisonExecuteComponent implements AfterViewInit{
   }
   joinPort( left:Port[], right:Port[]):Port[]{
     var allPorts:Port[] = left.concat( right )
-    allPorts.sort( (a, b) => a.name > b.name ? 1:-1)
+    allPorts.sort( (a, b) =>{
+      let a_left=left.indexOf(a)>0
+      let b_left=left.indexOf(b)>0
+      //if both ports are in the same array just compare the name
+      if( a_left == b_left ){
+        return a.name > b.name ? 1:-1
+      }
+      else{ //they are in different arrays pick the left one
+        if(  a.name == b.name && a_left && b_left==false ){
+          return -1
+        }
+        else{
+          return a.name > b.name ? 1:-1
+        }
+      }
+    }) 
     return allPorts
   }
 }

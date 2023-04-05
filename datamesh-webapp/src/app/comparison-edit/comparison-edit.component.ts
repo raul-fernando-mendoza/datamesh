@@ -57,6 +57,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     label:[''],
     leftDatasetId:[''],
     rightDatasetId:[''],
+    filter:['']
   })
 
   comparisonList:TreeNode[] = []
@@ -163,6 +164,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
                 this.FG.controls.label.setValue( this.comparison.label!)
                 this.FG.controls.leftDatasetId.setValue( this.comparison.leftDatasetId! )
                 this.FG.controls.rightDatasetId.setValue( this.comparison.rightDatasetId! )
+                this.FG.controls.filter.setValue( this.comparison.filter! )
 
                 //add the first node 
                 var node:TreeNode = {
@@ -309,7 +311,8 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
       rightDatasetId:this.FG.controls.rightDatasetId.value!,
       leftPorts:[],
       rightPorts:[],
-      joinConditions:[]
+      joinConditions:[],
+      filter:""
     }
     
     setDoc( doc(db, "Comparison" , comparison.id!), comparison).then( () =>{

@@ -21,7 +21,13 @@ Comparison Edit
             {{item.label}}
           </mat-option>
         </mat-select>
-      </mat-form-field>    
+      </mat-form-field>  
+  </p>
+  <p>      
+      <mat-form-field class="filter" appearance="fill">
+        <mat-label>filter</mat-label>
+        <textarea class="sql" matInput maxlength="10000" rows="5" formControlName="filter" (change)="onPropertyChange($event)"></textarea>
+    </mat-form-field>          
   </p>   
   <div *ngIf="!id">
   <button mat-raised-button (click)="onCancel()">Cancelar</button>     

@@ -35,6 +35,9 @@ export interface ConditionJoin{
   rightExpresion:string
   selected:boolean
 }
+
+
+
 export interface Comparison{
   id:string 
   label:string
@@ -43,6 +46,7 @@ export interface Comparison{
   leftPorts:Port[]
   rightPorts:Port[]
   joinConditions:ConditionJoin[]
+  filter:string
 }
 
 export enum JoinType { "inner_join" , "left_join" , "outer_join" }
