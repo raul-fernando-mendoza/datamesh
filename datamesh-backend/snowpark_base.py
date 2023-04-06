@@ -106,7 +106,8 @@ def executeJoin( req):
         return obj 
     else: #we have to do the join using pandas
         print("run query left")
-        leftDF = pd.read_csv(leftFile, sep = ',')
+        leftDF = pd.read_csv(leftFile, sep = ',', dtype = {'ACCOUNT': int,'CLUB': str,
+                                                      'AMOUNT': float,'ACCOUNT_SHORT_DESC': str})
         print( leftDF.head(10) )
         print("run query right")
         r_Dataframe = sess.sql(rightQry)
@@ -202,6 +203,7 @@ def executeChildJoin( req ):
         
     #first join the parent with the left and with the right
     print("parent join left")
+    print("join columns:" + str(leftJoinColumns))
     leftDF = parentDF \
         .join( right=leftOnlyDF,
               using_columns=leftJoinColumns,
@@ -209,7 +211,8 @@ def executeChildJoin( req ):
         .select( list(map( lambda column: leftOnlyDF[ column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) ) 
 
     print("left Dataframe")    
-    leftDF.show()  
+    leftDF.show() 
+    print("left count:" + str(leftDF.count()) ) 
     
     rightJoinColumns = []   
     rightColumnsAliasArray = [] 
@@ -223,6 +226,7 @@ def executeChildJoin( req ):
             rightColumnsAliasArray.append( fa )
             
     print("parent join right")
+    print("joinclumns:" + str(rightJoinColumns))
     rightDF = parentDF \
         .join( right=rightOnlyDF
         ,using_columns=rightJoinColumns,
@@ -231,6 +235,7 @@ def executeChildJoin( req ):
     
     print("right data")
     rightDF.show()
+    print("right count:" + str(rightDF.count())) 
     
     #prepare the names of the outerjoin
     joinColumnsRigh = [] #pick from right only those that does not exist in left 
@@ -238,17 +243,29 @@ def executeChildJoin( req ):
     for ct in rightColumns:
         fn:str = ct["name"] 
         fa:str = ct["alias"] if "alias" in ct else ct["name"]
+        
+        
+        print("searching:" + fa)
 
-        firstOcurr = next( (jc for jc in leftOnlyDF.columns if jc == fa), None)
-        if firstOcurr == None:
-            joinColumnsRigh.append( ct )
+        firstOcurrJoin = next( (jc for jc in joinColumns if (jc == fa)), None)
+        if firstOcurrJoin == None: #if column is not in the list of joins then if exist append _rigth
+            print("key:" + fa + "not found in join columns")
+            firstOcurrLeft = next( (lc for lc in leftColumns if (lc["alias"] if "alias" in lc else lc["name"] == fa)), None)
+            if firstOcurrLeft == None:
+                print("key:" + fa + " not found in left_columns")
+                joinColumnsRigh.append( ct )
+            else:
+                print("key:" + fa + "found in left_columns")
+                ct["alias"] = fa + "_right" 
+                joinColumnsRigh.append( ct )   
         
     #now do an ounter join between both resulting columns
     print("left join right")
+    print("joincolumns:" + str(joinColumns))
     df = leftDF \
         .join( right=rightDF 
         ,using_columns=joinColumns
-          ,join_type= "leftouter") \
+          ,join_type= "full") \
          .select( 
                  list(map( lambda    column: leftOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) 
                  + list(map( lambda column: rightOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ),joinColumnsRigh))  

@@ -20,17 +20,16 @@ class Request:
     
 qry2 = {
     "parentData": {
-        "ACCOUNT_ID": 900110,
-        "MONTH_ID": "20230200.00000",
-        "CLUB_SRC_NUM": "00592",
-        "VALUE": 8310,
-        "V1_VALUE": 24932
+        "ACCOUNT": 901259,
+        "CLUB": "00024",
+        "AMOUNT": 48,
+        "ACCOUNT_SHORT_DESC": "Unit/Basic/Nation/M/Ret#",
+        "MONTH_ID": "20230300.00000",
+        "REQUIRED": True,
+        "AMOUNT_V1": 48
     },
-    "leftQry": """
-    select distinct month_id, subscription_src_num,club_src_num, ad.account account_id, customer_src_num,  effective_date, ad.access, ad.product_rp_name, ad.master_addon_flag, ad.retail_corp_flag, ad.subscription_type_desc, IS_3DAY_CANCEL_FLAG,IS_SAME_DAY_CANCEL_FLAG,is_excludable_promo_flag, value as value_v1   from da_mem.memstats_account_detail ad join da_dw.dim_club using(club_id) join da_mem.memstats_account_list al on al.account_num = ad.account join da_dw.dim_subscription_new ds using(subscription_id) where  ds.is_current_record = true order by 
-    subscription_src_num """,
-    "rightQry": """select month_id, club_src_num, ad.account account_id, customer_src_num, subscription_src_num, effective_date, ad.access, ad.product_rp_name, ad.master_addon_flag, ad.retail_corp_flag, ad.subscription_type_desc, 
-value   from im_prd.dw_24hr.memstats_account_detail ad join im_prd.dw_24hr.dim_club using(club_id)""",
+    "leftQry": "select distinct month_id, subscription_src_num,club_src_num CLUB, ad.account ACCOUNT, customer_src_num,  effective_date, ad.access, ad.product_rp_name, ad.master_addon_flag, ad.retail_corp_flag, ad.subscription_type_desc, IS_3DAY_CANCEL_FLAG,IS_SAME_DAY_CANCEL_FLAG,is_excludable_promo_flag, value as value_subscription_v1   from da_mem.memstats_account_detail ad join da_dw.dim_club using(club_id) join da_mem.memstats_account_list al on al.account_num = ad.account join da_dw.dim_subscription_new ds using(subscription_id) where  ds.is_current_record = true and month_id = 20230300",
+    "rightQry": "select distinct SUBSCRIPTION_VERSION, VERSION_STATUS, ds.curr_version_flag, month_id month_id, subscription_src_num,club_src_num CLUB, ad.account account, customer_src_num,  effective_date, ad.access, ad.product_rp_name, ad.master_addon_flag, ad.retail_corp_flag, ad.subscription_type_desc, IS_3DAY_CANCEL_FLAG,IS_SAME_DAY_CANCEL_FLAG, value as value_subscription_im   from im_prd.dw_24hr.memstats_account_detail ad join im_prd.dw_24hr.dim_club using(club_id) join im_prd.dw_24hr.memstats_account_list al on al.account_num = ad.account join im_prd.dw_24hr.dim_subscription ds using(subscription_id) where  lower(ds.version_status) = 'active' and month_id = 20230300 order by subscription_src_num",
     "leftColumns": [
         {
             "datatype": "StringType()",
@@ -42,11 +41,11 @@ value   from im_prd.dw_24hr.memstats_account_detail ad join im_prd.dw_24hr.dim_c
         },
         {
             "datatype": "StringType()",
-            "name": "CLUB_SRC_NUM"
+            "name": "CLUB"
         },
         {
             "datatype": "LongType()",
-            "name": "ACCOUNT_ID"
+            "name": "ACCOUNT"
         },
         {
             "datatype": "StringType()",
@@ -90,29 +89,41 @@ value   from im_prd.dw_24hr.memstats_account_detail ad join im_prd.dw_24hr.dim_c
         },
         {
             "datatype": "DecimalType(38, 12)",
-            "name": "VALUE_V1"
+            "name": "VALUE_SUBSCRIPTION_V1"
         }
     ],
     "rightColumns": [
+        {
+            "datatype": "LongType()",
+            "name": "SUBSCRIPTION_VERSION"
+        },
+        {
+            "datatype": "StringType()",
+            "name": "VERSION_STATUS"
+        },
+        {
+            "datatype": "StringType()",
+            "name": "CURR_VERSION_FLAG"
+        },
         {
             "datatype": "LongType()",
             "name": "MONTH_ID"
         },
         {
             "datatype": "StringType()",
-            "name": "CLUB_SRC_NUM"
+            "name": "SUBSCRIPTION_SRC_NUM"
+        },
+        {
+            "datatype": "StringType()",
+            "name": "CLUB"
         },
         {
             "datatype": "LongType()",
-            "name": "ACCOUNT_ID"
+            "name": "ACCOUNT"
         },
         {
             "datatype": "StringType()",
             "name": "CUSTOMER_SRC_NUM"
-        },
-        {
-            "datatype": "StringType()",
-            "name": "SUBSCRIPTION_SRC_NUM"
         },
         {
             "datatype": "TimestampType()",
@@ -139,24 +150,34 @@ value   from im_prd.dw_24hr.memstats_account_detail ad join im_prd.dw_24hr.dim_c
             "name": "SUBSCRIPTION_TYPE_DESC"
         },
         {
+            "datatype": "StringType()",
+            "name": "IS_3DAY_CANCEL_FLAG"
+        },
+        {
+            "datatype": "StringType()",
+            "name": "IS_SAME_DAY_CANCEL_FLAG"
+        },
+        {
             "datatype": "DecimalType(18, 4)",
-            "name": "VALUE"
+            "name": "VALUE_SUBSCRIPTION_IM"
         }
     ],
     "joinColumns": [
         "MONTH_ID",
         "SUBSCRIPTION_SRC_NUM",
-        "CLUB_SRC_NUM",
-        "ACCOUNT_ID",
+        "CLUB",
+        "ACCOUNT",
         "CUSTOMER_SRC_NUM",
         "EFFECTIVE_DATE",
         "ACCESS",
         "PRODUCT_RP_NAME",
         "MASTER_ADDON_FLAG",
         "RETAIL_CORP_FLAG",
-        "SUBSCRIPTION_TYPE_DESC"
+        "SUBSCRIPTION_TYPE_DESC",
+        "IS_3DAY_CANCEL_FLAG",
+        "IS_SAME_DAY_CANCEL_FLAG"
     ]
-}    
+}
 
 class TestFireStore(unittest.TestCase):
 

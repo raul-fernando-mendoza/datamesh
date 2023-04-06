@@ -2,7 +2,7 @@ import { AfterViewInit, Component, Query, ViewChild } from '@angular/core';
 import {NestedTreeControl} from '@angular/cdk/tree';
 import {MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
 import { TreeNestedDataSource, TreeNode, TREENODE_EXAMPLE_DATA } from '../tree-nested-data-source';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Data, Router } from '@angular/router';
 import { UrlService } from '../url.service';
 import { db } from '../../environments/environment'
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
@@ -313,7 +313,6 @@ export class ComparisonExecuteComponent implements AfterViewInit{
           'next':(result)=>{
             console.log( result )
             
-            console.log( result )
             let strJson:string =  String(result) 
             var resultList:[] = JSON.parse( strJson ) 
   
@@ -344,7 +343,21 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     }
   }
   joinPort( left:Port[], right:Port[]):Port[]{
-    var allPorts:Port[] = left.concat( right )
+
+
+    var allPorts:Port[] = []
+    allPorts.concat( left )
+    right.map( rport =>{
+      let exists:Port|undefined = undefined
+      exists = left.find( lport => lport.name === rport.name)
+      if( exists == undefined ){
+        allPorts.push( rport )
+      }
+      else{
+        exists["alias"] =  exists.alias ? exists.alias : exists.name + "_right"
+        allPorts.push( exists ) 
+      }
+    })
     allPorts.sort( (a, b) =>{
       let a_left=left.indexOf(a)>0
       let b_left=left.indexOf(b)>0
@@ -365,5 +378,53 @@ export class ComparisonExecuteComponent implements AfterViewInit{
   }
   getChildrenIndex( node:TreeNode ):number{
     return node.parentNode!.children!.findIndex(x => x == node )
+  }
+  onDownload( node:TreeNode ){
+    var strArray:string[] = []
+    node.children?.forEach( child =>{
+      let data = child.obj as {[key: string | symbol]: any};
+      let strValues:string = ""
+
+      //first do the headers
+      if( strArray.length == 0){
+        let strValues:string = ""
+        for(const key in data){
+          if( strValues.length > 0 ){
+            strValues += ","
+          }
+          strValues += key
+        }
+        if( strArray.length > 0){
+          strArray.push("\n")
+        }
+        strArray.push( strValues)
+      }  
+
+      strValues = ""
+      for(const key in data){
+        if( strValues.length > 0 ){
+          strValues += ","
+        }
+        strValues += data[key] 
+      }
+      if( strArray.length > 0){
+        strArray.push("\n")
+      }
+      strArray.push( strValues)
+    })
+
+    let file = new Blob(strArray, {type: '.txt'});
+
+
+    let a = document.createElement("a"),
+            url = URL.createObjectURL(file);
+    a.href = url;
+    a.download = "myFile.csv";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function() {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);  
+    }, 0);     
   }
 }

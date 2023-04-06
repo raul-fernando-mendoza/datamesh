@@ -27,7 +27,7 @@ class TestFireStore(unittest.TestCase):
        
         request:Request = {
             "leftFile":"C:/Users/raul.mendoza/Documents/24hourfit/memstat/integration_test/bimemstats_SF_20230404.txt",
-    "leftColumns": [
+    "leftPorts": [
         {
             "datatype": "LongType()",
             "name": "ACCOUNT"
@@ -46,14 +46,14 @@ class TestFireStore(unittest.TestCase):
         },        
     ],
     "rightQry":"""
-  select  to_number(account_id) as ACCOUNT, to_number(club_src_num) as CLUB, month_id, account_long_desc, sum(round(value,0)) im_value
+  select  to_number(account_id) as ACCOUNT, club_src_num as CLUB, month_id, account_long_desc, sum(round(value,0)) im_value
   from im_prd.dw_24hr.memstat_account_summary 
   join im_prd.dw_24hr.dim_club using(club_id)
   left join im_prd.dw_24hr.memstats_account_list on account_id = account_num
   where month_id = 20230300 
   group by 1,2,3,4   
     """,
-    "rightColumns": [
+    "rightPorts": [
         {
             "datatype": "StringType()",
             "name": "ACCOUNT"
@@ -81,7 +81,6 @@ class TestFireStore(unittest.TestCase):
     ],
     "filter": "ACCOUNT == 901227"
 }
-        f = request["leftColumns"][0]["name"]
         data = snowpark_base.executeJoin(request) 
         
         #print(json.dumps({"result":data}, indent=1))
