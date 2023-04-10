@@ -45,7 +45,7 @@
     overflow: hidden;
     text-align: left;
   }
-  .DecimalType, .float64{
+  .DecimalType, .float64, .int32{
     min-width:5em;
     max-width:5em;
     width:5em;

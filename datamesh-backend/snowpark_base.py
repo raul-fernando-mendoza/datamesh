@@ -40,8 +40,9 @@ def getFielsForQuery(req):
             fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} ) 
         return {"fields":fields}
     else:
-        print("run query left")
-        leftDF = pd.read_csv(csvfile, sep = ',')
+        print("read csv")
+        leftDF = pd.read_csv(csvfile, sep = ',', dtype = {'ACCOUNT': int,'CLUB': str,
+                                                      'AMOUNT': float,'ACCOUNT_SHORT_DESC': str})
         print( leftDF.head(10) ) 
         types = leftDF.dtypes
         for columnName in leftDF.columns.tolist():
@@ -67,10 +68,12 @@ def executeJoin( req):
     if leftQry and rightQry:
         print("run query left")
         leftDF = sess.sql(leftQry)
-        leftDF.show()
+        #leftDF.show()
+        print( leftDF.schema.fields)
         print("run query right")
         rightDF = sess.sql(rightQry)
-        rightDF.show()
+        #rightDF.show()
+        print( rightDF.schema.fields)
         
         columnsArray = []
         for ct in leftCols:
@@ -108,6 +111,7 @@ def executeJoin( req):
         print("run query left")
         leftDF = pd.read_csv(leftFile, sep = ',', dtype = {'ACCOUNT': int,'CLUB': str,
                                                       'AMOUNT': float,'ACCOUNT_SHORT_DESC': str})
+        
         print( leftDF.head(10) )
         print("run query right")
         r_Dataframe = sess.sql(rightQry)
@@ -119,13 +123,13 @@ def executeJoin( req):
         for ct in leftCols:
             fn:str = ct["name"] 
             fa:str = ct["alias"] if "alias" in ct else ct["name"]
-            columnsArray.append( fn )
+            columnsArray.append( fn.upper() )
         for ct in rightCols:
             fn:str = ct["name"] 
             fa:str = ct["alias"] if "alias" in ct else ct["name"]
             firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
             if firstOcurr == None:
-                columnsArray.append( fn )
+                columnsArray.append( fn.upper() )
         
         print("left join right")   
         df = pd.merge( leftDF, 
@@ -175,16 +179,20 @@ def executeChildJoin( req ):
     parentCTE = "select " + parentFields
     print("parent query:" + parentCTE)
     
-    parentDF = sess.sql(parentCTE)      
+    parentDF = sess.sql(parentCTE) 
+    print(parentDF.schema)    
     parentDF.show()
     
     print("left query")
     leftOnlyDF = sess.sql(leftQry)\
         .select( list(map( lambda column: col(column["name"]).alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) ) 
+    
+    print(leftOnlyDF.schema)
     leftOnlyDF.show()
     print("right query")
     rightOnlyDF = sess.sql(rightQry)\
         .select( list(map( lambda column: col(column["name"]).alias( column['alias'] if 'alias' in column else column['name'] ), rightColumns)) ) 
+    print(rightOnlyDF.schema)
     rightOnlyDF.show()
         
     
@@ -234,7 +242,8 @@ def executeChildJoin( req ):
         .select( list(map( lambda column: rightOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ),rightColumns)) ) 
     
     print("right data")
-    rightDF.show()
+    print(rightOnlyDF.schema)
+    rightDF.show()    
     print("right count:" + str(rightDF.count())) 
     
     #prepare the names of the outerjoin
@@ -245,17 +254,17 @@ def executeChildJoin( req ):
         fa:str = ct["alias"] if "alias" in ct else ct["name"]
         
         
-        print("searching:" + fa)
+        #print("searching:" + fa)
 
         firstOcurrJoin = next( (jc for jc in joinColumns if (jc == fa)), None)
         if firstOcurrJoin == None: #if column is not in the list of joins then if exist append _rigth
-            print("key:" + fa + "not found in join columns")
+            #print("key:" + fa + "not found in join columns")
             firstOcurrLeft = next( (lc for lc in leftColumns if (lc["alias"] if "alias" in lc else lc["name"] == fa)), None)
             if firstOcurrLeft == None:
-                print("key:" + fa + " not found in left_columns")
+                #print("key:" + fa + " not found in left_columns")
                 joinColumnsRigh.append( ct )
             else:
-                print("key:" + fa + "found in left_columns")
+                #print("key:" + fa + "found in left_columns")
                 ct["alias"] = fa + "_right" 
                 joinColumnsRigh.append( ct )   
         
@@ -276,6 +285,6 @@ def executeChildJoin( req ):
     collected = df.limit(2000).collect()
     p_df = pd.DataFrame(data=collected)
     obj = p_df.to_json(orient = "records")   
-    print(json.dumps({"result":obj},indent=4))
+    #print(json.dumps({"result":obj},indent=4))
     print("executeChildJoin END")
     return obj 

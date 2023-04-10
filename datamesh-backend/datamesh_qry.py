@@ -102,6 +102,10 @@ def getFielsForQuery():
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
         return ({"error":str(e)}, 400, headers)
+    except:
+        msg = "**** something went wrong:"
+        log.error( msg)
+        return ({"error":str(msg)}, 400, msg)  
     return (data, 200, headers)
 
 @app.route('/executeJoin', methods=['POST','OPTIONS'])

@@ -9,6 +9,7 @@ Comparison Edit
       <mat-form-field class="dataset" appearance="fill">
         <mat-label>Main dataset</mat-label>
         <mat-select  formControlName="leftDatasetId" name="leftDatasetId" (selectionChange)="onSelectChange($event)">
+          <mat-option>{{ null }}</mat-option>
           <mat-option *ngFor="let item of datasets" [value]="item.id" >
             {{item.label}}
           </mat-option>
@@ -128,11 +129,11 @@ Comparison Edit
             <mat-icon>add</mat-icon>
             <span>add</span>
           </button>                  
-          <button mat-menu-item (click)="onEditChild(node)">
+          <button mat-menu-item *ngIf="node.nodeClass!='Comparison'" (click)="onEditChild(node)">
             <mat-icon>edit</mat-icon>
             <span>edit</span>
           </button>                  
-          <button mat-menu-item (click)="onRemoveChild(node)">
+          <button mat-menu-item *ngIf="node.nodeClass!='Comparison'" (click)="onRemoveChild(node)">
             <mat-icon>remove</mat-icon>
             <span>remove</span>
           </button>               
@@ -160,11 +161,11 @@ Comparison Edit
                   <mat-icon>add</mat-icon>
                   <span>add</span>
                 </button>                  
-                <button mat-menu-item (click)="onEditChild(node)">
+                <button mat-menu-item *ngIf="node.nodeClass!='Comparison'" (click)="onEditChild(node)">
                   <mat-icon>edit</mat-icon>
                   <span>edit</span>
                 </button>                  
-                <button mat-menu-item (click)="onRemoveChild(node)">
+                <button mat-menu-item *ngIf="node.nodeClass!='Comparison'" (click)="onRemoveChild(node)">
                   <mat-icon>remove</mat-icon>
                   <span>remove</span>
                 </button>

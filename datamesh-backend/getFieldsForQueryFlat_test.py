@@ -5,6 +5,8 @@ import snowpark_base
 
 log = logging.getLogger("datamesh")
 
+qry2 = {"csvfile": "C:/Users/raul.mendoza/Documents/24hourfit/memstat/integration_test/bimemstats_SF_20230401.txt"}
+
 class TestFireStore(unittest.TestCase):
 
     def test01_testdatabase(self):
@@ -14,7 +16,7 @@ class TestFireStore(unittest.TestCase):
         request = {
             "csvfile":"C:/Users/raul.mendoza/Documents/24hourfit/memstat/integration_test/bimemstats_SF_20230404.txt"
         }
-        data = snowpark_base.getFielsForQuery(request) 
+        data = snowpark_base.getFielsForQuery(qry2) 
         
         print(json.dumps({"result":data}))
 

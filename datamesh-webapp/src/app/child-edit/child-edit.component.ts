@@ -151,7 +151,7 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
                 })
           },
           (reason:any) =>{
-              alert("ERROR update list:" + reason)
+              alert("ERROR update list child:" + reason)
           }  
       )
       this.unsubscribes.set( "root", unsubscribe )
@@ -223,6 +223,7 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
         var dataset:Dataset = doc.data() as Dataset
         this.datasets.push( dataset )
       })
+      this.datasets.sort( (a,b) => a.label! > b.label! ? 1 : -1)
     })    
   }
 
@@ -241,7 +242,7 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
       console.log("created")
       this.data.id = child.id
       this.child = child      
-      this.onRefreshPorts().then( ()=>{
+      this.refreshPorts().then( ()=>{
         this.update()
       })      
     },
@@ -320,20 +321,29 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
     })
   }
 
-  onRefreshPorts():Promise<void>{
+  onRefreshPorts(){
+    this.submmiting = true
+    this.refreshPorts().then( ()=>{
+      this.submmiting = false
+    },
+    reason =>{
+      this.submmiting = false
+      alert("ERROR refreshing Ports" + reason.error.error)
+    })
+  }
+    
+  refreshPorts():Promise<void>{
     return new Promise<void>((resolve, reject) =>{
       let leftDatasetId:string|null = this.FG.controls.leftDatasetId.value
       let rightDatasetId:string|null = this.FG.controls.rightDatasetId.value
       let leftFile:string|null = this.FG.controls.leftFile.value
 
-      this.submmiting = true
       this.getPorts("left", this.leftItemPorts, leftDatasetId, leftFile ).then( ()=>{
       })
       .then( ()=>{
         return this.getPorts("right", this.rightItemPorts, rightDatasetId, leftFile )
       })
       .then( ()=>{
-        this.submmiting = false
         var allItemPorts:ItemPort[] = []
         this.leftItemPorts.map( item => allItemPorts.push(item))
         this.rightItemPorts.map( item => allItemPorts.push(item))
@@ -355,7 +365,7 @@ export class ChildEditComponent implements OnInit , AfterViewInit{
         var obj ={ 
           "leftPorts":this.child.leftPorts,
           "rightPorts":this.child.rightPorts,
-          "joinColumns ":this.child.joinColumns
+          "joinColumns":this.child.joinColumns
         }
         updateDoc( doc(db,this.data.parentCollection + "/Child",this.child.id), obj).then( ()=>{
           console.log("ports has been updated")

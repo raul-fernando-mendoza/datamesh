@@ -145,7 +145,10 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     var propertyName:any = event.source.ngControl.name
     var value = event.source.ngControl.value  
     var values:any = {}
-    values[propertyName]=value   
+    if( value == undefined ){
+      values[propertyName]=null     
+    }
+    else values[propertyName]=value   
     if( this.id ){
       updateDoc( doc( db, "Comparison", this.id), values ).then( ()=>{
         console.log("update property")
@@ -208,7 +211,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
               
           },
           (reason:any) =>{
-              alert("ERROR update list:" + reason)
+              alert("ERROR update comparison list:" + reason)
           }  
       )
       this.unsubscribes.set( "root", unsubscribe )
@@ -257,7 +260,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
         })
       },
       (reason:any) =>{
-        alert("ERROR update list:" + reason)
+        alert("ERROR update load children:" + reason)
         reject(reason)
       })
 
@@ -302,6 +305,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
         var dataset:Dataset = doc.data() as Dataset
         this.datasets.push( dataset )
       })
+      this.datasets.sort( (a,b) => a.label! > b.label! ? 1 : -1)
     })    
   } 
  
@@ -322,7 +326,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
       console.log("created")
       this.id = comparison.id!
       this.comparison = comparison      
-      this.onRefreshPorts().then( ()=>{
+      this.refreshPorts().then( ()=>{
         this.update()
       })
     },
@@ -339,11 +343,12 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   onEditChild(row:TreeNode){
     
     var parentCollection:string = this.dataSource.getPath( row.parentNode )
+    
 
     const dialogRef = this.dialog.open(ChildEditComponent, {
       height: '400px',
       width: '80%',
-      data: { parentCollection:parentCollection, id:row.obj.id }
+      data: {  parentCollection, id:row.obj.id }
     });
   
     dialogRef.afterClosed().subscribe( (data:any) => {
@@ -440,13 +445,22 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     })
   }
 
-  onRefreshPorts():Promise<void>{
+  onRefreshPorts(){
+    this.submmiting = true
+    this.refreshPorts().then( ()=>{
+      this.submmiting = false
+    },
+    reason =>{
+      this.submmiting = false
+      alert("ERROR refreshing Ports" + reason.error.error)
+    })
+  }
+
+  refreshPorts():Promise<void>{
     return new Promise<void>((resolve, reject) =>{
       let leftDatasetId:string|null = this.FG.controls.leftDatasetId.value
       let rightDatasetId:string|null = this.FG.controls.rightDatasetId.value
       let leftFile:string|null = this.FG.controls.leftFile.value
-
-      this.submmiting = true
       this.getPorts("left", this.leftItemPorts, leftDatasetId, leftFile ).then( ()=>{
       })
       .then( ()=>{
@@ -469,8 +483,8 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
         this.comparison.joinColumns.length = 0
         this.comparison.leftPorts.map( lPort =>{
           this.comparison.rightPorts.map( rPort =>{
-            if( lPort.name == rPort.name ){
-              this.comparison.joinColumns.push( lPort.name )
+            if( lPort.name.toUpperCase() == rPort.name.toUpperCase() ){
+              this.comparison.joinColumns.push( lPort.name.toUpperCase() )
             }
           })
         })

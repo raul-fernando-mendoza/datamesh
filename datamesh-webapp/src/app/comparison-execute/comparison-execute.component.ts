@@ -346,16 +346,12 @@ export class ComparisonExecuteComponent implements AfterViewInit{
 
 
     var allPorts:Port[] = []
-    allPorts.concat( left )
+    left.map( p => allPorts.push( p ) )
     right.map( rport =>{
       let exists:Port|undefined = undefined
       exists = left.find( lport => lport.name === rport.name)
       if( exists == undefined ){
         allPorts.push( rport )
-      }
-      else{
-        exists["alias"] =  exists.alias ? exists.alias : exists.name + "_right"
-        allPorts.push( exists ) 
       }
     })
     allPorts.sort( (a, b) =>{
