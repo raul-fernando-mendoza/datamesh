@@ -62,25 +62,35 @@ Comparison Edit
         <ng-container matColumnDef="name">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>name</th>
           <td mat-cell *matCellDef="let row; let i = index;">
-            <span>{{ row.port.name }}</span>
+            <span>{{ row.name }}</span>
           </td>
         </ng-container> 
         <ng-container matColumnDef="type">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>type</th>
           <td mat-cell *matCellDef="let row; let i = index;">
-            <span>{{ row.port.datatype }}</span>
+            <mat-form-field class="datatype" appearance="fill">
+              <mat-label>{{row.datatype}}</mat-label>
+              <mat-select (selectionChange)="onPortChange($event,row, 'datatype')" required [value]="row.datatype">
+                <mat-option *ngFor="let item of portdatatypes" [value]="item">
+                  {{ item }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>  
           </td>
         </ng-container>   
         <ng-container matColumnDef="alias">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>alias</th>
           <td mat-cell *matCellDef="let row; let i = index;">
-            <span>{{ row.port.alias }}</span>
+            <mat-form-field appearance="fill">
+              <mat-label>{{ row.name }}</mat-label>
+              <input matInput required (change)="onPortChange($event,row, 'alias')" [ngModel]="row.alias ? row.alias : null">
+            </mat-form-field>            
           </td>
         </ng-container>       
         <ng-container matColumnDef="selected">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>selected</th>
           <td mat-cell *matCellDef="let row; let i = index;">
-            <mat-checkbox (click)="onSelectPort(row)" [(ngModel)]="row.port.selected"></mat-checkbox>
+            <mat-checkbox (change)="onPortChange($event,row, 'selected')" [ngModel]="row.selected"></mat-checkbox>
           </td>
         </ng-container>          
           
@@ -95,12 +105,6 @@ Comparison Edit
           [pageSizeOptions]="[25, 50, 100, 250]">
       </mat-paginator>
     </mat-tab>
-    <mat-tab label="Keys"> 
-      Join conditions
-      <div *ngFor="let column of comparison.joinColumns">
-        {{column}}
-      </div>
-    </mat-tab>  
 </mat-tab-group>
 
   <h3>TREE</h3>
@@ -113,10 +117,10 @@ Comparison Edit
         {{node.obj.label}} <!--nodeClass:{{node.nodeClass}}-->
         <div *ngIf="node.nodeClass == 'Comparison'">
           <tr>
-            <td *ngFor="let port of node.obj.leftPorts">
+            <td *ngFor="let port of node.leftPorts">
               {{port.alias ? port.alias : port.name}}            
             </td>
-            <td *ngFor="let port of node.obj.leftPorts">
+            <td *ngFor="let port of node.rightPorts">
               {{port.alias ? port.alias : port.name}}            
             </td>          
           </tr>  

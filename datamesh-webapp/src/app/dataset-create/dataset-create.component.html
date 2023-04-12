@@ -1,4 +1,4 @@
-<p>Revisión</p>
+<p>Dataset Create</p>
 
 <div [formGroup]="FG">
     
@@ -14,8 +14,8 @@
             <textarea class="sql" matInput maxlength="10000" rows="10" formControlName="sql" ></textarea>
         </mat-form-field>         
     </p>
-
-    <button mat-raised-button mat-dialog-close>Cancelar</button>     
-    <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
-    <br/>
+    <div *ngIf="!id">
+        <button mat-raised-button (click)="onCancel()">Cancelar</button>     
+        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
+    </div>  
 </div>

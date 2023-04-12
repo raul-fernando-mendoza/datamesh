@@ -10,7 +10,7 @@ import { collection, deleteDoc , doc, onSnapshot} from "firebase/firestore";
 import { DatasetCreateComponent } from '../dataset-create/dataset-create.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Comparison, Dataset } from '../datatypes/datatypes.module';
-import { ChildEditComponent } from '../child-edit/child-edit.component';
+
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({

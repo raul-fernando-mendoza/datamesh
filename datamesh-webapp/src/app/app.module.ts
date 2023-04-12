@@ -26,7 +26,6 @@ import { MatInputModule } from '@angular/material/input';
 import { ComparisonListComponent } from './comparison-list/comparison-list.component';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatSelectModule} from '@angular/material/select';
-import { ChildEditComponent } from './child-edit/child-edit.component';
 import { ComparisonEditComponent } from './comparison-edit/comparison-edit.component';
 import {MatTreeModule} from '@angular/material/tree';
 import {MatDividerModule} from '@angular/material/divider';
@@ -35,6 +34,11 @@ import {MatCheckboxModule} from '@angular/material/checkbox';
 import { ComparisonExecuteComponent } from './comparison-execute/comparison-execute.component';
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
+import { DatasetTreeComponent } from './dataset-tree/dataset-tree.component';
+import { ComparisonTreeComponent } from './comparison-tree/comparison-tree.component';
+import { WelcomeComponent } from './welcome/welcome.component';
+import {MatCardModule} from '@angular/material/card';
+import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
 
 @NgModule({
   declarations: [
@@ -43,9 +47,12 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
     DatasetCreateComponent,
     DatasetListComponent,
     ComparisonListComponent,
-    ChildEditComponent,
     ComparisonEditComponent,
-    ComparisonExecuteComponent
+    ComparisonExecuteComponent,
+    DatasetTreeComponent,
+    ComparisonTreeComponent,
+    WelcomeComponent,
+    DatasetgroupEditComponent
   ],
   imports: [
     HttpClientModule,
@@ -74,7 +81,8 @@ import {MatProgressBarModule} from '@angular/material/progress-bar';
     MatDividerModule,
     MatCheckboxModule,
     MatTabsModule,
-    MatProgressBarModule    
+    MatProgressBarModule,
+    MatCardModule 
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -6,7 +6,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { UrlService } from '../url.service';
 import { db } from '../../environments/environment'
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
-import { ChiildJoinRequest, Child, Comparison, Dataset, Port, PortListRequest } from '../datatypes/datatypes.module';
+import { ChiildJoinRequest,  Comparison, Dataset, Port, PortListRequest } from '../datatypes/datatypes.module';
 import { StringUtilService } from '../string-util.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { Call, splitNsName } from '@angular/compiler';
@@ -81,6 +81,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
 
   loadHasPathChild(collectionPath:string):Promise<void>{
     return new Promise<void>((resolve, reject) =>{
+      /*
       var transaction = getDocs( collection(db, collectionPath + "/Child" ) ).then( docSet =>{
         if( docSet.docs.length > 0 ){
           this.hasPathChilds.set(collectionPath,true)
@@ -101,6 +102,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
           resolve()
         }
       })
+      */
     })
 
   }
@@ -142,7 +144,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
 
 
   update(){
-
+/*
       getDoc( doc( db,"Comparison", this.id! )).then( docSnap =>{
       this.comparison = docSnap.data() as Comparison
       this.req = docSnap.data() as ComparisonRequest
@@ -215,9 +217,10 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         }
       })         
     })
-  
+  */
   }
   loadChilds( node:TreeNode){
+    /*
     node.isLoading = true
     var collectionPath = this.getNodeChildPath(node)
     if( node.nodeClass == 'Data'){
@@ -274,7 +277,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
       .then( ()=>{
         return getDoc( doc(db, "Dataset" , child.rightDatasetId) ).then( (doc)=>{
           let dataset:Dataset = doc.data() as Dataset
-          rightQry = this.stringUtilService.removeNonPrintable(dataset.sql!)
+          //rightQry = this.stringUtilService.removeNonPrintable(dataset.sql!)
         })        
       })
       .then( ()=>{
@@ -307,7 +310,6 @@ export class ComparisonExecuteComponent implements AfterViewInit{
          rightQry:rightQry,
          leftColumns:leftColumns,
          rightColumns:rightColumns,
-         joinColumns:joinColumns
         }
         this.urlService.post("executeChildJoin",req).subscribe({ 
           'next':(result)=>{
@@ -341,6 +343,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         })      
       })
     }
+    */
   }
   joinPort( left:Port[], right:Port[]):Port[]{
 

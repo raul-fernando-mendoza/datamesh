@@ -1,0 +1,13 @@
+<div [formGroup]="FG">
+    <div class="example-container">
+        <mat-form-field appearance="fill">
+            <mat-label>Group name</mat-label>
+            <input matInput placeholder="PRD_V1" formControlName="label" required>
+            <mat-error *ngIf="FG.controls.label.invalid">{{getErrorMessage()}}</mat-error>
+        </mat-form-field>
+    </div>
+    <div *ngIf="!id">
+        <button mat-raised-button (click)="onCancel()">Cancelar</button>     
+        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
+      </div>        
+</div>  
