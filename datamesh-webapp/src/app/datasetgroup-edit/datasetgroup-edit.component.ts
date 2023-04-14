@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { ActivatedRoute, Route } from '@angular/router';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 import { uuidv4 } from '@firebase/util';
 import { FirebaseApp } from 'firebase/app';
 import { DatasetGroup } from '../datatypes/datatypes.module';
@@ -12,8 +12,11 @@ import * as uuid from 'uuid';
   templateUrl: './datasetgroup-edit.component.html',
   styleUrls: ['./datasetgroup-edit.component.css']
 })
-export class DatasetgroupEditComponent {
+export class DatasetgroupEditComponent implements OnInit,OnDestroy{
   id:string|null = null
+  datasetGroup:DatasetGroup|undefined
+
+  unsubscribe:any = null
 
   FG = this.fb.group({
     label:["", [Validators.required]]
@@ -23,11 +26,44 @@ export class DatasetgroupEditComponent {
   constructor( 
     private activatedRoute: ActivatedRoute,
     private fb:FormBuilder,
-    private firebaseService: FirebaseService
+    public firebaseService: FirebaseService,
+    private router:Router
   ){
     if( this.activatedRoute.snapshot.paramMap.get('id') != 'null'){
       this.id = this.activatedRoute.snapshot.paramMap.get('id') 
     }     
+    this.activatedRoute.params.subscribe(res => {
+      if("id" in res){
+        this.id = res["id"]
+        if( this.unsubscribe ){
+          this.unsubscribe()
+        }  
+        this.update()
+      }  
+    })       
+  }
+  ngOnDestroy(): void {
+    if( this.unsubscribe ){
+      this.unsubscribe()
+    }
+  }
+  ngOnInit(): void {
+    this.update()
+  }
+  update(){
+    if( this.id ){
+      this.firebaseService.onsnapShot( "DatasetGroup", this.id!, {
+        "next":((doc) =>{
+          if( doc.exists() ){
+            this.datasetGroup = doc.data() as DatasetGroup
+            this.FG.controls.label.setValue( this.datasetGroup.label)
+          }
+        }),
+        "error":((error)=>{
+          alert("ERROR:"+ error)
+        })
+      })
+    }
   }
   getErrorMessage() {
     if (this.FG.controls.label.hasError('required')) {
@@ -46,6 +82,13 @@ export class DatasetgroupEditComponent {
     })
   }  
   onCancel(){
-
+    this.router.navigate(["/"])
   }
+  onDelete(){
+    if( confirm("are you sure to delete:" + this.datasetGroup?.label) ){
+      this.firebaseService.deleteDoc("DatasetGroup", this.datasetGroup!.id ).then( ()=>{
+        this.router.navigate(["/"])
+      })
+    }
+  }  
 }

@@ -12,7 +12,7 @@
     <p>
         <mat-form-field class="dataset" appearance="fill">
             <mat-label>type dataset</mat-label> 
-            <mat-select name="type" formControlName="type" (selectionChange)="firebaseService.onSelectionChange($event, 'Dataset', id, 'type')">
+            <mat-select name="type" formControlName="type" (selectionChange)="onSelectTypeChange($event)">
                 <mat-option [value]="null"></mat-option>
                 <mat-option *ngFor="let t of typeList" [value]="t">{{t}}</mat-option>
             </mat-select>  
@@ -70,8 +70,8 @@
     <!--
         <p>sql:{{FG.controls.sql.valid}}</p>
         <p>filename:{{FG.controls.fileName.valid}}</p>
-    -->   
         <button mat-button>Sample</button>
+    -->   
         
     </div> 
     <div *ngIf="!dataset">

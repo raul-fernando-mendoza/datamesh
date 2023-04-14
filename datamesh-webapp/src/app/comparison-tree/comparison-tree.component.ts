@@ -1,270 +1,228 @@
-import {SelectionModel} from '@angular/cdk/collections';
+
 import {FlatTreeControl} from '@angular/cdk/tree';
-import {Component, Injectable} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {BehaviorSubject} from 'rxjs';
+import { Comparison, ComparisonGroup, Dataset, DatasetGroup, FileDataset, SnowFlakeDataset } from '../datatypes/datatypes.module';
+import { FirebaseService } from '../firebase.service';
+import { ActivatedRoute, Route, Router } from '@angular/router';
+import { FirestoreError } from 'firebase/firestore';
+
 
 /**
  * Node for to-do item
  */
-export class TodoItemNode {
-  children: TodoItemNode[] | undefined;
-  item: string | undefined;
+export interface ComparisonNode {
+  children: ComparisonNode[];
+  item: Comparison | ComparisonGroup;
 }
+
+
+
 
 /** Flat to-do item node with expandable and level information */
-export class TodoItemFlatNode {
-  item: string | undefined;
-  level: number = 0;
-  expandable: boolean = false;
+export interface ComparisonFlatNode {
+  item: Comparison | ComparisonGroup
+  level: number
+  expandable: boolean
 }
 
-/**
- * The Json object for to-do list data.
- */
-const TREE_DATA = {
-  Groceries: {
-    'Almond Meal flour': null,
-    'Organic eggs': null,
-    'Protein Powder': null,
-    Fruits: {
-      Apple: null,
-      Berries: ['Blueberry', 'Raspberry'],
-      Orange: null,
-    },
-  },
-  Reminders: ['Cook dinner', 'Read the Material Design spec', 'Upgrade Application to Angular'],
-};
-
-/**
- * Checklist database, it can build a tree structured Json object.
- * Each node in Json object represents a to-do item or a category.
- * If a node is a category, it has children items and new items can be added under the category.
- */
-@Injectable()
-export class ChecklistDatabase {
-  dataChange = new BehaviorSubject<TodoItemNode[]>([]);
-
-  get data(): TodoItemNode[] {
-    return this.dataChange.value;
-  }
-
-  constructor() {
-    this.initialize();
-  }
-
-  initialize() {
-    // Build the tree nodes from Json object. The result is a list of `TodoItemNode` with nested
-    //     file node as children.
-    const data = this.buildFileTree(TREE_DATA, 0);
-
-    // Notify the change.
-    this.dataChange.next(data);
-  }
-
-  /**
-   * Build the file structure tree. The `value` is the Json object, or a sub-tree of a Json object.
-   * The return value is the list of `TodoItemNode`.
-   */
-  buildFileTree(obj: {[key: string]: any}, level: number): TodoItemNode[] {
-    return Object.keys(obj).reduce<TodoItemNode[]>((accumulator, key) => {
-      const value = obj[key];
-      const node = new TodoItemNode();
-      node.item = key;
-
-      if (value != null) {
-        if (typeof value === 'object') {
-          node.children = this.buildFileTree(value, level + 1);
-        } else {
-          node.item = value;
-        }
-      }
-
-      return accumulator.concat(node);
-    }, []);
-  }
-
-  /** Add an item to to-do list */
-  insertItem(parent: TodoItemNode, name: string) {
-    if (parent.children) {
-      parent.children.push({item: name} as TodoItemNode);
-      this.dataChange.next(this.data);
-    }
-  }
-
-  updateItem(node: TodoItemNode, name: string) {
-    node.item = name;
-    this.dataChange.next(this.data);
-  }
-}
 
 /**
  * @title Tree with checkboxes
  */
-
- @Component({
+@Component({
   selector: 'app-comparison-tree',
   templateUrl: './comparison-tree.component.html',
-  styleUrls: ['./comparison-tree.component.css'],
-  providers: [ChecklistDatabase]
-
+  styleUrls: ['./comparison-tree.component.css']
 })
-export class ComparisonTreeComponent {
-
-
+export class ComparisonTreeComponent implements OnInit, OnDestroy {
+  unsubscribeMap:Map<string, any> = new Map<string,any>()
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
-  flatNodeMap = new Map<TodoItemFlatNode, TodoItemNode>();
+  flatNodeMap = new Map<ComparisonFlatNode, ComparisonNode>();
 
   /** Map from nested node to flattened node. This helps us to keep the same object for selection */
-  nestedNodeMap = new Map<TodoItemNode, TodoItemFlatNode>();
+  nestedNodeMap = new Map<ComparisonNode, ComparisonFlatNode>();
 
-  /** A selected parent node to be inserted */
-  selectedParent: TodoItemFlatNode | null = null;
+  treeControl: FlatTreeControl<ComparisonFlatNode>;
 
-  /** The new item's name */
-  newItemName = '';
+  treeFlattener: MatTreeFlattener<ComparisonNode, ComparisonFlatNode>;
 
-  treeControl: FlatTreeControl<TodoItemFlatNode>;
+  dataSource: MatTreeFlatDataSource<ComparisonNode, ComparisonFlatNode>;
 
-  treeFlattener: MatTreeFlattener<TodoItemNode, TodoItemFlatNode>;
-
-  dataSource: MatTreeFlatDataSource<TodoItemNode, TodoItemFlatNode>;
-
-  /** The selection for checklist */
-  checklistSelection = new SelectionModel<TodoItemFlatNode>(true /* multiple */);
-
-  constructor(private _database: ChecklistDatabase) {
+  _database = new BehaviorSubject<ComparisonNode[]>([]);
+  constructor(
+    private firebaseService:FirebaseService,
+    private router:Router,
+    private route: ActivatedRoute
+  ) {
     this.treeFlattener = new MatTreeFlattener(
       this.transformer,
       this.getLevel,
       this.isExpandable,
       this.getChildren,
     );
-    this.treeControl = new FlatTreeControl<TodoItemFlatNode>(this.getLevel, this.isExpandable);
+    this.treeControl = new FlatTreeControl<ComparisonFlatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
-    _database.dataChange.subscribe(data => {
+    this._database.subscribe(data => {
+      this.dataSource.data = []
       this.dataSource.data = data;
     });
   }
+  ngOnDestroy(): void {
+    this.unsubscribeMap.forEach( (key:string, unsubscribe:any) =>{
+      unsubscribe();
+    })
+  }
+  ngOnInit(): void {
+    this.update()
+  }
 
-  getLevel = (node: TodoItemFlatNode) => node.level;
+  getLevel = (node: ComparisonFlatNode) => node.level;
 
-  isExpandable = (node: TodoItemFlatNode) => node.expandable;
+  isExpandable = (node: ComparisonFlatNode) => node.expandable;
 
-  getChildren = (node: TodoItemNode): TodoItemNode[] => node.children!;
+  getChildren = (node: ComparisonNode): ComparisonNode[] => node.children!;
 
-  hasChild = (_: number, _nodeData: TodoItemFlatNode) => _nodeData.expandable;
-
-  hasNoContent = (_: number, _nodeData: TodoItemFlatNode) => _nodeData.item === '';
+  hasChild = (_: number, _nodeData: ComparisonFlatNode) => _nodeData.expandable;
 
   /**
    * Transformer to convert nested node to flat node. Record the nodes in maps for later use.
    */
-  transformer = (node: TodoItemNode, level: number) => {
+  transformer = (node: ComparisonNode, level: number) => {
     const existingNode = this.nestedNodeMap.get(node);
-    const flatNode =
-      existingNode && existingNode.item === node.item ? existingNode : new TodoItemFlatNode();
-    flatNode.item = node.item;
-    flatNode.level = level;
-    flatNode.expandable = !!node.children?.length;
+    if( existingNode && existingNode.item.id === node.item!.id ){
+      var flatNode:ComparisonFlatNode = existingNode
+    }
+    else{
+      var flatNode:ComparisonFlatNode = {
+        item: node.item,
+        level: level,
+        expandable: node.children.length > 0 ? true : false
+      }
+    }
     this.flatNodeMap.set(flatNode, node);
     this.nestedNodeMap.set(node, flatNode);
     return flatNode;
   };
 
-  /** Whether all the descendants of the node are selected. */
-  descendantsAllSelected(node: TodoItemFlatNode): boolean {
-    const descendants = this.treeControl.getDescendants(node);
-    const descAllSelected =
-      descendants.length > 0 &&
-      descendants.every(child => {
-        return this.checklistSelection.isSelected(child);
-      });
-    return descAllSelected;
+
+  addGroup() {
+    this.router.navigate(["/ComparisonGroup-edit"])
   }
 
-  /** Whether part of the descendants are selected */
-  descendantsPartiallySelected(node: TodoItemFlatNode): boolean {
-    const descendants = this.treeControl.getDescendants(node);
-    const result = descendants.some(child => this.checklistSelection.isSelected(child));
-    return result && !this.descendantsAllSelected(node);
+  onAddDataset(node:ComparisonNode){
+    let datasetGroup = node.item as DatasetGroup
+
+    this.router.navigate(["/Comparison-create",datasetGroup.id])
   }
 
-  /** Toggle the to-do item selection. Select/deselect all the descendants node */
-  todoItemSelectionToggle(node: TodoItemFlatNode): void {
-    this.checklistSelection.toggle(node);
-    const descendants = this.treeControl.getDescendants(node);
-    this.checklistSelection.isSelected(node)
-      ? this.checklistSelection.select(...descendants)
-      : this.checklistSelection.deselect(...descendants);
+  isDatasetGroup(node:ComparisonNode){
+    if( !("type" in node.item) ){
+      return true
+    }
+    else{
+      return false
+    }
+  }
+  update(){
+    this.unsubscribeMap.forEach( (key:string,unsubscribe:any) =>{
+      unsubscribe()
+    })
+    this.unsubscribeMap.clear()    
+    let unsubscribe = this.firebaseService.onsnapShotQuery("DatasetGroup",null, null, null,{
+      "next":( (set:any)=>{
+        var datasets:ComparisonNode[] = []
 
-    // Force update for the parent
-    descendants.forEach(child => this.checklistSelection.isSelected(child));
-    this.checkAllParentsSelection(node);
+        var transactions = set.docs.map( (item:any) =>{
+          var datasetGroup = item.data() as Comparison
+          let datasetNode:ComparisonNode = {
+            children: [],
+            item: datasetGroup
+          }
+          datasets.push( datasetNode )
+          return this.loadDatasetForGroup( datasetNode )
+        })
+        Promise.all( transactions ).then( ()=>{
+          datasets.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
+          this._database.next(datasets);
+        })
+      }),
+      "error":( (error: FirestoreError) =>{
+          alert("ERROR:" + error)
+      })
+    })
+    this.unsubscribeMap.set( "/", unsubscribe )
+  }  
+  loadDatasetForGroup(datasetNode:ComparisonNode):Promise<void>{
+    return new Promise<void>((resolve, reject) =>{
+      
+      let unsubscribe = this.firebaseService.onsnapShotQuery("Dataset","datasetGroupId","==",datasetNode.item.id, {
+        "next":( (set:any) =>{
+          datasetNode.children.length = 0
+          set.docs.map( (doc:any) =>{
+            let dataset:Dataset = doc.data() as Dataset
+            if( dataset.type == 'FileDataset'){
+              var fileDataset = dataset as FileDataset
+              let newDatasetNode:DatasetNode = {
+              children: [],
+              item: fileDataset
+            }
+            datasetNode.children.push( newDatasetNode )
+            }
+            else{
+              var snowflakeDataset = dataset as SnowFlakeDataset
+              let newDatasetNode:DatasetNode = {
+                children: [],
+                item: snowflakeDataset
+              }
+              datasetNode.children.push( newDatasetNode )            
+            }
+          })
+          datasetNode.children.sort( (a,b)=> a.item.label > b.item.label ? 1:-1)
+          if( !this.unsubscribeMap.get( datasetNode.item.id) ){
+            this.unsubscribeMap.set( datasetNode.item.id, unsubscribe)
+          }
+          else{
+            this.reload(this.nestedNodeMap.get( datasetNode ) )
+          }
+          resolve()
+        }),
+        "error":( (error:any) =>{
+          alert("ERROR:" +error)
+          reject()
+        })          
+      })
+      
+      
+    })
   }
 
-  /** Toggle a leaf to-do item selection. Check all the parents to see if they changed */
-  todoLeafItemSelectionToggle(node: TodoItemFlatNode): void {
-    this.checklistSelection.toggle(node);
-    this.checkAllParentsSelection(node);
-  }
-
-  /* Checks all the parents when a leaf node is selected/unselected */
-  checkAllParentsSelection(node: TodoItemFlatNode): void {
-    let parent: TodoItemFlatNode | null = this.getParentNode(node);
-    while (parent) {
-      this.checkRootNodeSelection(parent);
-      parent = this.getParentNode(parent);
+  isDataset( node:ComparisonNode ){
+    if( "type" in node.item ){
+      return true
+    }
+    else{
+      return false
     }
   }
 
-  /** Check root node checked state and change it accordingly */
-  checkRootNodeSelection(node: TodoItemFlatNode): void {
-    const nodeSelected = this.checklistSelection.isSelected(node);
-    const descendants = this.treeControl.getDescendants(node);
-    const descAllSelected =
-      descendants.length > 0 &&
-      descendants.every(child => {
-        return this.checklistSelection.isSelected(child);
-      });
-    if (nodeSelected && !descAllSelected) {
-      this.checklistSelection.deselect(node);
-    } else if (!nodeSelected && descAllSelected) {
-      this.checklistSelection.select(node);
+  editDataset( node:ComparisonNode ){
+    this.router.navigate(["/Dataset-edit/",  node.item.id]);
+    
+  }
+
+  reload( node:DatasetFlatNode|null = null ){
+    let temp=this.dataSource.data
+    this.dataSource.data = []
+    this.dataSource.data = temp;    
+    if( node ){ 
+      this.treeControl.expand( node )
     }
   }
 
-  /* Get the parent node of a node */
-  getParentNode(node: TodoItemFlatNode): TodoItemFlatNode | null {
-    const currentLevel = this.getLevel(node);
-
-    if (currentLevel < 1) {
-      return null;
-    }
-
-    const startIndex = this.treeControl.dataNodes.indexOf(node) - 1;
-
-    for (let i = startIndex; i >= 0; i--) {
-      const currentNode = this.treeControl.dataNodes[i];
-
-      if (this.getLevel(currentNode) < currentLevel) {
-        return currentNode;
-      }
-    }
-    return null;
-  }
-
-  /** Select the category so we can insert the new item. */
-  addNewItem(node: TodoItemFlatNode) {
-    const parentNode = this.flatNodeMap.get(node);
-    this._database.insertItem(parentNode!, '');
-    this.treeControl.expand(node);
-  }
-
-  /** Save the node to database */
-  saveNode(node: TodoItemFlatNode, itemValue: string) {
-    const nestedNode = this.flatNodeMap.get(node);
-    this._database.updateItem(nestedNode!, itemValue);
+  onEditDatasetGroup( node:DatasetNode ){
+    this.router.navigate(["/DatasetGroup-edit/",  node.item.id]);
   }
 }

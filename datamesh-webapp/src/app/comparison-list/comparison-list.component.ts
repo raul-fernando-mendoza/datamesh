@@ -7,7 +7,7 @@ import { db } from '../../environments/environment'
 import { Observable } from 'rxjs';
 
 import { collection, deleteDoc , doc, onSnapshot} from "firebase/firestore"; 
-import { DatasetCreateComponent } from '../dataset-create/dataset-create.component';
+import { DatasetEditComponent } from '../dataset-edit/dataset-edit.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Comparison, Dataset } from '../datatypes/datatypes.module';
 

@@ -38,7 +38,7 @@ export interface DatasetFlatNode {
   styleUrls: ['./dataset-tree.component.css']
 })
 export class DatasetTreeComponent implements OnInit, OnDestroy {
-  unsubscribeArray:any[] = []
+  unsubscribeMap:Map<string, any> = new Map<string,any>()
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeMap = new Map<DatasetFlatNode, DatasetNode>();
 
@@ -72,7 +72,9 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     });
   }
   ngOnDestroy(): void {
-    this.unsubscribeArray.map( unsubscribe => unsubscribe() )
+    this.unsubscribeMap.forEach( (key:string, unsubscribe:any) =>{
+      unsubscribe();
+    })
   }
   ngOnInit(): void {
     this.update()
@@ -114,7 +116,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
   onAddDataset(node:DatasetNode){
     let datasetGroup = node.item as DatasetGroup
 
-    this.router.navigate(["/Dataset-edit",{datasetGroupId:datasetGroup.id}])
+    this.router.navigate(["/Dataset-create",datasetGroup.id])
   }
 
   isDatasetGroup(node:DatasetNode){
@@ -126,10 +128,13 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     }
   }
   update(){
+    this.unsubscribeMap.forEach( (key:string,unsubscribe:any) =>{
+      unsubscribe()
+    })
+    this.unsubscribeMap.clear()    
     let unsubscribe = this.firebaseService.onsnapShotQuery("DatasetGroup",null, null, null,{
       "next":( (set:any)=>{
         var datasets:DatasetNode[] = []
-
         var transactions = set.docs.map( (item:any) =>{
           var datasetGroup = item.data() as DatasetGroup
           let datasetNode:DatasetNode = {
@@ -148,12 +153,12 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
           alert("ERROR:" + error)
       })
     })
-    this.unsubscribeArray.push( unsubscribe )
-
+    this.unsubscribeMap.set( "/", unsubscribe )
   }  
   loadDatasetForGroup(datasetNode:DatasetNode):Promise<void>{
     return new Promise<void>((resolve, reject) =>{
-      let observer = {
+      
+      let unsubscribe = this.firebaseService.onsnapShotQuery("Dataset","datasetGroupId","==",datasetNode.item.id, {
         "next":( (set:any) =>{
           datasetNode.children.length = 0
           set.docs.map( (doc:any) =>{
@@ -176,16 +181,21 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
             }
           })
           datasetNode.children.sort( (a,b)=> a.item.label > b.item.label ? 1:-1)
-          this.reload()
+          if( !this.unsubscribeMap.get( datasetNode.item.id) ){
+            this.unsubscribeMap.set( datasetNode.item.id, unsubscribe)
+          }
+          else{
+            this.reload(this.nestedNodeMap.get( datasetNode ) )
+          }
           resolve()
         }),
         "error":( (error:any) =>{
           alert("ERROR:" +error)
           reject()
         })          
-      }
-      let unsubscribe = this.firebaseService.onsnapShotQuery("Dataset","datasetGroupId","==",datasetNode.item.id, observer)
-      this.unsubscribeArray.push( unsubscribe )
+      })
+      
+      
     })
   }
 
@@ -199,13 +209,20 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
   }
 
   editDataset( node:DatasetNode ){
-    this.router.navigate(["/Dataset-edit/",  node.item.id]);
+    this.router.navigate(["/Dataset-edit",  node.item.id]);
     
   }
 
-  reload(){
-    var temp = this.dataSource.data
+  reload( node:DatasetFlatNode|null = null ){
+    let temp=this.dataSource.data
     this.dataSource.data = []
-    this.dataSource.data = temp;    
+    this.dataSource.data = temp;   
+    if( node ){ 
+      this.treeControl.expand( node )
+    }
+  }
+
+  onEditDatasetGroup( node:DatasetNode ){
+    this.router.navigate(["/DatasetGroup-edit/",  node.item.id]);
   }
 }

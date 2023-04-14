@@ -10,7 +10,7 @@ import { ChiildJoinRequest,  Comparison, Dataset, Port, PortListResponse } from 
 import { StringUtilService } from '../string-util.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { Call, splitNsName } from '@angular/compiler';
-import { DatasetCreateComponent } from '../dataset-create/dataset-create.component';
+import { DatasetEditComponent } from '../dataset-edit/dataset-edit.component';
 import { firstValueFrom } from 'rxjs';
 
 

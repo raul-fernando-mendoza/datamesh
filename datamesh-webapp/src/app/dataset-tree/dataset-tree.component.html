@@ -8,8 +8,9 @@
     {{node.item.label}}
     <button  mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
     <mat-menu #menu="matMenu">
+      <button *ngIf="isDatasetGroup(node)" (click)="onEditDatasetGroup(node)" mat-menu-item>Edit Group</button>      
       <button *ngIf="isDatasetGroup(node)" (click)="onAddDataset(node)" mat-menu-item>Add Dataset</button>
-      <button *ngIf="isDataset(node)" (click)="editDataset(node)" mat-menu-item>Edit</button>
+      <button *ngIf="isDataset(node)" (click)="editDataset(node)" mat-menu-item>Edit Dataset</button>
     </mat-menu>    
   </mat-tree-node>
 
@@ -23,7 +24,9 @@
     {{node.item.label}}
     <button  mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
     <mat-menu #menu="matMenu">
+      <button *ngIf="isDatasetGroup(node)" (click)="onEditDatasetGroup(node)" mat-menu-item>Edit Group</button>      
       <button *ngIf="isDatasetGroup(node)" (click)="onAddDataset(node)" mat-menu-item>Add Dataset</button>
-    </mat-menu>     
+      <button *ngIf="isDataset(node)" (click)="editDataset(node)" mat-menu-item>Edit Dataset</button>
+    </mat-menu>    
   </mat-tree-node>
 </mat-tree>

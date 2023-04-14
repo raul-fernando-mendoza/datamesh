@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { DatasetListComponent } from './dataset-list/dataset-list.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NavigationComponent } from './navigation/navigation.component';
 import { LayoutModule } from '@angular/cdk/layout';
@@ -18,7 +17,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { environment } from '../environments/environment';
-import { DatasetCreateComponent } from './dataset-create/dataset-create.component';
+import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -44,8 +43,7 @@ import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit
   declarations: [
     AppComponent,
     NavigationComponent,
-    DatasetCreateComponent,
-    DatasetListComponent,
+    DatasetEditComponent,
     ComparisonListComponent,
     ComparisonEditComponent,
     ComparisonExecuteComponent,

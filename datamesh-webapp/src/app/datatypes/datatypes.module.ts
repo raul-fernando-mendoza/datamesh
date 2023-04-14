@@ -17,6 +17,11 @@ export interface DatasetGroup{
   label:string
 }
 
+export interface ComparisonGroup{
+  id:string
+  label:string
+}
+
 export interface Port{
   name:string
   datatype:string

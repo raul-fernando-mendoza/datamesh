@@ -10,11 +10,11 @@ import { UrlService } from '../url.service';
 
 
 @Component({
-  selector: 'app-dataset-create',
-  templateUrl: './dataset-create.component.html',
-  styleUrls: ['./dataset-create.component.css']
+  selector: 'app-dataset-edit',
+  templateUrl: './dataset-edit.component.html',
+  styleUrls: ['./dataset-edit.component.css']
 })
-export class DatasetCreateComponent implements OnInit, OnDestroy{
+export class DatasetEditComponent implements OnInit, OnDestroy{
 
   displayedColumns: string[] = ['name', 'datatype' ];
   portdatatypes:string[] = [
@@ -71,7 +71,9 @@ export class DatasetCreateComponent implements OnInit, OnDestroy{
       })      
   }
   ngOnDestroy(): void {
-    this.unsubscribe()
+    if( this.unsubscribe ){
+      this.unsubscribe()
+    }
   }
   ngOnInit(): void {
     this.update()
@@ -81,22 +83,24 @@ export class DatasetCreateComponent implements OnInit, OnDestroy{
     if( this.id ){
       this.unsubscribe = this.firebaseService.onsnapShot("Dataset", this.id, {
         "next":((doc)=>{
-          let dataset:Dataset = doc.data() as Dataset
+          if( doc.exists()){
+            let dataset:Dataset = doc.data() as Dataset
 
-          this.FG.controls.type.setValue( dataset.type )
-          this.FG.controls.label.setValue( dataset.label )
-          
+            this.FG.controls.type.setValue( dataset.type )
+            this.FG.controls.label.setValue( dataset.label )
+            
 
-          if( dataset.type === "FileDataset"){
-            this.dataset = doc.data() as FileDataset
-            this.FG.controls.fileName.setValue( dataset.fileName )
+            if( dataset.type === "FileDataset"){
+              this.dataset = doc.data() as FileDataset
+              this.FG.controls.fileName.setValue( dataset.fileName )
+            }
+            else{
+              this.dataset = doc.data() as SnowFlakeDataset
+              this.FG.controls.sql.setValue( this.dataset.sql )
+            }
+
+            this.datasource = this.dataset.ports
           }
-          else{
-            this.dataset = doc.data() as SnowFlakeDataset
-            this.FG.controls.sql.setValue( this.dataset.sql )
-          }
-
-          this.datasource = this.dataset.ports
         }),
         "error":((reason)=>{
           alert("ERROR:" + reason)
@@ -181,6 +185,7 @@ export class DatasetCreateComponent implements OnInit, OnDestroy{
       this.FG.controls.fileName.addValidators(Validators.required)
       this.FG.controls.fileName.updateValueAndValidity()
     }
+    this.firebaseService.onSelectionChange(event, 'Dataset', this.id, 'type')
   }  
   
   onDelete(){
