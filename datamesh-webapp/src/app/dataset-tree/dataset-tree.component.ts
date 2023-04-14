@@ -8,7 +8,6 @@ import { FirebaseService } from '../firebase.service';
 import * as uuid from 'uuid';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { FirestoreError } from 'firebase/firestore';
-import { TreeNode } from '../tree-nested-data-source';
 
 /**
  * Node for to-do item
@@ -22,7 +21,7 @@ export interface DatasetNode {
 
 
 /** Flat to-do item node with expandable and level information */
-export interface DatasetFlatNode {
+export interface flatNode {
   item: DatasetGroup | SnowFlakeDataset | FileDataset
   level: number
   expandable: boolean
@@ -40,16 +39,16 @@ export interface DatasetFlatNode {
 export class DatasetTreeComponent implements OnInit, OnDestroy {
   unsubscribeMap:Map<string, any> = new Map<string,any>()
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
-  flatNodeMap = new Map<DatasetFlatNode, DatasetNode>();
+  flatNodeToNode = new Map<flatNode, DatasetNode>();
 
   /** Map from nested node to flattened node. This helps us to keep the same object for selection */
-  nestedNodeMap = new Map<DatasetNode, DatasetFlatNode>();
+  nodeToFlatNode = new Map<DatasetNode, flatNode>();
 
-  treeControl: FlatTreeControl<DatasetFlatNode>;
+  treeControl: FlatTreeControl<flatNode>;
 
-  treeFlattener: MatTreeFlattener<DatasetNode, DatasetFlatNode>;
+  treeFlattener: MatTreeFlattener<DatasetNode, flatNode>;
 
-  dataSource: MatTreeFlatDataSource<DatasetNode, DatasetFlatNode>;
+  dataSource: MatTreeFlatDataSource<DatasetNode, flatNode>;
 
   _database = new BehaviorSubject<DatasetNode[]>([]);
   constructor(
@@ -63,7 +62,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
       this.isExpandable,
       this.getChildren,
     );
-    this.treeControl = new FlatTreeControl<DatasetFlatNode>(this.getLevel, this.isExpandable);
+    this.treeControl = new FlatTreeControl<flatNode>(this.getLevel, this.isExpandable);
     this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
 
     this._database.subscribe(data => {
@@ -80,31 +79,31 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     this.update()
   }
 
-  getLevel = (node: DatasetFlatNode) => node.level;
+  getLevel = (node: flatNode) => node.level;
 
-  isExpandable = (node: DatasetFlatNode) => node.expandable;
+  isExpandable = (node: flatNode) => node.expandable;
 
   getChildren = (node: DatasetNode): DatasetNode[] => node.children!;
 
-  hasChild = (_: number, _nodeData: DatasetFlatNode) => _nodeData.expandable;
+  hasChild = (_: number, _nodeData: flatNode) => _nodeData.expandable;
 
   /**
    * Transformer to convert nested node to flat node. Record the nodes in maps for later use.
    */
   transformer = (node: DatasetNode, level: number) => {
-    const existingNode = this.nestedNodeMap.get(node);
+    const existingNode = this.nodeToFlatNode.get(node);
     if( existingNode && existingNode.item.id === node.item!.id ){
-      var flatNode:DatasetFlatNode = existingNode
+      var flatNode:flatNode = existingNode
     }
     else{
-      var flatNode:DatasetFlatNode = {
+      var flatNode:flatNode = {
         item: node.item,
         level: level,
         expandable: node.children.length > 0 ? true : false
       }
     }
-    this.flatNodeMap.set(flatNode, node);
-    this.nestedNodeMap.set(node, flatNode);
+    this.flatNodeToNode.set(flatNode, node);
+    this.nodeToFlatNode.set(node, flatNode);
     return flatNode;
   };
 
@@ -185,7 +184,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
             this.unsubscribeMap.set( datasetNode.item.id, unsubscribe)
           }
           else{
-            this.reload(this.nestedNodeMap.get( datasetNode ) )
+            this.reload(this.nodeToFlatNode.get( datasetNode ) )
           }
           resolve()
         }),
@@ -213,12 +212,21 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     
   }
 
-  reload( node:DatasetFlatNode|null = null ){
+  reload( flatNode:flatNode|null = null ){
     let temp=this.dataSource.data
     this.dataSource.data = []
     this.dataSource.data = temp;   
-    if( node ){ 
-      this.treeControl.expand( node )
+    if( flatNode ){ 
+      this.treeControl.expand( flatNode )
+      let node = this.flatNodeToNode.get(flatNode)
+      if( node ){
+        node.children.map( (childNode) =>{
+          let flatChildNode = this.nodeToFlatNode.get(childNode)
+          if( flatChildNode ){
+             this.treeControl.expand( flatChildNode )
+          }
+        })
+      }
     }
   }
 

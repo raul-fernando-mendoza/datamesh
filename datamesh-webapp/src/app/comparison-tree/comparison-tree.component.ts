@@ -39,10 +39,10 @@ export interface ComparisonFlatNode {
 export class ComparisonTreeComponent implements OnInit, OnDestroy {
   unsubscribeMap:Map<string, any> = new Map<string,any>()
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
-  flatNodeMap = new Map<ComparisonFlatNode, ComparisonNode>();
+  flatNodeToNode = new Map<ComparisonFlatNode, ComparisonNode>();
 
   /** Map from nested node to flattened node. This helps us to keep the same object for selection */
-  nestedNodeMap = new Map<ComparisonNode, ComparisonFlatNode>();
+  nodeToFlatNode = new Map<ComparisonNode, ComparisonFlatNode>();
 
   treeControl: FlatTreeControl<ComparisonFlatNode>;
 
@@ -91,19 +91,19 @@ export class ComparisonTreeComponent implements OnInit, OnDestroy {
    * Transformer to convert nested node to flat node. Record the nodes in maps for later use.
    */
   transformer = (node: ComparisonNode, level: number) => {
-    const existingNode = this.nestedNodeMap.get(node);
-    if( existingNode && existingNode.item.id === node.item!.id ){
+    const existingNode = this.nodeToFlatNode.get(node);
+    if( existingNode && existingNode.item.id === node.item.id ){
       var flatNode:ComparisonFlatNode = existingNode
     }
     else{
       var flatNode:ComparisonFlatNode = {
         item: node.item,
         level: level,
-        expandable: node.children.length > 0 ? true : false
+        expandable: ( node.item instanceof ComparisonGroup)
       }
     }
-    this.flatNodeMap.set(flatNode, node);
-    this.nestedNodeMap.set(node, flatNode);
+    this.flatNodeToNode.set(flatNode, node);
+    this.nodeToFlatNode.set(node, flatNode);
     return flatNode;
   };
 
@@ -112,14 +112,14 @@ export class ComparisonTreeComponent implements OnInit, OnDestroy {
     this.router.navigate(["/ComparisonGroup-edit"])
   }
 
-  onAddDataset(node:ComparisonNode){
-    let datasetGroup = node.item as DatasetGroup
+  onAddComparison(node:ComparisonNode){
+    let comparisonGroup = node.item as ComparisonGroup
 
-    this.router.navigate(["/Comparison-create",datasetGroup.id])
+    this.router.navigate(["/Comparison-create",comparisonGroup.id])
   }
 
-  isDatasetGroup(node:ComparisonNode){
-    if( !("type" in node.item) ){
+  isComparisonGroup(node:ComparisonNode){
+    if( node.item instanceof ComparisonGroup ){
       return true
     }
     else{
@@ -131,22 +131,22 @@ export class ComparisonTreeComponent implements OnInit, OnDestroy {
       unsubscribe()
     })
     this.unsubscribeMap.clear()    
-    let unsubscribe = this.firebaseService.onsnapShotQuery("DatasetGroup",null, null, null,{
+    let unsubscribe = this.firebaseService.onsnapShotQuery("ComparisonGroup",null, null, null,{
       "next":( (set:any)=>{
-        var datasets:ComparisonNode[] = []
+        var comparisonGroupNodes:ComparisonNode[] = []
 
         var transactions = set.docs.map( (item:any) =>{
-          var datasetGroup = item.data() as Comparison
+          var comparisonGroup = item.data() as ComparisonGroup
           let datasetNode:ComparisonNode = {
             children: [],
-            item: datasetGroup
+            item: comparisonGroup
           }
-          datasets.push( datasetNode )
-          return this.loadDatasetForGroup( datasetNode )
+          comparisonGroupNodes.push( datasetNode )
+          return this.loadComparisonForGroup( datasetNode )
         })
         Promise.all( transactions ).then( ()=>{
-          datasets.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
-          this._database.next(datasets);
+          comparisonGroupNodes.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
+          this._database.next(comparisonGroupNodes);
         })
       }),
       "error":( (error: FirestoreError) =>{
@@ -155,37 +155,26 @@ export class ComparisonTreeComponent implements OnInit, OnDestroy {
     })
     this.unsubscribeMap.set( "/", unsubscribe )
   }  
-  loadDatasetForGroup(datasetNode:ComparisonNode):Promise<void>{
+  loadComparisonForGroup(comparisonGroupNode:ComparisonNode):Promise<void>{
     return new Promise<void>((resolve, reject) =>{
       
-      let unsubscribe = this.firebaseService.onsnapShotQuery("Dataset","datasetGroupId","==",datasetNode.item.id, {
+      let unsubscribe = this.firebaseService.onsnapShotQuery("Comparison","comparisonGroupId","==",comparisonGroupNode.item.id, {
         "next":( (set:any) =>{
-          datasetNode.children.length = 0
+          comparisonGroupNode.children.length = 0
           set.docs.map( (doc:any) =>{
-            let dataset:Dataset = doc.data() as Dataset
-            if( dataset.type == 'FileDataset'){
-              var fileDataset = dataset as FileDataset
-              let newDatasetNode:DatasetNode = {
+            let comparison:Comparison = doc.data() as Comparison
+            let newComparisonNode:ComparisonNode = {
               children: [],
-              item: fileDataset
+              item: comparison
             }
-            datasetNode.children.push( newDatasetNode )
-            }
-            else{
-              var snowflakeDataset = dataset as SnowFlakeDataset
-              let newDatasetNode:DatasetNode = {
-                children: [],
-                item: snowflakeDataset
-              }
-              datasetNode.children.push( newDatasetNode )            
-            }
+            comparisonGroupNode.children.push( newComparisonNode )
           })
-          datasetNode.children.sort( (a,b)=> a.item.label > b.item.label ? 1:-1)
-          if( !this.unsubscribeMap.get( datasetNode.item.id) ){
-            this.unsubscribeMap.set( datasetNode.item.id, unsubscribe)
+          comparisonGroupNode.children.sort( (a,b)=> a.item.label > b.item.label ? 1:-1)
+          if( !this.unsubscribeMap.get( comparisonGroupNode.item.id) ){
+            this.unsubscribeMap.set( comparisonGroupNode.item.id, unsubscribe)
           }
           else{
-            this.reload(this.nestedNodeMap.get( datasetNode ) )
+            this.reload(this.nodeToFlatNode.get( comparisonGroupNode ) )
           }
           resolve()
         }),
@@ -194,12 +183,10 @@ export class ComparisonTreeComponent implements OnInit, OnDestroy {
           reject()
         })          
       })
-      
-      
     })
   }
 
-  isDataset( node:ComparisonNode ){
+  isComparison( node:ComparisonNode ){
     if( "type" in node.item ){
       return true
     }
@@ -208,12 +195,12 @@ export class ComparisonTreeComponent implements OnInit, OnDestroy {
     }
   }
 
-  editDataset( node:ComparisonNode ){
-    this.router.navigate(["/Dataset-edit/",  node.item.id]);
+  editComparison( node:ComparisonNode ){
+    this.router.navigate(["/Comparison-edit/",  node.item.id]);
     
   }
 
-  reload( node:DatasetFlatNode|null = null ){
+  reload( node:ComparisonFlatNode|null = null ){
     let temp=this.dataSource.data
     this.dataSource.data = []
     this.dataSource.data = temp;    
@@ -222,7 +209,7 @@ export class ComparisonTreeComponent implements OnInit, OnDestroy {
     }
   }
 
-  onEditDatasetGroup( node:DatasetNode ){
-    this.router.navigate(["/DatasetGroup-edit/",  node.item.id]);
+  onEditComparisonGroup( node:ComparisonFlatNode ){
+    this.router.navigate(["/ComparisonGroup-edit/",  node.item.id]);
   }
 }

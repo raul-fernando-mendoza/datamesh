@@ -91,12 +91,14 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
             
 
             if( dataset.type === "FileDataset"){
-              this.dataset = doc.data() as FileDataset
-              this.FG.controls.fileName.setValue( dataset.fileName )
+              let fileDataset = doc.data() as FileDataset
+              this.FG.controls.fileName.setValue( fileDataset.fileName )
+              this.dataset = fileDataset
             }
             else{
-              this.dataset = doc.data() as SnowFlakeDataset
-              this.FG.controls.sql.setValue( this.dataset.sql )
+              let snowFlakeDataset = doc.data() as SnowFlakeDataset
+              this.FG.controls.sql.setValue( snowFlakeDataset.sql )
+              this.dataset = snowFlakeDataset
             }
 
             this.datasource = this.dataset.ports

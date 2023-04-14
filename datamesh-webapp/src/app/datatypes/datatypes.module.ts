@@ -12,57 +12,59 @@ import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
 })
 export class DatatypesModule { }
 
-export interface DatasetGroup{
-  id:string
-  label:string
+export class DatasetGroup{
+  id:string = ""
+  label:string = ""
 }
 
-export interface ComparisonGroup{
-  id:string
-  label:string
+
+export class Port{
+  name:string = ""
+  datatype:string = ""
 }
 
-export interface Port{
-  name:string
-  datatype:string
+export class SnowFlakeDataset{
+  id:string = ""
+  type:string = "SnowFlakeDataset"
+  datasetGroupId:string = ""
+  label:string = ""
+  sql:string = ""
+  ports:Port[] = []
 }
-
-export interface SnowFlakeDataset{
-  id:string
-  type: "SnowFlakeDataset"
-  datasetGroupId:string
-  label:string
-  sql:string
-  ports:Port[]
-}
-export interface FileDataset{
-  id:string
-  type: "FileDataset"
-  label:string
-  datasetGroupId:string
-  fileName:string
-  ports:Port[]
+export class FileDataset{
+  id:string = ""
+  type:string = "FileDataset"
+  label:string = ""
+  datasetGroupId:string = ""
+  fileName:string = ""
+  ports:Port[] = []
 }
 
 export type Dataset = FileDataset|SnowFlakeDataset
 
-export interface ComparisonRow{
-  sourceId:number
-  name:string
-  datatype:string
-  alias:string | null 
-  selected:boolean | null
+export class ComparisonRow{
+  sourceId:number|null = null
+  name:string = ""
+  datatype:string = ""
+  alias:string | null = null
+  selected:boolean = false
 }
-export interface Source{
-  dataSet:SnowFlakeDataset | FileDataset
-  comparisonRows:ComparisonRow[]
+export class Source{
+  dataSet:SnowFlakeDataset | FileDataset | null = null
+  comparisonRows:ComparisonRow[] = []
 }
-export interface Comparison{
-  id:string 
-  label:string
-  sources:Source[]
-  parent:Source
-  filter:string
+
+export class ComparisonGroup{
+  id:string = ""
+  label:string = ""
+}
+
+export class Comparison{
+  id:string = ""
+  label:string = ""
+  sources:Source[] = []
+  parent:Source | null = null
+  filter:string | null = null
 }
 
 export enum JoinType { "inner_join" , "left_join" , "outer_join" }
