@@ -63,7 +63,7 @@ export interface Comparison{
 export enum JoinType { "inner_join" , "left_join" , "outer_join" }
 export enum Operator { "=", ">" , ">=" , "<", "<=", "between" }
 
-export interface PortListRequest{
+export interface PortListResponse{
   fields:Port[] 
 }
 

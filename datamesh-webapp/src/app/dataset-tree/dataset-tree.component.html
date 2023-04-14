@@ -1,3 +1,4 @@
+<h3>Dataset Tree</h3>
 <div>
 <button mat-button (click)="addGroup()">Add</button>
 </div>
@@ -7,7 +8,8 @@
     {{node.item.label}}
     <button  mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
     <mat-menu #menu="matMenu">
-      <button *ngIf="isDatasetGroup(node)" (click)="onAddDataset()" mat-menu-item>Add Dataset</button>
+      <button *ngIf="isDatasetGroup(node)" (click)="onAddDataset(node)" mat-menu-item>Add Dataset</button>
+      <button *ngIf="isDataset(node)" (click)="editDataset(node)" mat-menu-item>Edit</button>
     </mat-menu>    
   </mat-tree-node>
 
@@ -19,5 +21,9 @@
       </mat-icon>
     </button>
     {{node.item.label}}
+    <button  mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+    <mat-menu #menu="matMenu">
+      <button *ngIf="isDatasetGroup(node)" (click)="onAddDataset(node)" mat-menu-item>Add Dataset</button>
+    </mat-menu>     
   </mat-tree-node>
 </mat-tree>

@@ -41,7 +41,7 @@ export class DatasetgroupEditComponent {
       id: uuid.v4(),
       label: this.FG.controls.label.value!
     }
-    this.firebaseService.setDoc( "DatasetGroup", datasetGroup).then( ()=>{
+    this.firebaseService.setDoc( "DatasetGroup", datasetGroup.id, datasetGroup).then( ()=>{
       this.id = datasetGroup.id
     })
   }  

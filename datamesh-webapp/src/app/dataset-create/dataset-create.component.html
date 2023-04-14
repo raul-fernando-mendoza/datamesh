@@ -1,21 +1,81 @@
-<p>Dataset Create</p>
+<div class="header">
+    <span>Dataset Edit</span><span class="spacer"></span><span>{{id}}</span><button *ngIf="dataset" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+</div>
 
 <div [formGroup]="FG">
-    
     <p>
         <mat-form-field class="name" appearance="fill">
             <mat-label>Name</mat-label>
-            <input matInput formControlName="label" required>
+            <input matInput formControlName="label" (change)="firebaseService.onChange($event,'Dataset',id,'label')">
         </mat-form-field>
     <p>
     <p>
-        <mat-form-field class="description" appearance="fill">
-            <mat-label>sql</mat-label>
-            <textarea class="sql" matInput maxlength="10000" rows="10" formControlName="sql" ></textarea>
-        </mat-form-field>         
-    </p>
-    <div *ngIf="!id">
+        <mat-form-field class="dataset" appearance="fill">
+            <mat-label>type dataset</mat-label> 
+            <mat-select name="type" formControlName="type" (selectionChange)="firebaseService.onSelectionChange($event, 'Dataset', id, 'type')">
+                <mat-option [value]="null"></mat-option>
+                <mat-option *ngFor="let t of typeList" [value]="t">{{t}}</mat-option>
+            </mat-select>  
+        </mat-form-field>                    
+    </p>    
+    <div *ngIf="FG.controls.type.value == 'SnowFlakeDataset' " >
+        <p>
+            <mat-form-field class="description" appearance="fill">
+                <mat-label>sql</mat-label> 
+                <textarea class="sql" matInput maxlength="10000" rows="10" formControlName="sql" (change)="firebaseService.onChange($event,'Dataset',id,'sql')"></textarea>
+            </mat-form-field>         
+        </p>
+    </div>
+    <div *ngIf="FG.controls.type.value == 'FileDataset' ">    
+        <p>
+        <mat-form-field class="file" appearance="fill">
+            <mat-label>Filename</mat-label> 
+            <input matInput class="fileName" formControlName="fileName" (change)="firebaseService.onChange($event,'Dataset',id,'fileName')">
+        </mat-form-field>
+        </p>
+    </div>
+
+    <div *ngIf="dataset">
+        <button mat-button (click)="onRefreshPorts()">Refresh Fields</button>
+        <table mat-table [dataSource]="datasource" class="mat-elevation-z8">
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef> Name </th>
+            <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+            </ng-container>
+        
+            <!-- Weight Column -->
+            <ng-container matColumnDef="datatype">
+            <th mat-header-cell *matHeaderCellDef>datatype</th>
+            <td mat-cell *matCellDef="let element">
+                <div *ngIf=" dataset.type == 'SnowFlakeDataset' ">
+                {{element.datatype}} 
+                </div>
+                <div *ngIf=" dataset.type == 'FileDataset' ">
+                    <mat-form-field class="datatype" appearance="fill">
+                        <mat-label>{{element.datatype}}</mat-label>
+                        <mat-select (selectionChange)="onPortChange($event,element)" [value]="element.datatype">
+                            <mat-option *ngFor="let item of portdatatypes" [value]="item">
+                            {{ item }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>                 
+                </div>
+            </td>
+            </ng-container>
+        
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>    
+    <!--
+        <p>sql:{{FG.controls.sql.valid}}</p>
+        <p>filename:{{FG.controls.fileName.valid}}</p>
+    -->   
+        <button mat-button>Sample</button>
+        
+    </div> 
+    <div *ngIf="!dataset">
         <button mat-raised-button (click)="onCancel()">Cancelar</button>     
-        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
+        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
     </div>  
 </div>

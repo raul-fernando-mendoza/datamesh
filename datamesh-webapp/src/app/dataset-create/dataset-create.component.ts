@@ -1,10 +1,12 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
-import { Dataset, FileDataset, SnowFlakeDataset } from '../datatypes/datatypes.module';
+import { Dataset, FileDataset, Port, PortListResponse, SnowFlakeDataset } from '../datatypes/datatypes.module';
 import * as uuid from 'uuid';
 import { StringUtilService } from '../string-util.service';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { FirebaseService } from '../firebase.service';
+import { MatSelectChange } from '@angular/material/select';
+import { UrlService } from '../url.service';
 
 
 @Component({
@@ -14,23 +16,38 @@ import { FirebaseService } from '../firebase.service';
 })
 export class DatasetCreateComponent implements OnInit, OnDestroy{
 
+  displayedColumns: string[] = ['name', 'datatype' ];
+  portdatatypes:string[] = [
+    "int32",
+    "object",
+    "float64"
+  ]
+
+  typeList = ["FileDataset","SnowFlakeDataset"]
+
   FG = this.fb.group({
     type:['',[Validators.required]],
     label:['',[Validators.required]],
-    sql:[''],
-    fileName:['']
+    sql:['',[]],
+    fileName:['',[]]
+
   })
 
   id:string | null = null
   datasetGroupId:string | null = null
   unsubscribe:any
+  
+  dataset:FileDataset|SnowFlakeDataset|undefined
+
+  datasource:Port[] = []
 
   constructor( 
-    private fb:FormBuilder 
+     private fb:FormBuilder 
     ,private stringUtilService:StringUtilService
     ,private activatedRoute:ActivatedRoute
     ,private router:Router
-    ,private firebaseService:FirebaseService
+    ,public firebaseService:FirebaseService
+    ,private urlService:UrlService
     ){
 
       if( this.activatedRoute.snapshot.paramMap.get('id') != 'null'){
@@ -39,6 +56,19 @@ export class DatasetCreateComponent implements OnInit, OnDestroy{
       if( this.activatedRoute.snapshot.paramMap.get('datasetGroupId') != 'null'){
         this.datasetGroupId = this.activatedRoute.snapshot.paramMap.get('datasetGroupId')
       }  
+
+      this.activatedRoute.params.subscribe(res => {
+        if("id" in res){
+          this.id = res["id"]
+          if( this.unsubscribe ){
+            this.unsubscribe()
+          }  
+          this.update()
+        }  
+        else if("datasetGroupId" in res){
+          this.datasetGroupId = res["datasetGroupId"]
+        }
+      })      
   }
   ngOnDestroy(): void {
     this.unsubscribe()
@@ -55,51 +85,61 @@ export class DatasetCreateComponent implements OnInit, OnDestroy{
 
           this.FG.controls.type.setValue( dataset.type )
           this.FG.controls.label.setValue( dataset.label )
+          
 
           if( dataset.type === "FileDataset"){
-            let fileDataset:FileDataset = doc.data() as FileDataset
-            this.FG.controls.fileName.setValue( fileDataset.fileName )
+            this.dataset = doc.data() as FileDataset
+            this.FG.controls.fileName.setValue( dataset.fileName )
           }
           else{
-            let snowFlakeDataset:SnowFlakeDataset = doc.data() as SnowFlakeDataset
-            this.FG.controls.sql.setValue( snowFlakeDataset.sql ) 
+            this.dataset = doc.data() as SnowFlakeDataset
+            this.FG.controls.sql.setValue( this.dataset.sql )
           }
+
+          this.datasource = this.dataset.ports
         }),
         "error":((reason)=>{
-
+          alert("ERROR:" + reason)
         })
       })
     }
   }
 
-  onCreateNew(){
-    this.createNew()
+  onSubmit(){
+    if( !this.dataset ){
+      this.create()
+    }
+    else{
+      this.save()
+    }
   }
-  createNew():Promise<void>{
+  create():Promise<void>{
+    //create new
+    let dataset = {
+      id:uuid.v4(),
+      type: this.FG.controls.type.value,
+      label: this.FG.controls.label.value!,
+      datasetGroupId: this.datasetGroupId!,
+      fileName: this.FG.controls.fileName.value!,
+      sql:this.FG.controls.sql.value!,
+      ports: []
+    }
+    return this.firebaseService.setDoc( "Dataset", dataset.id, dataset).then( () =>{
+      this.id = dataset.id
+      this.update()
+    })
+  }
+
+  save(){
     let type=this.FG.controls.type.value
-    if( type == "FileDataset"){
-      let dataset:FileDataset ={
-        id: uuid.v4(),
-        type: 'FileDataset',
-        label: this.FG.controls.label.value!,
-        datasetGroupId: this.datasetGroupId!,
-        fileName: this.FG.controls.fileName.value!,
-        ports: []
-      }
-      return this.firebaseService.setDoc( "Dataset", dataset)
+    let values ={
+      type: this.FG.controls.type.value!,
+      label: this.FG.controls.label.value!,
+      sql:this.FG.controls.sql.value!,
+      fileName: this.FG.controls.fileName.value!,
+      ports: []
     }
-    else {
-      let dataset:SnowFlakeDataset ={
-        id: uuid.v4(),
-        type: 'SnowFlakeDataset',
-        label: this.FG.controls.label.value!,
-        datasetGroupId: this.datasetGroupId!,
-        sql: this.FG.controls.sql.value!,
-        ports: []
-      }
-      return this.firebaseService.setDoc( "Dataset", dataset)
-    }
-    
+    return this.firebaseService.updateDoc( "Dataset", this.dataset!.id, values)
   }
 
   onCancel(){
@@ -124,4 +164,69 @@ export class DatasetCreateComponent implements OnInit, OnDestroy{
       */
     })
   }
+
+  onSelectTypeChange(event:MatSelectChange){
+    
+    console.log("onSelectChange")
+    var propertyName:any = event.source.ngControl.name
+    var value = event.source.ngControl.value  
+    if(this.FG.controls.type.value == 'SnowFlakeDataset'){
+      this.FG.controls.fileName.removeValidators(Validators.required)
+      this.FG.controls.fileName.updateValueAndValidity()
+      this.FG.controls.sql.addValidators(Validators.required); 
+      this.FG.controls.sql.updateValueAndValidity()               
+    } else {                
+      this.FG.controls.sql.removeValidators(Validators.required)
+      this.FG.controls.sql.updateValueAndValidity()
+      this.FG.controls.fileName.addValidators(Validators.required)
+      this.FG.controls.fileName.updateValueAndValidity()
+    }
+  }  
+  
+  onDelete(){
+    if( confirm("are you sure to delete:" + this.dataset?.label) ){
+      this.firebaseService.deleteDoc("Dataset", this.dataset!.id ).then( ()=>{
+        this.router.navigate(["/"])
+      })
+    }
+  }
+
+  onRefreshPorts():Promise<void>{
+    
+    return new Promise<void>((resolve,reject)=>{
+      
+      let param:any
+      if( this.dataset!.type == "SnowFlakeDataset"  ){
+        
+        param = {"qry":(this.dataset! as SnowFlakeDataset).sql }
+      }//finish left dataset qry    
+      else{
+        param = {"csvfile":( this.dataset! as FileDataset).fileName}
+      }    
+      this.urlService.post("getFielsForQuery",param).subscribe({ 
+            'next':(result)=>{
+             
+              var tempPorts:Port[] = []
+              var data:PortListResponse = result as PortListResponse 
+    
+              this.dataset!.ports = data["fields"]
+              this.datasource = this.dataset!.ports
+              
+              this.firebaseService.updateDoc("Dataset", this.dataset!.id, {ports:this.dataset!.ports})
+              resolve()
+            },
+            'error':(reason)=>{
+              reject(reason)
+            }
+          })
+    
+    })
+    
+  }
+
+  onPortChange($event:any, port:Port){
+    port.datatype = $event.value
+    this.firebaseService.updateDoc( "Dataset", this.id!, {ports:this.dataset!.ports})
+  }
 }
+

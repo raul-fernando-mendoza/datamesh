@@ -9,7 +9,7 @@ import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit
 import { WelcomeComponent } from './welcome/welcome.component';
 
 const routes: Routes = [
-  { path: 'Dataset-edit', component:DatasetCreateComponent }, 
+  { path: 'Dataset-edit/:id', component:DatasetCreateComponent }, 
   { path: 'Comparison-edit', component: ComparisonEditComponent},
   { path: "Comparison-execute", component: ComparisonExecuteComponent},
   { path: "DatasetGroup-edit", component: DatasetgroupEditComponent},
@@ -18,7 +18,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, { onSameUrlNavigation: 'reload' })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

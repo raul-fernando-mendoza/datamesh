@@ -4,3 +4,12 @@
 .description{
     width: 90%;
 }
+.header{
+    display: flex;
+}
+.spacer {
+    flex: 1;
+}
+.file{
+    width:90%;
+}

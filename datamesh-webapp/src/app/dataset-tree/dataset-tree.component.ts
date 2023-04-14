@@ -2,12 +2,13 @@
 import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
-import {BehaviorSubject} from 'rxjs';
-import { DatasetGroup, FileDataset, SnowFlakeDataset } from '../datatypes/datatypes.module';
+import {BehaviorSubject, firstValueFrom} from 'rxjs';
+import { Dataset, DatasetGroup, FileDataset, SnowFlakeDataset } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import * as uuid from 'uuid';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Route, Router } from '@angular/router';
 import { FirestoreError } from 'firebase/firestore';
+import { TreeNode } from '../tree-nested-data-source';
 
 /**
  * Node for to-do item
@@ -37,7 +38,7 @@ export interface DatasetFlatNode {
   styleUrls: ['./dataset-tree.component.css']
 })
 export class DatasetTreeComponent implements OnInit, OnDestroy {
-  unsubscribe:any
+  unsubscribeArray:any[] = []
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeMap = new Map<DatasetFlatNode, DatasetNode>();
 
@@ -53,7 +54,8 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
   _database = new BehaviorSubject<DatasetNode[]>([]);
   constructor(
     private firebaseService:FirebaseService,
-    private router:Router
+    private router:Router,
+    private route: ActivatedRoute
   ) {
     this.treeFlattener = new MatTreeFlattener(
       this.transformer,
@@ -70,40 +72,11 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     });
   }
   ngOnDestroy(): void {
-    this.unsubscribe()
+    this.unsubscribeArray.map( unsubscribe => unsubscribe() )
   }
   ngOnInit(): void {
-    this.unsubscribe = this.firebaseService.onsnapShotQuery("DatasetGroup",null, null, null,{
-      "next":( (set:any)=>{
-        var datasets:DatasetNode[] = []
-
-        var dataset : FileDataset | SnowFlakeDataset | DatasetGroup
-        set.docs.map( (item:any) =>{
-          if( item.data()["type"] == 'FileDataset'){
-            dataset = item.data() as FileDataset
-          }
-          else if( item.data()["type"] == 'SnowFlakeDataset'){
-            dataset = item.data() as SnowFlakeDataset
-          }
-          else{
-            dataset = item.data() as DatasetGroup
-          }
-  
-          let datasetNode:DatasetNode = {
-            children: [],
-            item: dataset
-          }
-          datasets.push( datasetNode )
-        })
-        datasets.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
-        this._database.next(datasets);
-      }),
-      "error":( (error: FirestoreError) =>{
-          alert("ERROR:" + error)
-      })
-    })
+    this.update()
   }
-
 
   getLevel = (node: DatasetFlatNode) => node.level;
 
@@ -135,11 +108,13 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
 
 
   addGroup() {
-    this.router.navigate(["DatasetGroup-edit"])
+    this.router.navigate(["/DatasetGroup-edit"])
   }
 
-  onAddDataset(){
-    this.router.navigate(["Dataset-edit"])
+  onAddDataset(node:DatasetNode){
+    let datasetGroup = node.item as DatasetGroup
+
+    this.router.navigate(["/Dataset-edit",{datasetGroupId:datasetGroup.id}])
   }
 
   isDatasetGroup(node:DatasetNode){
@@ -149,5 +124,88 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     else{
       return false
     }
+  }
+  update(){
+    let unsubscribe = this.firebaseService.onsnapShotQuery("DatasetGroup",null, null, null,{
+      "next":( (set:any)=>{
+        var datasets:DatasetNode[] = []
+
+        var transactions = set.docs.map( (item:any) =>{
+          var datasetGroup = item.data() as DatasetGroup
+          let datasetNode:DatasetNode = {
+            children: [],
+            item: datasetGroup
+          }
+          datasets.push( datasetNode )
+          return this.loadDatasetForGroup( datasetNode )
+        })
+        Promise.all( transactions ).then( ()=>{
+          datasets.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
+          this._database.next(datasets);
+        })
+      }),
+      "error":( (error: FirestoreError) =>{
+          alert("ERROR:" + error)
+      })
+    })
+    this.unsubscribeArray.push( unsubscribe )
+
+  }  
+  loadDatasetForGroup(datasetNode:DatasetNode):Promise<void>{
+    return new Promise<void>((resolve, reject) =>{
+      let observer = {
+        "next":( (set:any) =>{
+          datasetNode.children.length = 0
+          set.docs.map( (doc:any) =>{
+            let dataset:Dataset = doc.data() as Dataset
+            if( dataset.type == 'FileDataset'){
+              var fileDataset = dataset as FileDataset
+              let newDatasetNode:DatasetNode = {
+                children: [],
+                item: fileDataset
+              }
+              datasetNode.children.push( newDatasetNode )
+            }
+            else{
+              var snowflakeDataset = dataset as SnowFlakeDataset
+              let newDatasetNode:DatasetNode = {
+                children: [],
+                item: snowflakeDataset
+              }
+              datasetNode.children.push( newDatasetNode )            
+            }
+          })
+          datasetNode.children.sort( (a,b)=> a.item.label > b.item.label ? 1:-1)
+          this.reload()
+          resolve()
+        }),
+        "error":( (error:any) =>{
+          alert("ERROR:" +error)
+          reject()
+        })          
+      }
+      let unsubscribe = this.firebaseService.onsnapShotQuery("Dataset","datasetGroupId","==",datasetNode.item.id, observer)
+      this.unsubscribeArray.push( unsubscribe )
+    })
+  }
+
+  isDataset( node:DatasetNode ){
+    if( "type" in node.item ){
+      return true
+    }
+    else{
+      return false
+    }
+  }
+
+  editDataset( node:DatasetNode ){
+    this.router.navigate(["/Dataset-edit/",  node.item.id]);
+    
+  }
+
+  reload(){
+    var temp = this.dataSource.data
+    this.dataSource.data = []
+    this.dataSource.data = temp;    
   }
 }

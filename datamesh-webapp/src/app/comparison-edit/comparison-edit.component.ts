@@ -6,7 +6,7 @@ import { db } from '../../environments/environment'
 
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
 import { MatDialog } from '@angular/material/dialog';
-import { Comparison, PortListRequest, Dataset, Port, ComparisonRow } from '../datatypes/datatypes.module';
+import { Comparison, PortListResponse, Dataset, Port, ComparisonRow } from '../datatypes/datatypes.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as uuid from 'uuid';
 import { FormBuilder, FormGroup } from '@angular/forms';

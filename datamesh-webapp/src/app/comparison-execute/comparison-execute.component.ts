@@ -6,7 +6,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { UrlService } from '../url.service';
 import { db } from '../../environments/environment'
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
-import { ChiildJoinRequest,  Comparison, Dataset, Port, PortListRequest } from '../datatypes/datatypes.module';
+import { ChiildJoinRequest,  Comparison, Dataset, Port, PortListResponse } from '../datatypes/datatypes.module';
 import { StringUtilService } from '../string-util.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { Call, splitNsName } from '@angular/compiler';

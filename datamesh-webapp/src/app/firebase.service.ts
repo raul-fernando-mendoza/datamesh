@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { db } from '../environments/environment'
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp} from "firebase/firestore"; 
 import { Directionality } from '@angular/cdk/bidi';
+import { MatSelectChange } from '@angular/material/select';
 
 
 @Injectable({ 
@@ -12,14 +13,14 @@ export class FirebaseService {
   constructor() { }
 
 
-  setDoc(collectionPath:string, obj:{ [key: string]: any }):Promise<void>{
-    return setDoc( doc(db, collectionPath , obj["id"]), obj)
+  setDoc(collectionPath:string, id:string, obj:{ [key: string]: any }):Promise<void>{
+    return setDoc( doc(db, collectionPath , id), obj)
   }
   getdoc( collectionPath:string, id:string):Promise<DocumentData>{
     return getDoc( doc( db,collectionPath, id ))
   }
-  updateDoc( collectionPath:string, obj:{ [key: string]: any }):Promise<void>{
-    return updateDoc( doc(db, collectionPath , obj["id"]), obj)
+  updateDoc( collectionPath:string, id:string, obj:{ [key: string]: any }):Promise<void>{
+    return updateDoc( doc(db, collectionPath , id), obj)
   }
   getDocs( collectionPath:string ):Promise<QuerySnapshot<DocumentData>>{
     return new Promise<QuerySnapshot<DocumentData>>((resolve, reject) =>{
@@ -73,4 +74,49 @@ export class FirebaseService {
     return onSnapshot( doc( db,collectionPath, id), observer )  
   }
 
+  onChange(event:any, collectionPath:string, id:string|null, propertyName:string){
+    var value:any = event.target.value      
+    var values:any = {}
+    values[propertyName]=value 
+    if( id ){
+      updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
+        console.log("update property")
+      })
+    }
+  }
+  onCheckboxChange(event:any, collectionPath:string, id:string|null, propertyName:string){
+    var value:boolean = event.checked     
+    var values:any = {}
+    values[propertyName]=value   
+    if( id ){
+      updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
+        console.log("update property")
+      })
+    }
+  }  
+  onSelectionChange(event:MatSelectChange, collectionPath:string, id:string|null, propertyName:string){
+    var value = event.source.ngControl.value  
+    var values:any = {}
+    if( value == undefined ){
+      values[propertyName]=null     
+    }
+    else values[propertyName]=value   
+    if( id ){
+      updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
+        console.log("update property")
+      },
+      reason=>{
+        alert("ERROR:" + reason)
+      })
+    }
+  }  
+
+  deleteDoc(collectionPath:string, id:string):Promise<void>{
+    return deleteDoc( doc( db, collectionPath, id )).then( () =>{
+      console.log("remove successful")
+    },
+    reason =>{
+      alert("ERROR removing:" + reason)
+    })
+  }
 }
