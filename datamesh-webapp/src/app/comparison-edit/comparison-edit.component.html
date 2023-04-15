@@ -1,11 +1,19 @@
-Comparison Edit
+
+<div class="header">
+  <span>Comparison Edit</span><span class="spacer"></span><span>{{id}}</span><button *ngIf="comparison" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+</div>
 
 <div [formGroup]="FG">
       <mat-form-field appearance="fill">
           <mat-label>Name</mat-label>
           <input matInput formControlName="label" required (change)="onPropertyChange($event)" required>
       </mat-form-field>
-      <p>
+      <div *ngIf="!id">
+        <button mat-raised-button (click)="onCancel()">Cancelar</button>     
+        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
+      </div>          
+</div>              
+<!--
       <mat-form-field class="dataset" appearance="fill">
         <mat-label>Main dataset</mat-label>
         <mat-select  formControlName="leftDatasetId" name="leftDatasetId" (selectionChange)="onSelectChange($event)">
@@ -36,10 +44,7 @@ Comparison Edit
         <textarea class="sql" matInput maxlength="10000" rows="5" formControlName="filter" (change)="onPropertyChange($event)"></textarea>
     </mat-form-field>          
   </p>   
-  <div *ngIf="!id">
-  <button mat-raised-button (click)="onCancel()">Cancelar</button>     
-  <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
-  </div>       
+   
 </div>
 <div *ngIf="comparison">
   <button mat-raised-button [disabled]="submmiting" (click)="onRefreshPorts()">Reload Fields</button>
@@ -110,11 +115,9 @@ Comparison Edit
   <h3>TREE</h3>
   
   <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
-    <!-- This is the tree node template for leaf nodes -->
-    <!-- There is inline padding applied to this node using styles.
-      This padding value depends on the mat-icon-button width. -->
+
     <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle>
-        {{node.obj.label}} <!--nodeClass:{{node.nodeClass}}-->
+        {{node.obj.label}} 
         <div *ngIf="node.nodeClass == 'Comparison'">
           <tr>
             <td *ngFor="let port of node.leftPorts">
@@ -143,7 +146,7 @@ Comparison Edit
           </button>               
         </mat-menu>         
     </mat-tree-node>
-    <!-- This is the tree node template for expandable nodes -->
+
     <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
         <div class="mat-tree-node">
           <div>
@@ -177,8 +180,7 @@ Comparison Edit
             </div>
           </div>
         </div>
-        <!-- There is inline padding applied to this div using styles.
-            This padding value depends on the mat-icon-button width.  -->
+
         <div [class.example-tree-invisible]="!treeControl.isExpanded(node)"
             role="group">
           <ng-container matTreeNodeOutlet></ng-container>
@@ -190,4 +192,4 @@ Comparison Edit
   loading.
   <mat-spinner></mat-spinner>
 </ng-template>
-  
+-->          

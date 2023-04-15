@@ -62,9 +62,10 @@ export class ComparisonGroup{
 export class Comparison{
   id:string = ""
   label:string = ""
+  groupId:string = ""
   sources:Source[] = []
-  parent:Source | null = null
-  filter:string | null = null
+  parentId:string | null = null
+  filter:string = ""
 }
 
 export enum JoinType { "inner_join" , "left_join" , "outer_join" }

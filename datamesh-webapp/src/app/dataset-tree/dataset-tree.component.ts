@@ -48,14 +48,11 @@ export interface FlatNode {
 })
 export class DatasetTreeComponent implements OnInit, OnDestroy {
 
-  @Input() groupCollection!:string //the folder where the file should be written
-  @Input() dataCollection!:string //displayName
+  @Input() groupCollection:string = "INVALIDSET" //the folder where the file should be written
+  @Input() dataCollection:string ="INVALIDDATA" //displayName
 
+  unsubscribe:any
   unsubscribeMap:Map<string, any> = new Map<string,any>()
-
-  
-
-  snapshotTime:Map<string,number> = new Map<string,number>() //tells if the snapshot was recorded on cache data 
   /** Map from flat node to nested node. This helps us finding the nested node to be modified */
   flatNodeToNode = new Map<FlatNode, TreeNode>();
 
@@ -141,8 +138,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
         unsubscribe()
       })
       this.unsubscribeMap.clear()  
-      this.snapshotTime.clear()  
-      let unsubscribe = this.firebaseService.onsnapShotQuery(this.groupCollection,null, null, null,{
+      this.unsubscribe = this.firebaseService.onsnapShotQuery(this.groupCollection,null, null, null,{
         "next":( (set:any)=>{
           console.log("reload parent")
           var datasets:TreeNode[] = []
@@ -158,9 +154,6 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
           Promise.all( transactions ).then( ()=>{
             datasets.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
             this._database.next(datasets);
-            if( !this.unsubscribeMap.get( "/" )){
-              this.unsubscribeMap.set( "/", unsubscribe )
-            }
             resolve()
           })
         }),
@@ -178,6 +171,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
         "next":( (set:any) =>{
           
           groupNode.children.length = 0
+          console.log("childs for collections:" + this.dataCollection + ": " + groupNode.item.id + ":" + set.docs.length)
           set.docs.map( (doc:any) =>{
             var data = doc.data() as Data
             let newDatasetNode:TreeNode = {
@@ -187,17 +181,8 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
             groupNode.children.push( newDatasetNode )            
           })
           groupNode.children.sort( (a,b)=> a.item.label > b.item.label ? 1:-1)
-          let prev = this.snapshotTime.get( groupNode.item.id )
-          if( prev ){
-            let now = (new Date()).getTime()
-            if( (now - prev) > 1000){
-              console.log("calling reload from:" + groupNode.item.label)
-              this.reload( groupNode.item.id )
-            }
-          }
-          console.log("register:" + groupNode.item.label + " cache:" + set.metadata.fromCache)
-          
-          this.snapshotTime.set( groupNode.item.id, (new Date()).getTime() )
+          this.reload( groupNode.item.id )
+
           resolve()
         }),
         "error":( (error:any) =>{
@@ -222,28 +207,25 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
 
 
   reload( id:string | null ){
-    this.update().then( ()=>{
-      if( id ){ 
-        this.nodeToFlatNode.forEach( (groupFlatNode, key)=>{
-          if( groupFlatNode.item.id == id){
-            this.treeControl.expand( groupFlatNode )
-            let groupNode = this.flatNodeToNode.get( groupFlatNode )            
-            if( groupNode ){
-              groupNode.children.map( (childNode) =>{
-                let flatChildNode = this.nodeToFlatNode.get(childNode)
-                if( flatChildNode ){
-                  console.log("expand: " + flatChildNode.item.label)
-                   this.treeControl.expand( flatChildNode )
-                }
-              })
-            }
+    let oldValue = this._database.value 
+    this._database.next(oldValue)
+    if( id ){ 
+      this.nodeToFlatNode.forEach( (groupFlatNode, key)=>{
+        if( groupFlatNode.item.id == id){
+          this.treeControl.expand( groupFlatNode )
+          let groupNode = this.flatNodeToNode.get( groupFlatNode )            
+          if( groupNode ){
+            groupNode.children.map( (childNode) =>{
+              let flatChildNode = this.nodeToFlatNode.get(childNode)
+              if( flatChildNode ){
+                console.log("expand: " + flatChildNode.item.label)
+                  this.treeControl.expand( flatChildNode )
+              }
+            })
           }
-        })
-      }
-    },
-    error=>{
-      alert("ERROR:" + error)
-    })
+        }
+      })
+    }
   }
   addGroup() {
     this.router.navigate(["/" + this.groupCollection + "-create"])

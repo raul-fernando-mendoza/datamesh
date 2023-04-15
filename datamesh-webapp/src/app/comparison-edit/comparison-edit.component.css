@@ -38,3 +38,10 @@ td{
 .filter{
   width:90%;
 }
+
+.header{
+  display: flex;
+}
+.spacer {
+  flex: 1;
+}

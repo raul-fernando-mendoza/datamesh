@@ -34,10 +34,10 @@ import { ComparisonExecuteComponent } from './comparison-execute/comparison-exec
 import {MatTabsModule} from '@angular/material/tabs';
 import {MatProgressBarModule} from '@angular/material/progress-bar';
 import { DatasetTreeComponent } from './dataset-tree/dataset-tree.component';
-import { ComparisonTreeComponent } from './comparison-tree/comparison-tree.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import {MatCardModule} from '@angular/material/card';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
+import { ComparisonGroupEditComponent } from './comparisongroup-edit/comparisongroup-edit.component';
 
 @NgModule({
   declarations: [
@@ -48,9 +48,9 @@ import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit
     ComparisonEditComponent,
     ComparisonExecuteComponent,
     DatasetTreeComponent,
-    ComparisonTreeComponent,
     WelcomeComponent,
-    DatasetgroupEditComponent
+    DatasetgroupEditComponent,
+    ComparisonGroupEditComponent
   ],
   imports: [
     HttpClientModule,

@@ -17,6 +17,7 @@ import { MatTree } from '@angular/material/tree';
 import { UrlService } from '../url.service';
 import { StringUtilService } from '../string-util.service';
 import { Portal } from '@angular/cdk/portal';
+import { FirebaseService } from '../firebase.service';
 
 
   //dataset:Dataset
@@ -48,12 +49,11 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   datasets:Dataset[] = []
 
   comparison!:Comparison
+  groupId:string = ""
+
   FG = this.fb.group({
     id:[''],
     label:[''],
-    leftFile:[''],
-    leftDatasetId:[''],
-    rightDatasetId:[''],
     filter:['']
   })
 
@@ -65,6 +65,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
 
   submmiting=false
 
+  unsubscribe:any
   unsubscribes = new Map()
 
   portsDataSource:ComparisonRow[] = []
@@ -82,17 +83,32 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   constructor(
       public dialog: MatDialog
      ,private router:Router
-     ,private route: ActivatedRoute
+     ,private activatedRoute: ActivatedRoute
      ,private urlService:UrlService
      ,private stringUtilService:StringUtilService
-     ,private fb:FormBuilder) {
-    if( this.route.snapshot.paramMap.get('id') != 'null'){
-      this.id = this.route.snapshot.paramMap.get('id')
-    }    
+     ,private fb:FormBuilder
+     ,private firebaseService:FirebaseService) {
+      this.activatedRoute.params.subscribe(res => {
+        if("id" in res){
+          this.id = res["id"]
+          if( this.unsubscribe ){
+            this.unsubscribe()
+            this.unsubscribe=null
+          }  
+          this.update()
+        }  
+        else if("groupId" in res){
+          this.groupId = res["groupId"]
+        }
+      })  
     this.dataSource.data = TREENODE_EXAMPLE_DATA;   
   }
 
   ngOnDestroy(): void {
+    if( this.unsubscribe ){
+      this.unsubscribe()
+    }
+    
     this.unsubscribes.forEach( item =>{
       item()
     })
@@ -200,15 +216,16 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   }
  
   update(){
-    /*
+    
     if( this.id ){
-      let unsubscribe = onSnapshot( doc( db,"Comparison", this.id ),
+      this.unsubscribe = onSnapshot( doc( db,"Comparison", this.id ),
           (docRef) =>{
-                //initialize the form
-                this.comparison=docRef.data() as Comparison
+                if( docRef.exists()){
+                  this.comparison=docRef.data() as Comparison
 
-                this.FG.controls.label.setValue( this.comparison.label!)
-
+                  this.FG.controls.label.setValue( this.comparison.label!)
+                }
+/*
                 this.portsDataSource.length = 0
                 //load the ports to portdatasource
 
@@ -239,17 +256,14 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
                 this.loadChildren( parentPath , node ).then( () =>{
                   this.dataSource.data = this.comparisonList
                 })
-                
-              
+  */              
           },
           (reason:any) =>{
               alert("ERROR update comparison list:" + reason)
           }  
       )
-      this.unsubscribes.set( "root", unsubscribe )
-      
     }
-    */
+    
     
   }  
 
@@ -302,14 +316,13 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
 */
     })
   }
-  onRemove(id:string){
-    deleteDoc( doc( db, "Comparison", id )).then( () =>{
-      console.log("remove successful")
-    },
-    reason =>{
-      alert("ERROR removing:" + reason)
-    })
-  }  
+  onDelete(){
+    if( confirm("are you sure to delete:" + this.comparison?.label) ){
+      this.firebaseService.deleteDoc("Comparison", this.comparison!.id ).then( ()=>{
+        this.router.navigate(["/"])
+      })
+    }
+  }
   onAddChild(parentNode:TreeNode){
 /*
     var parentCollection:string = this.dataSource.getPath( parentNode )
@@ -346,31 +359,25 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   } 
  
   onCreateNew(){
-    /*
     var comparison:Comparison={
       id:uuid.v4(),
       label:this.FG.controls.label.value!,
-      leftFile:this.FG.controls.leftFile.value!,
-      leftDatasetId:this.FG.controls.leftDatasetId.value!,
-      rightDatasetId:this.FG.controls.rightDatasetId.value!,
-      leftPorts:[],
-      rightPorts:[],
-      joinColumns:[],
+      groupId:this.groupId,
+      sources:[],
+      parentId:null,
       filter:""
     }
     
     setDoc( doc(db, "Comparison" , comparison.id!), comparison).then( () =>{
       console.log("created")
       this.id = comparison.id!
-      this.comparison = comparison      
-      this.refreshPorts().then( ()=>{
-        this.update()
-      })
+      this.comparison = comparison  
+      this.router.navigate(["Comparison-edit",this.comparison.id])    
     },
     reason =>{
       console.log("ERROR:" + reason )
     })
-    */
+    
   }   
   
   onCancel(){
