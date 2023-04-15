@@ -34,7 +34,7 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
   })
 
   id:string | null = null
-  datasetGroupId:string | null = null
+  groupId:string | null = null
   unsubscribe:any
   
   dataset:FileDataset|SnowFlakeDataset|undefined
@@ -49,14 +49,6 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
     ,public firebaseService:FirebaseService
     ,private urlService:UrlService
     ){
-
-      if( this.activatedRoute.snapshot.paramMap.get('id') != 'null'){
-        this.id = this.activatedRoute.snapshot.paramMap.get('id')
-      }     
-      if( this.activatedRoute.snapshot.paramMap.get('datasetGroupId') != 'null'){
-        this.datasetGroupId = this.activatedRoute.snapshot.paramMap.get('datasetGroupId')
-      }  
-
       this.activatedRoute.params.subscribe(res => {
         if("id" in res){
           this.id = res["id"]
@@ -65,8 +57,8 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
           }  
           this.update()
         }  
-        else if("datasetGroupId" in res){
-          this.datasetGroupId = res["datasetGroupId"]
+        else if("groupId" in res){
+          this.groupId = res["groupId"]
         }
       })      
   }
@@ -121,18 +113,18 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
   }
   create():Promise<void>{
     //create new
-    let dataset = {
+    let dataset:Dataset = {
       id:uuid.v4(),
-      type: this.FG.controls.type.value,
+      type: this.FG.controls.type.value!,
       label: this.FG.controls.label.value!,
-      datasetGroupId: this.datasetGroupId!,
+      groupId: this.groupId!,
       fileName: this.FG.controls.fileName.value!,
       sql:this.FG.controls.sql.value!,
       ports: []
     }
     return this.firebaseService.setDoc( "Dataset", dataset.id, dataset).then( () =>{
       this.id = dataset.id
-      this.update()
+      this.router.navigate(["Dataset-edit",this.id])
     })
   }
 

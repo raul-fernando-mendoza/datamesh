@@ -35,7 +35,7 @@ export class FileDataset{
   id:string = ""
   type:string = "FileDataset"
   label:string = ""
-  datasetGroupId:string = ""
+  groupId:string = ""
   fileName:string = ""
   ports:Port[] = []
 }

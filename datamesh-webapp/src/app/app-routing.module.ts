@@ -7,12 +7,14 @@ import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit
 import { WelcomeComponent } from './welcome/welcome.component';
 
 const routes: Routes = [
+  { path: 'DatasetGroup-create', component:DatasetgroupEditComponent },    
   { path: 'DatasetGroup-edit/:id', component:DatasetgroupEditComponent },   
-  { path: 'Dataset-create/:datasetGroupId', component:DatasetEditComponent },
+  { path: 'Dataset-create/:groupId', component:DatasetEditComponent },
   { path: 'Dataset-edit/:id', component:DatasetEditComponent }, 
   
+  { path: 'ComparisonGroup-create', component: ComparisonEditComponent},
   { path: 'ComparisonGroup-edit/:id', component: ComparisonEditComponent},
-  { path: 'Comparison-create/:comparisonGroupID', component: ComparisonEditComponent},
+  { path: 'Comparison-create/:groupID', component: ComparisonEditComponent},
   { path: 'Comparison-edit/:id', component: ComparisonEditComponent},
   { path: "Comparison-execute", component: ComparisonExecuteComponent},
   { path: "DatasetGroup-edit", component: DatasetgroupEditComponent},
@@ -21,7 +23,9 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes,{
+    onSameUrlNavigation: 'reload'
+  })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
