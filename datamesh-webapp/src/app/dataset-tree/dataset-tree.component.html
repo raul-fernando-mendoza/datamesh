@@ -1,11 +1,13 @@
-<h3>{{dataCollection}} Tree</h3>
-<div>
-<button mat-button (click)="addGroup()">Add</button>
+<div class="header">
+  <span class="spacer"></span>
+  <button mat-button (click)="addGroup()">
+  <mat-icon>add</mat-icon>Add</button>
 </div>
 <mat-tree  [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
     <button mat-icon-button disabled></button>
-    {{node.item.label}}
+    <span *ngIf="!isData(node)">{{node.item.label}}</span>
+    <span *ngIf="isData(node)" draggable [dragData]="node.item.id">{{node.item.label}}</span>
     <button  mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
     <mat-menu #menu="matMenu">
       <button *ngIf="isGroup(node)" (click)="onEditGroup(node)" mat-menu-item>Edit</button>      
@@ -21,12 +23,11 @@
         {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
       </mat-icon>
     </button>
-    {{node.item.label}} 
+    {{node.item.label}}
     <button  mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
     <mat-menu #menu="matMenu">
       <button *ngIf="isGroup(node)" (click)="onEditGroup(node)" mat-menu-item>Edit</button>      
       <button *ngIf="isGroup(node)" (click)="onAddData(node)" mat-menu-item>Add</button>
-      <button *ngIf="isData(node)" (click)="onEditData(node)" mat-menu-item>Edit</button>
     </mat-menu>    
   </mat-tree-node>
 </mat-tree>

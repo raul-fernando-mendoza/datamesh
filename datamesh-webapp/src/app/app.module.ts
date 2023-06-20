@@ -16,13 +16,11 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { environment } from '../environments/environment';
 import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { ComparisonListComponent } from './comparison-list/comparison-list.component';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatSelectModule} from '@angular/material/select';
 import { ComparisonEditComponent } from './comparison-edit/comparison-edit.component';
@@ -38,19 +36,25 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import {MatCardModule} from '@angular/material/card';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
 import { ComparisonGroupEditComponent } from './comparisongroup-edit/comparisongroup-edit.component';
+import {MatGridListModule} from '@angular/material/grid-list';
+import { NgDragDropModule } from 'ng-drag-drop';
+import {MatExpansionModule} from '@angular/material/expansion';
+import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
+import { SqlJupiterEditComponent } from './sql-jupiter-edit/sql-jupiter-edit.component'
 
 @NgModule({
   declarations: [
     AppComponent,
     NavigationComponent,
     DatasetEditComponent,
-    ComparisonListComponent,
     ComparisonEditComponent,
     ComparisonExecuteComponent,
     DatasetTreeComponent,
     WelcomeComponent,
     DatasetgroupEditComponent,
-    ComparisonGroupEditComponent
+    ComparisonGroupEditComponent,
+    SqlJupiterDocComponent,
+    SqlJupiterEditComponent
   ],
   imports: [
     HttpClientModule,
@@ -80,7 +84,10 @@ import { ComparisonGroupEditComponent } from './comparisongroup-edit/comparisong
     MatCheckboxModule,
     MatTabsModule,
     MatProgressBarModule,
-    MatCardModule 
+    MatCardModule,
+    MatGridListModule,
+    MatExpansionModule,
+    NgDragDropModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]

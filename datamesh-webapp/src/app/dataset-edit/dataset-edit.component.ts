@@ -215,6 +215,7 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
               resolve()
             },
             'error':(reason)=>{
+              alert("ERROR:" + reason.error.error)
               reject(reason)
             }
           })

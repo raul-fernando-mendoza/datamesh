@@ -4,9 +4,9 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { db } from '../../environments/environment'
 
-import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
+import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot} from "firebase/firestore"; 
 import { MatDialog } from '@angular/material/dialog';
-import { Comparison, PortListResponse, Dataset, Port, ComparisonRow } from '../datatypes/datatypes.module';
+import { Comparison, PortListResponse, Dataset, Port, ComparisonPort, KeyLeftRight } from '../datatypes/datatypes.module';
 import { ActivatedRoute, Router } from '@angular/router';
 import * as uuid from 'uuid';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -18,7 +18,12 @@ import { UrlService } from '../url.service';
 import { StringUtilService } from '../string-util.service';
 import { Portal } from '@angular/cdk/portal';
 import { FirebaseService } from '../firebase.service';
+import { CdkDragDrop, CdkDragEnter, CdkDragExit, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
 
+
+
+
+const keyports = "keyports"
 
   //dataset:Dataset
 
@@ -29,10 +34,13 @@ import { FirebaseService } from '../firebase.service';
 })
 export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, OnDestroy{
 
+  @ViewChild(keyports, {
+    static: true
+    }) table!: MatTable<KeyLeftRight> ;
   @ViewChild(MatPaginator) paginator!: MatPaginator ;
   @ViewChild(MatSort) sort!: MatSort ;
-  @ViewChild(MatTable) table!: MatTable<ComparisonRow> ;
-  @ViewChild(MatTree) tree!: MatTree<TreeNode> ; 
+  
+  //@ViewChild(MatTree) tree!: MatTree<TreeNode> ; 
 
   treeControl = new NestedTreeControl<TreeNode>(node => 
     node.children
@@ -59,16 +67,13 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
 
   comparisonList:TreeNode[] = []
   //nodeTreeDataSource!:TreeNestedDataSource 
-  
-  /** Columns displayed in the table. Columns IDs can be added, removed, or reordered. */
-  displayedColumns = ['idx','source','name','type','alias','selected'];
-
+ 
   submmiting=false
 
   unsubscribe:any
   unsubscribes = new Map()
 
-  portsDataSource:ComparisonRow[] = []
+  portsDataSource:KeyLeftRight[] = []
 
   portdatatypes:string[] = [
     "int32",
@@ -80,6 +85,16 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     "StringType()"
   ]
 
+  done = ['Get up', 'Brush teeth', 'Take a shower', 'Check e-mail', 'Walk dog'];
+
+  displayedColumns: string[] = ['idx','parent', 'left', 'right', 'selected'];
+  portsSource = [];  
+
+  leftDataset:Dataset | null = null
+  rightDataset:Dataset | null = null
+
+  leftDisplayedColumns = ['idx','name','alias','isSelected']
+
   constructor(
       public dialog: MatDialog
      ,private router:Router
@@ -87,7 +102,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
      ,private urlService:UrlService
      ,private stringUtilService:StringUtilService
      ,private fb:FormBuilder
-     ,private firebaseService:FirebaseService) {
+     ,public firebaseService:FirebaseService) {
       this.activatedRoute.params.subscribe(res => {
         if("id" in res){
           this.id = res["id"]
@@ -114,106 +129,13 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     })
   }
   ngOnInit(): void {
-    this.loadDataSets()
+ 
   }
   ngAfterViewInit(): void {
     this.update()
   }
   
-  onPropertyChange(event:any){
-    var propertyName:string = event.srcElement.attributes.formControlname.value
-    var value:any = event.target.value      
-    var values:any = {}
-    values[propertyName]=value 
-    if( this.id ){
-      updateDoc( doc( db, "Comparison", this.id), values ).then( ()=>{
-        console.log("update property")
-      })
-    }
-  }
-  onCheckboxChange(event:any){
-    var propertyName = event.source.name
-    var value:boolean = event.checked     
-    var values:any = {}
-    values[propertyName]=value   
-    if( this.id ){
-      updateDoc( doc( db, "Comparison", this.id), values ).then( ()=>{
-        console.log("update property")
-      })
-    }
-  }  
-  onSelectChange(event:MatSelectChange){
-    console.log("onSelectChange")
-    var propertyName:any = event.source.ngControl.name
-    var value = event.source.ngControl.value  
-    var values:any = {}
-    if( value == undefined ){
-      values[propertyName]=null     
-    }
-    else values[propertyName]=value   
-    if( this.id ){
-      updateDoc( doc( db, "Comparison", this.id), values ).then( ()=>{
-        console.log("update property")
-      },
-      reason=>{
-        alert("ERROR:" + reason)
-      })
-    }
-  }  
 
-  onPortChange($event:any, row:ComparisonRow, property:string){
-    
-/*     
-    if( row.side == "left"){
-      var port = this.comparison.leftPorts.find( element => {
-        return element.name == row.name;
-      })  
-    }
-    else{
-       var port = this.comparison.rightPorts.find( element => {
-        return element.name == row.name;
-      })   
-    } 
-    
-    if( port ){
-      switch (property){
-        case "datatype":
-          port.datatype = $event.value 
-          break
-        case "alias":
-          port.alias = $event.srcElement.value
-          break 
-        case "selected":
-          port.selected = $event.checked
-          break 
-      }
-    } 
-
-    var values:any = {}  
-    if( port ){
-      if( port.side == 'left'){
-        values["leftPorts"]=this.comparison.leftPorts
-      }
-      else{
-        values["rightPorts"]=this.comparison.rightPorts
-      }
-
-
-      if( this.id ){
-        updateDoc( doc( db, "Comparison", this.id), values ).then( ()=>{
-          console.log("update port values")
-        },
-        reason=>{
-          alert("ERROR:" + reason)
-        })
-        .then( ()=>{
-          this.updateJoinColumns()   
-        })
-      }
-         
-    }    
-    */  
-  }
  
   update(){
     
@@ -224,39 +146,14 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
                   this.comparison=docRef.data() as Comparison
 
                   this.FG.controls.label.setValue( this.comparison.label!)
+
+                  this.updateDataSources()
+
+                  this.table.dataSource = []
+                  this.table.dataSource = this.comparison.keyLeftRight
+                  this.table.renderRows()
                 }
-/*
-                this.portsDataSource.length = 0
-                //load the ports to portdatasource
-
-                
-                this.comparison.leftPorts.map(port=>{
-                  this.portsDataSource.push( port )
-                })
-                this.comparison.rightPorts.map(port=>{
-                  this.portsDataSource.push( port )
-                })
-                
-                
-                //now Add the tree for childs
-                var node:TreeNode = {
-                  obj:this.comparison,
-                  opened:false,
-                  children:null,
-                  nodeClass:"Comparison",
-                  isLeaf:true,
-                  parentNode:null,
-                  isLoading:false
-                }
-                this.comparisonList.length=0
-                this.comparisonList.push( node )
-
-
-                let parentPath = "Comparison" + "/" + this.comparison.id
-                this.loadChildren( parentPath , node ).then( () =>{
-                  this.dataSource.data = this.comparisonList
-                })
-  */              
+        
           },
           (reason:any) =>{
               alert("ERROR update comparison list:" + reason)
@@ -347,25 +244,23 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   }
 
 
-  loadDataSets(){
-    getDocs( query( collection(db, "Dataset") ) ).then( set =>{
-      this.datasets.length = 0
-      set.docs.map( doc =>{
-        var dataset:Dataset = doc.data() as Dataset
-        this.datasets.push( dataset )
-      })
-      this.datasets.sort( (a,b) => a.label! > b.label! ? 1 : -1)
-    })    
-  } 
+
  
   onCreateNew(){
     var comparison:Comparison={
-      id:uuid.v4(),
-      label:this.FG.controls.label.value!,
-      groupId:this.groupId,
-      sources:[],
-      parentId:null,
-      filter:""
+      id: uuid.v4(),
+      label: this.FG.controls.label.value!,
+      groupId: this.groupId,
+      parentDatasetId: null,
+      parentPorts:[],
+      filter: "",
+      leftDatasetId: null,
+      leftPorts:[],
+      rightDatasetId: null,
+      rightPorts:[],
+      keyLeftRight:[],
+      keyParenRight:[],
+      keyParentLeft:[]
     }
     
     setDoc( doc(db, "Comparison" , comparison.id!), comparison).then( () =>{
@@ -384,29 +279,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     this.router.navigate(["Comparison-list"])
   }
 
-
-  onEditChild(row:TreeNode){
-    /*
-    var parentCollection:string = this.dataSource.getPath( row.parentNode )
-    
-
-    const dialogRef = this.dialog.open(ChildEditComponent, {
-      height: '400px',
-      width: '80%',
-      data: {  parentCollection, id:row.obj.id }
-    });
-  
-    dialogRef.afterClosed().subscribe( (data:any) => {
-      console.log('The dialog was closed');
-      if( data != undefined && data != ''){
-        console.log(data)
-      }
-      else{
-        console.debug("none")
-      }
-    });   
-    */
-  }  
+/*
   onRemoveChild(row:TreeNode){
     var parentCollection:string = this.dataSource.getPath( row.parentNode )
     deleteDoc( doc(db, parentCollection + "/Child", row.obj.id) ).then( ()=>{
@@ -420,161 +293,146 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   sortData($event:any){
     console.log( $event )
   }  
-
-  getDataset(id:string):Dataset|null{
-    var selectedDataset:Dataset|null = null
-    this.datasets.map( dataset =>{
-      if( id == dataset.id){
-        selectedDataset = dataset
-      }
-    })
-    return selectedDataset
-  } 
-  getPorts( side:"left"|"right",comparisonPorts:ComparisonRow[], datasetId:string|null, csvfile:string|null ):Promise<void>{
-    
-    return new Promise<void>((resolve,reject)=>{
-      /*
-      let param:any
-      if( datasetId ){
-        let dataSet = this.getDataset( datasetId )
-        if( dataSet && dataSet.sql ){
-          var qry = this.stringUtilService.removeNonPrintable(dataSet.sql)
-          param = {"qry":qry}
-        }
-          
-      }//finish left dataset qry    
-      else{
-        param = {"csvfile":csvfile}
-      }    
-      this.urlService.post("getFielsForQuery",param).subscribe({ 
-            'next':(result)=>{
-             
-              var tempItemPorts:ComparisonRow[] = []
-              var data:PortListRequest = result as PortListRequest 
-    
-              var fields = data["fields"]
-              fields.map( field =>{
-                let port:ComparisonRow = {
-                  name: field.name,
-                  datatype: field.datatype,
-                  alias: null,
-                  selected: true,
-                  side: side
-                }
-                tempItemPorts.push( port )
-              })
-              comparisonPorts.map( oldItemPort =>{
-                tempItemPorts.filter( p => p.name == oldItemPort.name).map( p=>{
-                  p.selected = oldItemPort.selected
-                  if( oldItemPort.alias != null ){
-                    p.alias = oldItemPort.alias
-                  }
-                })
-              })
-              comparisonPorts.length=0
-              tempItemPorts.map( item => {
-                comparisonPorts.push(item)
-              })
-              resolve()
-            },
-            'error':(reason)=>{
-              reject(reason)
-            }
-          })
-    */
-    })
-    
-  }
-
-  onRefreshPorts(){
-    this.submmiting = true
-    this.refreshPorts().then( ()=>{
-      this.submmiting = false
-    },
-    reason =>{
-      this.submmiting = false
-      alert("ERROR refreshing Ports" + reason.error.error)
-    })
-  }
-
-  refreshPorts():Promise<void>{
-    
-    return new Promise<void>((resolve, reject) =>{
-      /*
-      let leftDatasetId:string|null = this.FG.controls.leftDatasetId.value
-      let rightDatasetId:string|null = this.FG.controls.rightDatasetId.value
-      let leftFile:string|null = this.FG.controls.leftFile.value
-      this.getPorts("left", this.comparison.leftPorts, leftDatasetId, leftFile ).then( ()=>{
-      })
-      .then( ()=>{
-        return this.getPorts("right", this.comparison.rightPorts, rightDatasetId, leftFile )
-      })
-      .then( ()=>{
-        this.submmiting = false
-        var allItemPorts:ComparisonRow[] = []
-        this.comparison.leftPorts.map( port => allItemPorts.push(port))
-        this.comparison.rightPorts.map( port => allItemPorts.push(port))
-        this.portsDataSource.length = 0
-        allItemPorts.map( item => this.portsDataSource.push(item))
-
-        this.updateJoinColumns()
-
-        var obj ={ 
-          "leftPorts":this.comparison.leftPorts,
-          "rightPorts":this.comparison.rightPorts,
-        }
-        updateDoc( doc(db,"Comparison",this.comparison.id), obj).then( ()=>{
-          console.log("ports has been updated")
-          resolve()
-        },
-        reason=>{
-          alert("ERROR:"+ reason)
-        })
-      })
-      .catch( (reason) =>{
-        reject( reason )
-      })
-      */
-    })
-    
-  }
-  
+*/
   onExecute(){
     this.router.navigate(["Comparison-execute",{id:this.comparison.id}])
   }
-  updateJoinColumns():Promise<void>{
+  onLeftSourceDrop(e: any) {
+    // Get the dropped data here
+    console.log(e)
+    this.comparison.leftDatasetId = e.dragData
     
-    return new Promise<void>( (resolve,reject) =>{
-      /*
-      //update joinColumns
-      //1.-first read all fields with the same name 
-      //2.-save the newOnes
-      if( !this.comparison.joinColumns ){
-        this.comparison.joinColumns = []
-      }
-      this.comparison.joinColumns.length = 0
-      this.comparison.leftPorts.map( lPort =>{
-        this.comparison.rightPorts.map( rPort =>{
-          var lName = lPort.alias ? lPort.alias.toUpperCase() : lPort.name.toUpperCase()
-          var rName = rPort.alias ? rPort.alias.toUpperCase() : rPort.name.toUpperCase()
-          if( lName == rName ){
-            this.comparison.joinColumns.push( lName )
-          }
-        })
-      }) 
-      var obj ={ 
-        "joinColumns":this.comparison.joinColumns
-      }
-      updateDoc( doc(db,"Comparison",this.comparison.id), obj).then( ()=>{
-        console.log("ports has been updated")
-        resolve()
-      },
-      reason=>{
-        alert("ERROR:"+ reason)
-        reject(reason)
-      })           
-      */
-    })   
+    this.firebaseService.updateDoc("Comparison",this.id!, {leftDatasetId:this.comparison.leftDatasetId }).then( ()=>{
+      this.updatePorts()
+    })
+
     
   }
+  onRightSourceDrop(e:any){
+    console.log(e)
+    this.comparison.rightDatasetId = e.dragData
+    this.firebaseService.updateDoc("Comparison",this.id!, {rightDatasetId:this.comparison.rightDatasetId }).then( ()=>{
+      this.updatePorts()
+    })
+    
+  }
+
+  updateDataSources():Promise<void>{
+    return new Promise<void>( (resolve, reject) =>{
+      let transactions:any = []
+      if( this.comparison.leftDatasetId ){
+        let leftTransaction = this.firebaseService.getdoc("Dataset", this.comparison.leftDatasetId).then( (doc:DocumentSnapshot) =>{
+          if( doc.exists() ){
+            this.leftDataset = doc.data() as Dataset
+            this.comparison.leftPorts = []
+            this.leftDataset.ports.map( port =>{
+              let comparisonPort:ComparisonPort = {
+                name: port.name,
+                type: port.datatype,
+                alias: "",
+                isSelected: true
+              }
+              this.comparison.leftPorts.push( comparisonPort )
+            })
+          }
+        })
+        transactions.push( leftTransaction )
+      }
+      if( this.comparison.rightDatasetId ){
+        let rightTransaction = this.firebaseService.getdoc("Dataset", this.comparison.rightDatasetId).then( (doc:DocumentSnapshot) =>{
+          if( doc.exists() ){
+            this.rightDataset = doc.data() as Dataset
+            this.comparison.rightPorts = []
+            this.rightDataset.ports.map( port =>{
+              let comparisonPort:ComparisonPort = {
+                name: port.name,
+                type: port.datatype,
+                alias: "",
+                isSelected: true
+              }
+              this.comparison.rightPorts.push( comparisonPort )
+            })
+          }
+        })
+        transactions.push( rightTransaction )
+      }
+      Promise.all( transactions ).then( ()=>{
+        resolve()
+      },
+      error =>{
+        reject(error)
+      })
+    })        
+  }
+
+
+  updatePorts():Promise<void>{
+    return new Promise<void>( (resolve,reject) =>{
+      let transactions:any = []
+      if( this.comparison.leftDatasetId ){
+        let leftTransaction = this.firebaseService.getdoc("Dataset", this.comparison.leftDatasetId).then( (doc:DocumentSnapshot) =>{
+          if( doc.exists() ){
+            this.leftDataset = doc.data() as Dataset
+            this.comparison.leftPorts = []
+            this.leftDataset.ports.map( port =>{
+              let comparisonPort:ComparisonPort = {
+                name: port.name,
+                type: port.datatype,
+                alias: "",
+                isSelected: true
+              }
+              this.comparison.leftPorts.push( comparisonPort )
+            })
+            this.firebaseService.updateDoc("Comparison",this.id!, {leftPorts:this.comparison.leftPorts })
+          }
+        })
+        transactions.push( leftTransaction )
+      }
+      if( this.comparison.rightDatasetId ){
+        let rightTransaction = this.firebaseService.getdoc("Dataset", this.comparison.rightDatasetId).then( (doc:DocumentSnapshot) =>{
+          if( doc.exists() ){
+            this.rightDataset = doc.data() as Dataset
+            this.comparison.rightPorts = []
+            this.rightDataset.ports.map( port =>{
+              let comparisonPort:ComparisonPort = {
+                name: port.name,
+                type: port.datatype,
+                alias: "",
+                isSelected: true
+              }
+              this.comparison.rightPorts.push( comparisonPort )
+            })
+            this.firebaseService.updateDoc("Comparison",this.id!, {rightPorts:this.comparison.rightPorts })
+          }
+        })
+        transactions.push( rightTransaction )
+      }
+      Promise.all( transactions ).then( ()=>{
+        //when reaching here the comparison leftPorts and rightPorts sholuld have been filled
+        this.comparison.keyLeftRight.length = 0
+        //go trough all the left ports and check if the right has the same port if that is the case add key
+        this.comparison.leftPorts.map( lport =>{
+          let found = this.comparison.rightPorts.find( rport =>{
+            return (lport.alias!=""?lport.alias:lport.name) == (rport.alias!=""?rport.alias:rport.name) 
+          }) 
+          if( found ){
+            let newRow:KeyLeftRight ={
+              leftPortName: lport.name,
+              leftPortType: lport.type,
+              leftPortAlias: lport.alias,
+              rightPortName: found.name,
+              rightPortType: found.type,
+              rightPortAlias: found.alias,
+              isSelected:true
+            }
+            this.comparison.keyLeftRight.push( newRow )
+          }
+        })
+        this.firebaseService.updateDoc("Comparison",this.id!, {keyLeftRight:this.comparison.keyLeftRight })
+        this.table.dataSource = []
+        this.table.dataSource = this.comparison.keyLeftRight
+        this.table.renderRows()
+      })
+    })   
+  }  
 }

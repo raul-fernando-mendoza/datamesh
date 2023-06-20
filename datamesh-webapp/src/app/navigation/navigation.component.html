@@ -1,20 +1,39 @@
-<mat-toolbar color="primary">
-  <button
-    type="button"
-    aria-label="Toggle sidenav"
-    mat-icon-button
-    *ngIf="isHandset$ | async">
-    <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
-  </button>
-</mat-toolbar>
-<mat-drawer-container class="container" autosize>
-  <mat-drawer mode="side" opened>
-    <mat-tab-group>
-      <mat-tab label="Sources"><app-dataset-tree groupCollection="DatasetGroup" dataCollection="Dataset"></app-dataset-tree></mat-tab>
-      <mat-tab label="comparison"><app-dataset-tree groupCollection="ComparisonGroup" dataCollection="Comparison"></app-dataset-tree></mat-tab>
-    </mat-tab-group>
-  </mat-drawer>
-  <mat-drawer-content>
-    <router-outlet></router-outlet>
-  </mat-drawer-content>
-</mat-drawer-container>  
+<div class="container">
+  <mat-toolbar class="header" color="primary">
+    <button *ngIf="!(isHandset$ | async)">
+      <span aria-label="Title">Database analysis</span>
+    </button>
+    <span class="spacer"></span>
+    <button mat-button [matMenuTriggerFor]="menu">Menu</button>
+    <mat-menu #menu="matMenu">
+      <a href="jupiter-sql" mat-menu-item>Item 1</a>
+    </mat-menu>    
+  </mat-toolbar>
+  <mat-drawer-container autosize>
+    <mat-drawer mode="side" opened >
+      <mat-accordion>
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Sql-jupiter
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <app-dataset-tree title="sql-jupiter" groupCollection="SqlJupiterGroup" dataCollection="SqlJupiterDoc">
+          </app-dataset-tree>
+        </mat-expansion-panel>
+        <mat-expansion-panel >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Self aware panel
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <p>I'm visible because I am open</p>
+        </mat-expansion-panel>
+      </mat-accordion>      
+    </mat-drawer>
+    <mat-drawer-content>
+      <router-outlet></router-outlet>
+    </mat-drawer-content>
+</mat-drawer-container>    
+    
+</div>

@@ -5,9 +5,20 @@ import { ComparisonExecuteComponent } from './comparison-execute/comparison-exec
 import { ComparisonGroupEditComponent } from './comparisongroup-edit/comparisongroup-edit.component';
 import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
+import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 
-const routes: Routes = [
+const routes: Routes = [ 
+  
+  { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent }, 
+  { path: 'datasetgroup/:groupCollection/edit/:id', component:DatasetgroupEditComponent }, 
+  { path: 'datasetgroup/:groupCollection/edit/:id', component:DatasetgroupEditComponent }, 
+
+  { path: 'SqlJupiterDoc/create/:groupId', component:SqlJupiterDocComponent },
+  { path: 'SqlJupiterDoc/edit/:id', component:SqlJupiterDocComponent },
+  
+
+
   { path: 'DatasetGroup-create', component:DatasetgroupEditComponent },    
   { path: 'DatasetGroup-edit/:id', component:DatasetgroupEditComponent },   
   { path: 'Dataset-create/:groupId', component:DatasetEditComponent },

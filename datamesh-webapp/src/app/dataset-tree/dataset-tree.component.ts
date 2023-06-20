@@ -6,6 +6,7 @@ import {BehaviorSubject, firstValueFrom} from 'rxjs';
 import { FirebaseService } from '../firebase.service';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { FirestoreError } from 'firebase/firestore';
+import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 
 
 export interface Data{
@@ -48,6 +49,7 @@ export interface FlatNode {
 })
 export class DatasetTreeComponent implements OnInit, OnDestroy {
 
+  @Input() title:string ="Grupo" //displayName
   @Input() groupCollection:string = "INVALIDSET" //the folder where the file should be written
   @Input() dataCollection:string ="INVALIDDATA" //displayName
 
@@ -66,6 +68,9 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
   dataSource: MatTreeFlatDataSource<TreeNode, FlatNode>;
 
   _database = new BehaviorSubject<TreeNode[]>([]);
+
+  todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];
+
   constructor(
     private firebaseService:FirebaseService,
     private router:Router,
@@ -228,18 +233,30 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     }
   }
   addGroup() {
-    this.router.navigate(["/" + this.groupCollection + "-create"])
-  }
-
-  onAddData(node:TreeNode){
-    let group = node.item as Group
-
-    this.router.navigate(["/" + this.dataCollection + "-create", group.id])
+    this.router.navigate(["datasetgroup", this.groupCollection, "create"])
   }
   onEditGroup( node:TreeNode ){
-    this.router.navigate(["/" + this.groupCollection + "-edit/",  node.item.id]);
+    this.router.navigate(["datasetgroup", this.groupCollection, "edit", node.item.id]);
+  }
+  onAddData(node:TreeNode){
+    let group = node.item as Group
+    this.router.navigate([this.dataCollection, "create", group.id])
   }
   onEditData( node:TreeNode ){
-    this.router.navigate(["/" + this.dataCollection + "-edit",  node.item.id]);
-  }  
+    let group = node.item as Group
+    this.router.navigate([this.dataCollection, "edit",  node.item.id]);
+  }
+  drop(event: CdkDragDrop<string[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+    }
+  }
+
 }

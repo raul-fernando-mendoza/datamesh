@@ -42,30 +42,61 @@ export class FileDataset{
 
 export type Dataset = FileDataset|SnowFlakeDataset
 
-export class ComparisonRow{
-  sourceId:number|null = null
-  name:string = ""
-  datatype:string = ""
-  alias:string | null = null
-  selected:boolean = false
-}
-export class Source{
-  dataSet:SnowFlakeDataset | FileDataset | null = null
-  comparisonRows:ComparisonRow[] = []
-}
-
 export class ComparisonGroup{
   id:string = ""
   label:string = ""
 }
 
+export interface ComparisonPort{
+  name:string,
+  type:string,
+  alias:string,
+  isSelected:boolean
+}
+
+export interface KeyLeftRight {
+  leftPortName:string
+  leftPortType:string
+  leftPortAlias:string
+  rightPortName:string
+  rightPortType:string
+  rightPortAlias:string
+  isSelected:boolean
+}
+export interface KeyParentLeft{
+  parentPortName:string | null 
+  parentPortType:string | null
+  parentPortAlias:string | null
+  leftPortName:string
+  leftPortType:string
+  leftPortAlias:string
+  isSelected:boolean
+}
+export interface KeyParentRight{
+  parentPortName:string | null 
+  parentPortType:string | null
+  parentPortAlias:string | null
+  rightPortName:string
+  rightPortType:string
+  rightPortAlias:string
+  isSelected:boolean
+}
+
 export class Comparison{
-  id:string = ""
-  label:string = ""
-  groupId:string = ""
-  sources:Source[] = []
-  parentId:string | null = null
-  filter:string = ""
+  id!:string 
+  label!:string 
+  groupId!:string 
+  parentDatasetId:string | null = null
+  parentPorts:ComparisonPort[] = []
+  leftDatasetId:string | null = null
+  leftPorts:ComparisonPort[] = []
+  rightDatasetId:string | null = null
+  rightPorts:ComparisonPort[] = []
+  filter:string | null = null
+
+  keyParentLeft:KeyParentLeft[] = []
+  keyParenRight:KeyParentRight[] = []
+  keyLeftRight:KeyLeftRight[] = []
 }
 
 export enum JoinType { "inner_join" , "left_join" , "outer_join" }
@@ -81,5 +112,17 @@ export interface ChiildJoinRequest{
   rightQry:string,
   leftColumns:Port[],
   rightColumns:Port[],
+}
+
+export class SqlJupiter{
+  sql:string = ""
+  result:any
+}
+
+export class SqlJupiterDoc{
+  id:string=""
+  label:string=""
+  groupId:string=""
+  sqlJupiterList:Array<SqlJupiter> = []
 }
 

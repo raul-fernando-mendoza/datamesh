@@ -1,0 +1,32 @@
+<div class="sql-container" [formGroup]="FG">
+    <div>
+        <mat-form-field class="sql" appearance="fill">
+            <mat-label>sql</mat-label> 
+            <textarea class="sql" matInput oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' maxlength="10000" formControlName="sql" (change)="onSqlChange($event)"></textarea>
+        </mat-form-field>
+        <button mat-raised-button [disabled]="submitting" (click)="remove()"><mat-icon>remove</mat-icon></button>    
+    </div>
+    <div>
+        <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+    </div>
+    <div class="table-holder">
+        <table *ngIf="sqlJupiter!.result">
+            <thead>
+                <tr>
+                    <th>idx</th>
+                    <th *ngFor="let col of sqlJupiter!.result.metadata">
+                        {{ col.name }}
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let row of sqlJupiter!.result.resultSet; index as i">
+                    <td>{{i+1}}</td>
+                    <td *ngFor="let col of sqlJupiter!.result.metadata">
+                        {{ row[col.name] }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>  

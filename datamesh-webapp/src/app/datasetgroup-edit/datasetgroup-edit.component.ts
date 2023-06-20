@@ -15,6 +15,7 @@ import * as uuid from 'uuid';
 export class DatasetgroupEditComponent implements OnInit,OnDestroy{
   id:string|null = null
   datasetGroup:DatasetGroup|undefined
+  groupCollection:string = "invalid"
 
   unsubscribe:any = null
 
@@ -35,11 +36,11 @@ export class DatasetgroupEditComponent implements OnInit,OnDestroy{
     this.activatedRoute.params.subscribe(res => {
       if("id" in res){
         this.id = res["id"]
-        if( this.unsubscribe ){
-          this.unsubscribe()
-        }  
-        this.update()
+      }
+      if("groupCollection" in res){
+        this.groupCollection = res["groupCollection"]
       }  
+      this.update()
     })       
   }
   ngOnDestroy(): void {
@@ -52,7 +53,10 @@ export class DatasetgroupEditComponent implements OnInit,OnDestroy{
   }
   update(){
     if( this.id ){
-      this.firebaseService.onsnapShot( "DatasetGroup", this.id!, {
+      if( this.unsubscribe ){
+        this.unsubscribe()
+      }        
+      this.unsubscribe = this.firebaseService.onsnapShot( this.groupCollection , this.id!, {
         "next":((doc) =>{
           if( doc.exists() ){
             this.datasetGroup = doc.data() as DatasetGroup
@@ -77,7 +81,7 @@ export class DatasetgroupEditComponent implements OnInit,OnDestroy{
       id: uuid.v4(),
       label: this.FG.controls.label.value!
     }
-    this.firebaseService.setDoc( "DatasetGroup", datasetGroup.id, datasetGroup).then( ()=>{
+    this.firebaseService.setDoc( this.groupCollection, datasetGroup.id, datasetGroup).then( ()=>{
       this.id = datasetGroup.id
     })
   }  
@@ -85,10 +89,12 @@ export class DatasetgroupEditComponent implements OnInit,OnDestroy{
     this.router.navigate(["/"])
   }
   onDelete(){
-    if( confirm("are you sure to delete:" + this.datasetGroup?.label) ){
-      this.firebaseService.deleteDoc("DatasetGroup", this.datasetGroup!.id ).then( ()=>{
-        this.router.navigate(["/"])
-      })
+    if( this.id && this.datasetGroup){
+      if( confirm("are you sure to delete:" + this.datasetGroup.label) ){
+        this.firebaseService.deleteDoc(this.groupCollection, this.datasetGroup.id ).then( ()=>{
+          this.router.navigate(["/"])
+        })
+      }
     }
   }  
 }

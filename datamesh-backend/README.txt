@@ -9,3 +9,5 @@ curl.exe http://localhost:5000/getFielsForQuery -H "Content-type:application/jso
 curl.exe http://localhost:5000/getFielsForQuery -H "Content-type:application/json" -X POST -d @data.json
 
 curl.exe http://localhost:5000/getFielsForQuery -H "Content-type:application/json" -X POST -d "@.\\getFielsForQuery_test.json"
+
+curl.exe http://localhost:5000/executeSql -H "Content-type:application/json" -X POST -d "@.\\sql_data.json"

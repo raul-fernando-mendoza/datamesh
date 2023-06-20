@@ -1,0 +1,26 @@
+<div class="header">
+    <span>sqlJupiterDoc Edit</span><span class="spacer"></span><span class="id">{{id}}</span><button *ngIf="sqlJupiterDoc" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+</div> 
+<div [formGroup]="FG">
+    <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="label" required (change)="firebaseService.onChange($event,'SqlJupiterDoc',id,'label')" required>
+    </mat-form-field>
+    <div *ngIf="!id">
+      <button mat-raised-button (click)="onCancel()">Cancelar</button>     
+      <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
+    </div>
+    <div *ngIf="sqlJupiterDoc && sqlJupiterDoc.sqlJupiterList">
+        <div *ngFor="let sqlJupiter of sqlJupiterDoc!.sqlJupiterList; index as i; first as isFirst">
+            <div class="header">
+                <button mat-button (click)="onAddSqlJupiter(i)"><mat-icon>add</mat-icon>Insert</button>
+            </div>
+            <div >
+                <app-sql-jupiter-edit class="sql" [sqlJupiter]="sqlJupiter" (change)="onSqlChangeItem($event,i)"  (delete)="onSqlDelete($event,i)"></app-sql-jupiter-edit>
+            </div>
+        </div>
+    </div>    
+    <div>
+        <button mat-button (click)="onAddSqlJupiter(sqlJupiterDoc!.sqlJupiterList.length)"><mat-icon>add</mat-icon>Add</button>
+    </div>
+</div>   

@@ -45,3 +45,7 @@ td{
 .spacer {
   flex: 1;
 }
+
+mat-grid-tile{
+  background-color: lightgray;
+}

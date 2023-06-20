@@ -1,0 +1,19 @@
+.sql-container{
+    display:inline;
+    background-color: brown;
+}
+mat-form-field{
+    width:90%;
+}
+.table-holder{
+    width:90%;
+    font-size: small;
+    overflow-y:auto;
+}
+table{
+    border-collapse: collapse;
+}
+th, td{
+    border: 1px solid black;
+}
+

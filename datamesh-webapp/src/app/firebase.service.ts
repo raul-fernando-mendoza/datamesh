@@ -16,7 +16,7 @@ export class FirebaseService {
   setDoc(collectionPath:string, id:string, obj:{ [key: string]: any }):Promise<void>{
     return setDoc( doc(db, collectionPath , id), obj)
   }
-  getdoc( collectionPath:string, id:string):Promise<DocumentData>{
+  getdoc( collectionPath:string, id:string):Promise<DocumentSnapshot>{
     return getDoc( doc( db,collectionPath, id ))
   }
   updateDoc( collectionPath:string, id:string, obj:{ [key: string]: any }):Promise<void>{
@@ -94,6 +94,17 @@ export class FirebaseService {
       })
     }
   }  
+  onArrayCheckboxChange(event:any, collectionPath:string, id:string|null, array:any, propertyName:string, index:number, key:string){
+    var value:boolean = event.checked     
+    var values:any = {}
+    array[index][key] = value
+    values[propertyName]=array   
+    if( id ){
+      updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
+        console.log("update property")
+      })
+    }
+  }   
   onSelectionChange(event:MatSelectChange, collectionPath:string, id:string|null, propertyName:string){
     var value = event.source.ngControl.value  
     var values:any = {}
