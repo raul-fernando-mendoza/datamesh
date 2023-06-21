@@ -1,16 +1,20 @@
+<div>
+    parentCollection:{{ parentCollection }}
+    collection:{{ collection }}
+    id:{{ id }}
+</div>
 <div class="sql-container" [formGroup]="FG">
+    <div>
+        <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+    </div>    
     <div>
         <mat-form-field class="sql" appearance="fill">
             <mat-label>sql</mat-label> 
-            <textarea class="sql" matInput oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' maxlength="10000" formControlName="sql" (change)="onSqlChange($event)"></textarea>
+            <textarea class="sql" matInput rows="{{rows}}" maxlength="10000" formControlName="sql" (change)="onSqlChange($event)"></textarea>
         </mat-form-field>
-        <button mat-raised-button [disabled]="submitting" (click)="remove()"><mat-icon>remove</mat-icon></button>    
-    </div>
-    <div>
-        <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
     </div>
     <div class="table-holder">
-        <table *ngIf="sqlJupiter!.result">
+        <table *ngIf="sqlJupiter && sqlJupiter.result">
             <thead>
                 <tr>
                     <th>idx</th>

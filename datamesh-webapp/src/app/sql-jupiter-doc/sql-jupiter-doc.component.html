@@ -10,17 +10,19 @@
       <button mat-raised-button (click)="onCancel()">Cancelar</button>     
       <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
     </div>
-    <div *ngIf="sqlJupiterDoc && sqlJupiterDoc.sqlJupiterList">
-        <div *ngFor="let sqlJupiter of sqlJupiterDoc!.sqlJupiterList; index as i; first as isFirst">
+    <div *ngIf="sqlJupiterDoc && sqlJupiterDoc.itemList">
+        <div *ngFor="let item of sqlJupiterDoc!.itemList; index as i; first as isFirst">
             <div class="header">
                 <button mat-button (click)="onAddSqlJupiter(i)"><mat-icon>add</mat-icon>Insert</button>
             </div>
             <div >
-                <app-sql-jupiter-edit class="sql" [sqlJupiter]="sqlJupiter" (change)="onSqlChangeItem($event,i)"  (delete)="onSqlDelete($event,i)"></app-sql-jupiter-edit>
+                parent id:{{i}} - {{item.id}}
+                <app-sql-jupiter-edit parentCollection="{{parentCollection}}" collection="{{item.className}}" id="{{item.id}}"></app-sql-jupiter-edit>
             </div>
+            <button mat-raised-button [disabled]="submitting" (click)="onSqlDelete(i)"><mat-icon>remove</mat-icon></button>    
         </div>
     </div>    
     <div>
-        <button mat-button (click)="onAddSqlJupiter(sqlJupiterDoc!.sqlJupiterList.length)"><mat-icon>add</mat-icon>Add</button>
+        <button mat-button (click)="onAddSqlJupiter(sqlJupiterDoc!.itemList.length)"><mat-icon>add</mat-icon>Add</button>
     </div>
 </div>   
