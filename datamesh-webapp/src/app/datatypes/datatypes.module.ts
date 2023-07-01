@@ -115,14 +115,21 @@ export interface ChiildJoinRequest{
 }
 
 export class SqlJupiter{
+  id!:string
+  className!:string
   sql:string = ""
-  result:any
+  result:any|null
+}
+export class TextJupiter{
+  id!:string
+  className!:string
+  txt:string = ""
 }
 
-export class SqlJupiterDoc{
+export class JupiterDoc{
   id:string=""
   label:string=""
   groupId:string=""
-  sqlJupiterList:Array<SqlJupiter> = []
+  itemList:Array<{className:string, id:string}> = []
 }
 

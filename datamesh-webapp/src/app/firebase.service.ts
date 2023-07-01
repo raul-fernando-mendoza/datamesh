@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { db } from '../environments/environment'
-import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp} from "firebase/firestore"; 
+import {  collection, doc, addDoc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp, DocumentReference} from "firebase/firestore"; 
 import { Directionality } from '@angular/cdk/bidi';
 import { MatSelectChange } from '@angular/material/select';
 

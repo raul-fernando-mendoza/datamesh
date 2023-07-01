@@ -40,7 +40,9 @@ import {MatGridListModule} from '@angular/material/grid-list';
 import { NgDragDropModule } from 'ng-drag-drop';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
-import { SqlJupiterEditComponent } from './sql-jupiter-edit/sql-jupiter-edit.component'
+import { SqlJupiterEditComponent } from './sql-jupiter-edit/sql-jupiter-edit.component';
+import { TextJupiterComponent } from './text-jupiter/text-jupiter.component'
+import { QuillModule } from 'ngx-quill';
 
 @NgModule({
   declarations: [
@@ -54,7 +56,8 @@ import { SqlJupiterEditComponent } from './sql-jupiter-edit/sql-jupiter-edit.com
     DatasetgroupEditComponent,
     ComparisonGroupEditComponent,
     SqlJupiterDocComponent,
-    SqlJupiterEditComponent
+    SqlJupiterEditComponent,
+    TextJupiterComponent
   ],
   imports: [
     HttpClientModule,
@@ -87,7 +90,8 @@ import { SqlJupiterEditComponent } from './sql-jupiter-edit/sql-jupiter-edit.com
     MatCardModule,
     MatGridListModule,
     MatExpansionModule,
-    NgDragDropModule.forRoot()
+    NgDragDropModule.forRoot(),
+    QuillModule
   ],
   providers: [],
   bootstrap: [AppComponent]
