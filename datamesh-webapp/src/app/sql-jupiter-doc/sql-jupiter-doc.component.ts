@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SqlJupiter, JupiterDoc } from '../datatypes/datatypes.module';
+import { SqlJupiter, JupiterDoc, TextJupiter } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot} from "firebase/firestore"; 
 import { db } from '../../environments/environment'
@@ -108,6 +108,28 @@ export class SqlJupiterDocComponent {
       }
       this.firebaseService.setDoc( 'SqlJupiterDoc/'+this.id+"/SqlJupiter", newSqlJupiter.id, newSqlJupiter).then( () =>  {      
         thiz.sqlJupiterDoc!.itemList.splice(idx,0,{className:"SqlJupiter", id:newSqlJupiter.id})
+        thiz.submitting = false
+        thiz.save().then( () =>{
+          console.log("success saving data")
+        })
+        
+      },
+      reason =>{
+        thiz.submitting = false
+        alert("Error saving doc:" + reason)
+      })
+    }
+  }
+  onAddTextJupiter(idx:number){
+    if( this.sqlJupiterDoc ){
+      let thiz = this
+      var newTxtJupiter:TextJupiter = {
+        id: uuid.v4(),
+        className: "TextJupiter",
+        txt: "hello"
+      }
+      this.firebaseService.setDoc( 'SqlJupiterDoc/'+this.id+"/TextJupiter", newTxtJupiter.id, newTxtJupiter).then( () =>  {      
+        thiz.sqlJupiterDoc!.itemList.splice(idx,0,{className:"TextJupiter", id:newTxtJupiter.id})
         thiz.submitting = false
         thiz.save().then( () =>{
           console.log("success saving data")

@@ -120,6 +120,11 @@ export class SqlJupiter{
   sql:string = ""
   result:any|null
 }
+export class TextJupiter{
+  id!:string
+  className!:string
+  txt:string = ""
+}
 
 export class JupiterDoc{
   id:string=""
