@@ -6,6 +6,28 @@ import { db } from '../../environments/environment'
 import { FormBuilder } from '@angular/forms';
 import { UrlService } from '../url.service';
 
+
+export interface PeriodicElement {
+  name: string;
+  position: number;
+  weight: number;
+  symbol: string;
+}
+
+const ELEMENT_DATA: PeriodicElement[] = [
+  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
+  {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
+  {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
+  {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
+  {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
+  {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
+  {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
+  {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
+  {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
+  {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
+];
+
+
 @Component({
   selector: 'app-sql-jupiter-edit',
   templateUrl: './sql-jupiter-edit.component.html',
@@ -19,6 +41,9 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   unsubscribe:any 
   sqlJupiter:SqlJupiter|null = null 
   rows = 1
+
+  displayedColumns = ['position', 'name', 'weight', 'symbol'];
+  dataSource = ELEMENT_DATA;
 
   submitting = false
   FG = this.fb.group({
@@ -54,6 +79,14 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         this.sqlJupiter = doc.data() as SqlJupiter
         this.rows = this.sqlJupiter.sql.split('\n').length
         this.FG.controls.sql.setValue( this.sqlJupiter.sql )
+
+        var resultJson = this.sqlJupiter.result
+
+        this.displayedColumns = ["idx"]
+
+        for( var c=0; c<resultJson["metadata"].length; c++){
+          this.displayedColumns.push(resultJson["metadata"][c]["name"])
+        }        
       }),
       "error":( (reason)=>{
         alert("Error:" + reason)
@@ -103,6 +136,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
             }         
             objResultSet.push(rowObj)
           } 
+
           var objResult = {
             "metadata":resultJson["metadata"],
             "resultSet":objResultSet
@@ -110,6 +144,18 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
           
           console.log(result)
           this.sqlJupiter!.result = objResult
+
+          var obj ={
+            result:objResult
+          }
+
+          this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, obj ).then( ()=>{
+            console.log("save result")
+          },
+          reason =>{
+            alert("ERROR saving sql:" + reason)
+          })
+
         },
         'error':(reason)=>{
           this.submitting = false
@@ -117,9 +163,5 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         }
       })
     }  
-  }
-  textAreaAdjust(element:any) {
-    element.style.height = "1px";
-    element.style.height = (25+element.scrollHeight)+"px";
   }
 }

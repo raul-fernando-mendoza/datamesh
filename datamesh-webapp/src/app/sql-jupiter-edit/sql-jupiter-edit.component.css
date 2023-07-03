@@ -1,19 +1,16 @@
-.sql-container{
-    display:inline;
-    background-color: brown;
+.result-container {
+    height: 12em;
+    overflow: auto;
 }
+
 mat-form-field{
     width:90%;
 }
-.table-holder{
-    width:90%;
-    font-size: small;
-    overflow-y:auto;
-}
-table{
-    border-collapse: collapse;
-}
-th, td{
-    border: 1px solid black;
+
+.result-table {
+    width: 100%;
 }
 
+.ids{
+    color:white;
+}
