@@ -3,7 +3,7 @@
     collection:{{ collection }}
     id:{{ id }}
 </div>
-<div [formGroup]="FG">
+<div *ngIf="sqlJupiter" [formGroup]="FG" >
     <div>
         <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
     </div>    
@@ -13,17 +13,17 @@
             <textarea class="sql" matInput rows="{{rows}}" maxlength="10000" formControlName="sql" (change)="onSqlChange($event)"></textarea>
         </mat-form-field>
     </div>
-    <section class="result-container" *ngIf="sqlJupiter && sqlJupiter.result">
+    <section *ngIf="sqlJupiter.result" class="result-container" >
         <table class="result-table" mat-table [dataSource]="sqlJupiter.result['resultSet']">
 
-            <ng-container matColumnDef="idx">
-            <th mat-header-cell *matHeaderCellDef>idx</th>
-            <td mat-cell *matCellDef="let element; let i = index;"> {{i}} </td>
-            </ng-container>
         
-            <ng-container *ngFor="let col of sqlJupiter!.result['metadata']" matColumnDef="{{col['name']}}">
-            <th mat-header-cell *matHeaderCellDef>{{col["name"]}} </th>
-            <td mat-cell *matCellDef="let element"> {{element[col["name"]]}} </td>
+            <ng-container *ngFor="let col of displayedColumns" matColumnDef="{{col}}">
+            <th mat-header-cell *matHeaderCellDef>{{col}} </th>
+            <td mat-cell *matCellDef="let element; let i = index;"> 
+                <div *ngIf="col=='idx'"> {{i}}</div>
+                <div *ngIf="col!='idx'"> {{element[col]}} </div>
+                 
+            </td>
             </ng-container>
             
         

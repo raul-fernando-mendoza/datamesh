@@ -79,14 +79,19 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         this.sqlJupiter = doc.data() as SqlJupiter
         this.rows = this.sqlJupiter.sql.split('\n').length
         this.FG.controls.sql.setValue( this.sqlJupiter.sql )
-
-        var resultJson = this.sqlJupiter.result
-
         this.displayedColumns = ["idx"]
+        if( this.sqlJupiter.result ){
+          var resultJson = this.sqlJupiter.result
 
-        for( var c=0; c<resultJson["metadata"].length; c++){
-          this.displayedColumns.push(resultJson["metadata"][c]["name"])
-        }        
+          for( var c=0; c<resultJson["metadata"].length; c++){
+            if( this.displayedColumns.indexOf(resultJson["metadata"][c]["name"]) < 0 ){
+              this.displayedColumns.push(resultJson["metadata"][c]["name"])
+            }
+            
+          }        
+  
+        }
+
       }),
       "error":( (reason)=>{
         alert("Error:" + reason)
@@ -159,7 +164,12 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         },
         'error':(reason)=>{
           this.submitting = false
-          alert("ERROR:" + reason.message)
+
+          let errorMessage = reason.message
+          if( reason.error && reason.error.error ){
+            errorMessage = reason.error.error
+          }
+          alert("ERROR:" + errorMessage)
         }
       })
     }  
