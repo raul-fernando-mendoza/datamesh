@@ -5,6 +5,7 @@ import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDo
 import { db } from '../../environments/environment'
 import { FormBuilder } from '@angular/forms';
 import { UrlService } from '../url.service';
+import { ngxCsv } from 'ngx-csv/ngx-csv';
 
 
 export interface PeriodicElement {
@@ -173,5 +174,22 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         }
       })
     }  
+  }
+  onExportCsv(){
+    var options = { 
+      fieldSeparator: ',',
+      quoteStrings: '"',
+      decimalseparator: '.',
+      showLabels: true, 
+      showTitle: false,
+      title: 'Your title',
+      useBom: true,
+      noDownload: false,
+      headers: this.displayedColumns.slice(1)
+    };    
+    if( this.sqlJupiter ){
+      new ngxCsv(this.sqlJupiter.result.resultSet, 'My Report', options);
+    }
+    
   }
 }

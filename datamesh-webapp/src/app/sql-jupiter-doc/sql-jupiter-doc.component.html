@@ -13,6 +13,7 @@
     <div *ngIf="sqlJupiterDoc && sqlJupiterDoc.itemList">
         <div *ngFor="let item of sqlJupiterDoc!.itemList; index as i; first as isFirst">
             <div class="header">
+                <div class="spacer"></div>
                 <button mat-button (click)="onAddSqlJupiter(i)"><mat-icon>join_inner</mat-icon>sql</button>
                 <button mat-button (click)="onAddTextJupiter(i)"><mat-icon>description</mat-icon>text</button>
                 <span class="spacer"></span>
@@ -25,9 +26,11 @@
                 <app-text-jupiter *ngIf="item.className == 'TextJupiter' " parentCollection="{{parentCollection}}" collection="{{item.className}}" id="{{item.id}}"> </app-text-jupiter>
             </div>
         </div>
-        <div>
+        <div class="header">
+            <div class="spacer"></div>
             <button mat-button (click)="onAddSqlJupiter(sqlJupiterDoc!.itemList.length)"><mat-icon>join_inner</mat-icon>sql</button>
             <button mat-button (click)="onAddTextJupiter(sqlJupiterDoc!.itemList.length)"><mat-icon>description</mat-icon>text</button>
+            <div class="spacer"></div>
         </div>        
     </div>    
 
