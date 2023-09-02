@@ -84,9 +84,38 @@
       </table>      
 
     </mat-tab>
-    <mat-tab label="right">right</mat-tab>
+    <mat-tab label="right">
+      <table mat-table #rightports [dataSource]="this.comparison?this.comparison.rightPorts:[]" class="mat-elevation-z8">
+
+        <ng-container matColumnDef="idx">
+          <th mat-header-cell *matHeaderCellDef>idx</th>
+          <td mat-cell *matCellDef="let element; let i = index;">{{i+1}}</td>
+        </ng-container>
+    
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>name</th>
+          <td mat-cell *matCellDef="let element">{{element.name}}:{{element.type}}</td>
+        </ng-container>
+      
+        <ng-container matColumnDef="alias">
+          <th mat-header-cell *matHeaderCellDef>alias</th>
+          <td mat-cell *matCellDef="let element">{{element.alias}}</td>
+        </ng-container>
+    
+        <ng-container matColumnDef="isSelected">
+          <th mat-header-cell *matHeaderCellDef>selected</th>
+          <td mat-cell *matCellDef="let element; let i = index;"> i:{{i}} <mat-checkbox [ngModel]="comparison.rightPorts[i].isSelected" (change)="firebaseService.onArrayCheckboxChange($event,'Comparison',id,comparison.rightPorts,'rightPorts', i, 'isSelected')"></mat-checkbox> </td>
+        </ng-container>
+    
+        
+        <tr mat-header-row *matHeaderRowDef="leftDisplayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: leftDisplayedColumns; let idx = dataIndex;"></tr>
+      </table>      
+
+    </mat-tab>
+
   </mat-tab-group>  
 
-  
+  <button mat-raised-button (click)="onExecute()">Execute</button> 
   
 </div>

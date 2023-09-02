@@ -6,7 +6,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { UrlService } from '../url.service';
 import { db } from '../../environments/environment'
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
-import { ChiildJoinRequest,  Comparison, Dataset, Port, PortListResponse } from '../datatypes/datatypes.module';
+import { ChiildJoinRequest,  Comparison, Dataset, Port, PortListResponse, SnowFlakeDataset } from '../datatypes/datatypes.module';
 import { StringUtilService } from '../string-util.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { Call, splitNsName } from '@angular/compiler';
@@ -16,7 +16,8 @@ import { firstValueFrom } from 'rxjs';
 
 interface ComparisonRequest extends Comparison{
   leftQry:string,
-  rightQry:string
+  rightQry:string,
+  joinColumns:string[]
 }
 
 @Component({
@@ -38,8 +39,8 @@ export class ComparisonExecuteComponent implements AfterViewInit{
   submmiting=false
 
   
+  req:ComparisonRequest | null = null
 
-  req!:ComparisonRequest 
 
   comparisonChilds:TreeNode[] = []
 
@@ -144,10 +145,24 @@ export class ComparisonExecuteComponent implements AfterViewInit{
 
 
   update(){
-/*
-      getDoc( doc( db,"Comparison", this.id! )).then( docSnap =>{
+
+    getDoc( doc( db,"Comparison", this.id! )).then( docSnap =>{
       this.comparison = docSnap.data() as Comparison
       this.req = docSnap.data() as ComparisonRequest
+
+      var joinColumns = []
+      //calculate join 
+      for( var i =0; i< this.comparison.keyLeftRight.length; i++){
+        let keyLeftRight = this.comparison.keyLeftRight[i]
+
+        if( keyLeftRight.isSelected == true ){
+          joinColumns.push( keyLeftRight.leftPortName )
+        }
+      }
+       
+      this.req.joinColumns=joinColumns       
+      
+
       //add the first node 
       var node:TreeNode = {
         obj:this.comparison,
@@ -164,9 +179,9 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     })
     .then( ()=>{
       if( this.comparison?.leftDatasetId ){
-        return getDoc( doc( db,"Dataset", this.comparison!.leftDatasetId )).then( docSnap =>{
-          let dataset = docSnap.data() as Dataset
-          this.req.leftQry = this.stringUtilService.removeNonPrintable((dataset.sql!))
+        return getDoc( doc( db,"Dataset", this.comparison.leftDatasetId )).then( docSnap =>{
+          let dataset = docSnap.data() as SnowFlakeDataset
+          this.req!.leftQry = this.stringUtilService.removeNonPrintable((dataset.sql!))
         })
       }
       else{
@@ -174,18 +189,23 @@ export class ComparisonExecuteComponent implements AfterViewInit{
       }
     })
     .then( ()=>{
-      return getDoc( doc( db,"Dataset", this.comparison!.rightDatasetId )).then( docSnap =>{
-        let dataset = docSnap.data() as Dataset
-        this.req.rightQry = this.stringUtilService.removeNonPrintable((dataset.sql!))
-      })
+      if( this.comparison?.rightDatasetId ){
+        return getDoc( doc( db,"Dataset", this.comparison.rightDatasetId )).then( docSnap =>{
+          let dataset = docSnap.data() as SnowFlakeDataset
+          this.req!.rightQry = this.stringUtilService.removeNonPrintable((dataset.sql))
+        })
+      }
+      else{
+         return null;
+      }
     })
-    .then( ()=>{
-      return this.loadHasPathChild("Comparison/" + this.comparison!.id )
-    })
+    //.then( ()=>{
+    //  return this.loadHasPathChild("Comparison/" + this.comparison!.id )
+    //})
     .then( ()=>{
       this.submmiting = true
 
-       this.urlService.post("executeJoin",this.req).subscribe({ 
+       this.urlService.post("executeJoin",this.req!).subscribe({ 
         'next':(result)=>{
           this.submmiting = false
           console.log( result )
@@ -217,9 +237,10 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         }
       })         
     })
-  */
+  
   }
   loadChilds( node:TreeNode){
+    return null
     /*
     node.isLoading = true
     var collectionPath = this.getNodeChildPath(node)
@@ -345,17 +366,30 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     }
     */
   }
-  joinPort( left:Port[], right:Port[]):Port[]{
+  joinPort( left:Port[], right:Port[], keyLeftRight:any[]):Port[]{
 
 
     var allPorts:Port[] = []
     left.map( p => allPorts.push( p ) )
     right.map( rport =>{
-      let exists:Port|undefined = undefined
-      exists = left.find( lport => lport.name === rport.name)
-      if( exists == undefined ){
-        allPorts.push( rport )
-      }
+
+
+      let isKey = keyLeftRight.find( key => key.leftPortName == rport.name && key.isSelected == true)
+      if( isKey == undefined ){
+        let exists:Port|undefined = undefined
+        exists = left.find( lport => lport.name === rport.name)
+        if( exists == undefined ){
+          allPorts.push( rport )
+        }
+        else{
+          var newPort:Port = { 
+            name:rport.name + "_RIGHT", 
+            type:rport.type
+          }
+          allPorts.push( newPort )
+        }
+      } 
+      
     })
     allPorts.sort( (a, b) =>{
       let a_left=left.indexOf(a)>0

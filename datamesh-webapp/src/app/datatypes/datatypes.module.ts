@@ -20,7 +20,7 @@ export class DatasetGroup{
 
 export class Port{
   name:string = ""
-  datatype:string = ""
+  type:string = ""
 }
 
 export class SnowFlakeDataset{

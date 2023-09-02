@@ -72,28 +72,46 @@ def executeJoin( req):
         print( leftDF.schema.fields)
         print("run query right")
         rightDF = sess.sql(rightQry)
+        
+        
         #rightDF.show()
         print( rightDF.schema.fields)
         
         columnsArray = []
         for ct in leftCols:
             fn:str = ct["name"] 
-            fa:str = ct["alias"] if "alias" in ct else ct["name"]
+            fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
             columnsArray.append( leftDF[fn].alias(fa) )
+            
+        rightColsSelected = []    
         for ct in rightCols:
             fn:str = ct["name"] 
-            fa:str = ct["alias"] if "alias" in ct else ct["name"]
-            firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
-            if firstOcurr == None:
-                columnsArray.append( rightDF[fn].alias(fa) )
+            fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
+            
+            isInKeys = next( (lc for lc in joinColumns if lc == fa), None)
+            if isInKeys:
+                rightColsSelected.append( rightDF[fn].alias(fa) )
+            else: #is not a key append if not exists
+                firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
+                if firstOcurr == None:
+                    columnsArray.append( rightDF[fn].alias(fa) )
+                    rightColsSelected.append( rightDF[fn].alias(fa) )
+                else: #here the column exist to append with suffix 
+                    columnsArray.append( rightDF[fn].alias(fa + "_right") )
+                    rightColsSelected.append( rightDF[fn].alias(fa + "_right") )
+        rightDF = rightDF.select( rightColsSelected )
         
-        print("left join right")   
+        print("right dataframe renamed")
+        rightDF.show()
+        
+        print("left join right 1")   
         df = leftDF \
             .join( right=rightDF, 
                 using_columns=joinColumns,
             join_type= "leftouter") \
-            .select( columnsArray )\
-            .sort( joinColumns )
+                .sort( joinColumns )
+            
+        df.show()    
             
         #now apply filters if there is any
         print("apply filter")
@@ -131,12 +149,13 @@ def executeJoin( req):
             if firstOcurr == None:
                 columnsArray.append( fn.upper() )
         
-        print("left join right")   
+        print("left join right 2")   
         df = pd.merge( leftDF, 
                 rightDF, 
                 on=joinColumns,
             how = "outer")
         #    .sort_values( joinColumns )
+        print("selecting columns")
         
         df = df[ columnsArray ]
             

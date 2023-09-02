@@ -13,10 +13,10 @@
           <td class="index">
             {{getChildrenIndex(node)}}
           </td>           
-          <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
-            <div >
+          <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="port.type.split('(')[0]">
+            <div ><!-- first comparison show-->
               <div class="cell">{{port.name}}</div>
-              <div class="cell">{{port.datatype}}</div>
+              <div class="cell">{{port.type}}</div>
              </div> 
           </td>
         </tr>         
@@ -24,7 +24,7 @@
           <td class="index">
             {{ getChildrenIndex(node) + 1}}
           </td>           
-          <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
+          <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="port.type.split('(')[0]">
              <div class="cell">{{node.obj[port.name]}}</div>   
           </td>
         </tr>                                  
@@ -52,10 +52,11 @@
               <td class="index">
                 {{getChildrenIndex(node)}}
               </td>           
-              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
+              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="port.type.split('(')[0]">
                 <div >
+                  <div>HOLA</div>
                   <div class="cell">{{port.name}}</div>
-                  <div class="cell">{{port.datatype}}</div>
+                  <div class="cell">{{port.type}}</div>
                  </div> 
               </td>
             </tr>         
@@ -63,7 +64,7 @@
               <td class="index">
                 {{ getChildrenIndex(node) + 1}}
               </td>           
-              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts)" [class]="port.datatype.split('(')[0]">
+              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="port.type.split('(')[0]">
                  <div class="cell">{{node.obj[port.name]}}</div>   
               </td>
             </tr>                                  

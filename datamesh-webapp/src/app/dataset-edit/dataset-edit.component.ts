@@ -225,7 +225,7 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
   }
 
   onPortChange($event:any, port:Port){
-    port.datatype = $event.value
+    port.type = $event.value
     this.firebaseService.updateDoc( "Dataset", this.id!, {ports:this.dataset!.ports})
   }
 }

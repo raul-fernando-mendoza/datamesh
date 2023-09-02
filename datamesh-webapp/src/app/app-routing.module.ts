@@ -12,23 +12,17 @@ const routes: Routes = [
   
   { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent }, 
   { path: 'datasetgroup/:groupCollection/edit/:id', component:DatasetgroupEditComponent }, 
-  { path: 'datasetgroup/:groupCollection/edit/:id', component:DatasetgroupEditComponent }, 
 
   { path: 'SqlJupiterDoc/create/:groupId', component:SqlJupiterDocComponent },
   { path: 'SqlJupiterDoc/edit/:id', component:SqlJupiterDocComponent },
   
-
-
-  { path: 'DatasetGroup-create', component:DatasetgroupEditComponent },    
-  { path: 'DatasetGroup-edit/:id', component:DatasetgroupEditComponent },   
-  { path: 'Dataset-create/:groupId', component:DatasetEditComponent },
-  { path: 'Dataset-edit/:id', component:DatasetEditComponent }, 
+  { path: 'Dataset/create/:groupId', component:DatasetEditComponent },
+  { path: 'Dataset/edit/:id', component:DatasetEditComponent }, 
   
-  { path: 'ComparisonGroup-create', component: ComparisonGroupEditComponent},
-  { path: 'ComparisonGroup-edit/:id', component: ComparisonGroupEditComponent},
-  { path: 'Comparison-create/:groupId', component: ComparisonEditComponent},
-  { path: 'Comparison-edit/:id', component: ComparisonEditComponent},
-  { path: "Comparison-execute", component: ComparisonExecuteComponent},
+  { path: 'Comparison/create/:groupId', component: ComparisonEditComponent},
+  { path: 'Comparison/edit/:id', component: ComparisonEditComponent},
+
+  { path: "Comparison/execute/:id", component: ComparisonExecuteComponent},
   { path: "DatasetGroup-edit", component: DatasetgroupEditComponent},
   { path: '**', component: WelcomeComponent },
 

@@ -147,7 +147,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
 
                   this.FG.controls.label.setValue( this.comparison.label!)
 
-                  this.updateDataSources()
+                  //this.updateDataSources()
 
                   this.table.dataSource = []
                   this.table.dataSource = this.comparison.keyLeftRight
@@ -295,7 +295,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   }  
 */
   onExecute(){
-    this.router.navigate(["Comparison-execute",{id:this.comparison.id}])
+    this.router.navigate(["Comparison","execute",this.comparison.id])
   }
   onLeftSourceDrop(e: any) {
     // Get the dropped data here
@@ -328,7 +328,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.leftDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.datatype,
+                type: port.type,
                 alias: "",
                 isSelected: true
               }
@@ -346,7 +346,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.rightDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.datatype,
+                type: port.type,
                 alias: "",
                 isSelected: true
               }
@@ -377,7 +377,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.leftDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.datatype,
+                type: port.type,
                 alias: "",
                 isSelected: true
               }
@@ -396,7 +396,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.rightDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.datatype,
+                type: port.type,
                 alias: "",
                 isSelected: true
               }

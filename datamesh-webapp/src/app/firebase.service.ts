@@ -102,6 +102,9 @@ export class FirebaseService {
     if( id ){
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
+      },
+      reason =>{
+        alert("ERROR update arraycheckbox:" + reason)
       })
     }
   }   
