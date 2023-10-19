@@ -1,5 +1,6 @@
 <p>text-jupiter works!</p>
-
 <form *ngIf="textJupiter" [formGroup]="FG" >
-    <quill-editor  formControlName="txt" (onBlur)="onBlur('txt', $event)" ></quill-editor>
+    <div >
+        <quill-editor  formControlName="txt" (focusout)="onBlur('txt', $event)" ></quill-editor>
+    </div>
 </form>
