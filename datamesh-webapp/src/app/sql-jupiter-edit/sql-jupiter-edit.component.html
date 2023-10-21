@@ -11,7 +11,7 @@
     <div>
         <mat-form-field class="sql" appearance="fill">
             <mat-label>sql</mat-label> 
-            <textarea class="sql" matInput rows="{{rows}}" maxlength="10000" formControlName="sql" (change)="onSqlChange($event)"></textarea>
+            <textarea class="sql" matInput rows="{{rows}}" formControlName="sql" (change)="onSqlChange($event)"></textarea>
         </mat-form-field>
     </div>
     <section *ngIf="sqlJupiter.result" class="result-container" >
