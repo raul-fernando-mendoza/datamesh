@@ -1,0 +1,8 @@
+#use get2 to keep the function running for long time
+gcloud beta functions deploy backupfull  --gen2 --runtime python39 --trigger-http --allow-unauthenticated --timeout 1800s
+
+//show the project app will apply to
+gcloud config list
+gcloud config set project thoth-dev-346022
+gcloud auth list
+gcloud projects list

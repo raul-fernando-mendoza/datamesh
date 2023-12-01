@@ -1,5 +1,9 @@
-<div class="header">
-  <span>dateset-tree</span>
+<div [formGroup]="FG" class="header">
+
+  <mat-form-field appearance="fill">
+    <input matInput placeholder="" formControlName="search" required (change)="onSearch($event)">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
   <span class="spacer"></span>
   <button mat-button (click)="addGroup()">
   <mat-icon>add</mat-icon>Add</button>

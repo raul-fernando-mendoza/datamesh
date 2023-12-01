@@ -3,21 +3,26 @@ import {FlatTreeControl} from '@angular/cdk/tree';
 import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {BehaviorSubject, firstValueFrom} from 'rxjs';
-import { FirebaseService } from '../firebase.service';
+import { FirebaseService, QryPar } from '../firebase.service';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { FirestoreError } from 'firebase/firestore';
 import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 
 
 export interface Data{
   id:string
   label:string
   groupId:string
+  updateon:Date
+  createon:Date
 }
 
 export interface Group{
   id:string
   label:string
+  updateon:Date
+  createon:Date
 }
 
 /**
@@ -71,10 +76,16 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
 
   todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];
 
+  FG = this.fb.group({
+    search:[""]
+  })
+
+
   constructor(
     private firebaseService:FirebaseService,
     private router:Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private fb:FormBuilder,
   ) {
     this.treeFlattener = new MatTreeFlattener(
       this.transformer,
@@ -143,7 +154,8 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
         unsubscribe()
       })
       this.unsubscribeMap.clear()  
-      this.unsubscribe = this.firebaseService.onsnapShotQuery(this.groupCollection,null, null, null,{
+
+      this.unsubscribe = this.firebaseService.onsnapShotQuery({collectionPath:this.groupCollection,orderByField:"updateon",orderDirection:"desc"},{
         "next":( (set:any)=>{
           console.log("reload parent")
           var datasets:TreeNode[] = []
@@ -153,11 +165,21 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
               children: [],
               item: datasetGroup
             }
-            datasets.push( datasetNode )
-            return this.loadDataForGroup( datasetNode )
+            if( this.FG.controls.search.value != null && this.FG.controls.search.value.length > 0){
+              if( datasetGroup.label.toUpperCase().indexOf(this.FG.controls.search.value.toUpperCase()) >= 0 ){
+                datasets.push( datasetNode ) 
+                return this.loadDataForGroup( datasetNode )               
+              }
+              else return null
+            }
+            else{
+              datasets.push( datasetNode )    
+              return this.loadDataForGroup( datasetNode )        
+            }         
+            
           })
           Promise.all( transactions ).then( ()=>{
-            datasets.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
+            //datasets.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
             this._database.next(datasets);
             resolve()
           })
@@ -172,7 +194,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
   }  
   loadDataForGroup(groupNode:TreeNode):Promise<void>{
     return new Promise<void>((resolve, reject) =>{
-      let unsubscribe = this.firebaseService.onsnapShotQuery(this.dataCollection,"groupId","==",groupNode.item.id, {
+      let unsubscribe = this.firebaseService.onsnapShotQuery({collectionPath:this.dataCollection,fieldPath:"groupId",opStr:"==", value: groupNode.item.id},{
         "next":( (set:any) =>{
           
           groupNode.children.length = 0
@@ -185,7 +207,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
             }
             groupNode.children.push( newDatasetNode )            
           })
-          groupNode.children.sort( (a,b)=> a.item.label > b.item.label ? 1:-1)
+          groupNode.children.sort( (a,b)=> a.item.updateon < b.item.updateon ? 1:-1)
           this.reload( groupNode.item.id )
 
           resolve()
@@ -259,4 +281,9 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     }
   }
 
+  onSearch(event:any){
+    console.log(event)
+    this.update()
+    
+  }
 }

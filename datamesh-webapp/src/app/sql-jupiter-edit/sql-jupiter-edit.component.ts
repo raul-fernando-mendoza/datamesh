@@ -39,9 +39,11 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   @Input() collection!:string
   @Input() id!:string
 
+  MIN_ROWS = 3
+  MAX_ROWS = 20
   unsubscribe:any 
   sqlJupiter:SqlJupiter|null = null 
-  rows = 1
+  rows = this.MIN_ROWS
 
   displayedColumns = ['position', 'name', 'weight', 'symbol'];
   dataSource = ELEMENT_DATA;
@@ -78,7 +80,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     {
       "next":( (doc) =>{
         this.sqlJupiter = doc.data() as SqlJupiter
-        this.rows = this.sqlJupiter.sql.split('\n').length
+        this.rows = this.sqlJupiter.sql.split('\n').length > this.MAX_ROWS ? this.MAX_ROWS : this.MIN_ROWS 
         this.FG.controls.sql.setValue( this.sqlJupiter.sql )
         this.displayedColumns = ["idx"]
         if( this.sqlJupiter.result ){

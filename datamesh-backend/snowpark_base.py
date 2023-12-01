@@ -27,6 +27,10 @@ def database():
         "schema":r[0]['SCHEMA']
     }
 
+#return the fields of a query or the fields of a csv
+# req = { "qry":"select * from dual"}
+# or
+# req = { "csvfile": "c://my_file.csv"}  
 def getFielsForQuery(req):
     print("getFielsForQuery called")
     print(json.dumps(req))
@@ -70,45 +74,41 @@ def executeJoin( req):
         leftDF = sess.sql(leftQry)
         #leftDF.show()
         print( leftDF.schema.fields)
+
         print("run query right")
-        rightDF = sess.sql(rightQry)
-        
-        
+        rightDF = sess.sql(rightQry)      
         #rightDF.show()
-        print( rightDF.schema.fields)
+        print( rightDF.schema.fields)        
+
         
-        columnsArray = []
+        leftColsSelected = []
         for ct in leftCols:
             fn:str = ct["name"] 
             fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
-            columnsArray.append( leftDF[fn].alias(fa) )
+            leftColsSelected.append( leftDF[fn].alias(fa) )
             
         rightColsSelected = []    
         for ct in rightCols:
             fn:str = ct["name"] 
             fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
             
-            isInKeys = next( (lc for lc in joinColumns if lc == fa), None)
-            if isInKeys:
+            #append the column with its alias if it does not exist in the left  
+            firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
+            if firstOcurr == None:
                 rightColsSelected.append( rightDF[fn].alias(fa) )
-            else: #is not a key append if not exists
-                firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
-                if firstOcurr == None:
-                    columnsArray.append( rightDF[fn].alias(fa) )
-                    rightColsSelected.append( rightDF[fn].alias(fa) )
-                else: #here the column exist to append with suffix 
-                    columnsArray.append( rightDF[fn].alias(fa + "_right") )
-                    rightColsSelected.append( rightDF[fn].alias(fa + "_right") )
-        rightDF = rightDF.select( rightColsSelected )
-        
-        print("right dataframe renamed")
-        rightDF.show()
-        
+            else: #here the column exist in the left then append with suffix 
+                rightColsSelected.append( rightDF[fn].alias(fa + "_right") )
+                
+        leftColsSelected.extend(rightColsSelected)
+        print( "allColumns")
+        print( leftColsSelected )
+                
         print("left join right 1")   
         df = leftDF \
             .join( right=rightDF, 
                 using_columns=joinColumns,
             join_type= "leftouter") \
+                .select( leftColsSelected ) \
                 .sort( joinColumns )
             
         df.show()    
@@ -307,3 +307,7 @@ def executeChildJoin( req ):
     #print(json.dumps({"result":obj},indent=4))
     print("executeChildJoin END")
     return obj 
+
+if __name__ == '__main__':
+    jsonDatabase = database()
+    print(jsonDatabase)

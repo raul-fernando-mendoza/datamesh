@@ -1,25 +1,40 @@
 import { Injectable } from '@angular/core';
 import { db } from '../environments/environment'
-import {  collection, doc, addDoc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp, DocumentReference} from "firebase/firestore"; 
+import {  collection, doc, limit, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp, orderBy, QueryConstraint, Query, QueryNonFilterConstraint, startAt, OrderByDirection} from "firebase/firestore"; 
 import { Directionality } from '@angular/cdk/bidi';
 import { MatSelectChange } from '@angular/material/select';
 
+
+export interface QryPar {
+  collectionPath:string,
+  fieldPath?:string|null,
+  opStr?:WhereFilterOp|null,
+  value?:unknown|null,
+  orderByField?:FieldPath|string,
+  orderDirection?:OrderByDirection |undefined,
+  startAtPage?:number|null,  
+  pageSize?:number|null
+}
 
 @Injectable({ 
   providedIn: 'root'
 })
 export class FirebaseService {
+  
 
   constructor() { }
 
 
   setDoc(collectionPath:string, id:string, obj:{ [key: string]: any }):Promise<void>{
+    obj["createon"] = new Date()
+    obj["updateon"] = new Date()
     return setDoc( doc(db, collectionPath , id), obj)
   }
   getdoc( collectionPath:string, id:string):Promise<DocumentSnapshot>{
     return getDoc( doc( db,collectionPath, id ))
   }
   updateDoc( collectionPath:string, id:string, obj:{ [key: string]: any }):Promise<void>{
+    obj["updateon"] = new Date()
     return updateDoc( doc(db, collectionPath , id), obj)
   }
   getDocs( collectionPath:string ):Promise<QuerySnapshot<DocumentData>>{
@@ -46,7 +61,19 @@ export class FirebaseService {
       })
     })
   }
-  onsnapShotQuery(collectionPath:string, fieldPath: string | FieldPath | null, opStr: WhereFilterOp | null, value: unknown | null
+
+
+
+  onsnapShotQuery({
+    collectionPath,
+    fieldPath,
+    opStr,
+    value,
+    orderByField,
+    orderDirection,
+    startAtPage,
+    pageSize
+  }:QryPar
     ,observer: {
       next?: (snapshot: any) => void;
       error?: (error: FirestoreError) => void;
@@ -54,15 +81,27 @@ export class FirebaseService {
     }
       ):Unsubscribe{
 
-     
+    var q :Query<DocumentData> 
+    var queryFilterConstraints: QueryNonFilterConstraint[]  = []
+    
+    if( orderByField != null ){
+      queryFilterConstraints.push(  orderBy(orderByField , orderDirection) )
+    }
+    if( pageSize != null){
+      queryFilterConstraints.push(  limit(pageSize ) )
+    }    
+    if( startAtPage != null && pageSize != null){
+      queryFilterConstraints.push( startAt( (startAtPage-1) * pageSize ) )
+    }
+
     if ( fieldPath != null && opStr!=null && value!=null){
-      var q = query(collection(db, collectionPath), where(fieldPath, opStr, value));    
-      return onSnapshot(q, observer ) 
-    }
+      q = query(collection(db, collectionPath), where(fieldPath, opStr, value), ...queryFilterConstraints)
+    }      
     else{
-      var q = query(collection(db, collectionPath)); 
-      return onSnapshot(q, observer )    
+      q = query(collection(db, collectionPath),...queryFilterConstraints); 
     }
+
+    return onSnapshot(q, observer )
      
   }
 
@@ -78,6 +117,7 @@ export class FirebaseService {
     var value:any = event.target.value      
     var values:any = {}
     values[propertyName]=value 
+    values["updateon"] = new Date()
     if( id ){
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
@@ -88,6 +128,7 @@ export class FirebaseService {
     var value:boolean = event.checked     
     var values:any = {}
     values[propertyName]=value   
+    values["updateon"] = new Date()
     if( id ){
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
@@ -99,6 +140,7 @@ export class FirebaseService {
     var values:any = {}
     array[index][key] = value
     values[propertyName]=array   
+    values["updateon"] = new Date()
     if( id ){
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
@@ -114,7 +156,8 @@ export class FirebaseService {
     if( value == undefined ){
       values[propertyName]=null     
     }
-    else values[propertyName]=value   
+    else values[propertyName]=value  
+    values["updateon"] = new Date() 
     if( id ){
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")

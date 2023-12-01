@@ -28,7 +28,7 @@ class TestFireStore(unittest.TestCase):
         request:Request = {
             "leftQry":"select * from im_prd.dw_24hr.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
             "rightQry":"select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
-            "leftColumns":[
+            "leftPorts":[
                 {
                     'name':'ACCOUNT_NUM',
                     'alias':'ACCOUNT_NUM'
@@ -38,7 +38,7 @@ class TestFireStore(unittest.TestCase):
                     'alias':'ACCOUNT_SHORT_DESC'
                 }
             ],
-            "rightColumns":[
+            "rightPorts":[
                 {
                     "name":"ACCOUNT_NUM"
                     ,"alias":"ACCOUNT_NUM_1"
@@ -52,10 +52,9 @@ class TestFireStore(unittest.TestCase):
             "filter":"nvl(ACCOUNT_SHORT_DESC,'') != nvl(DA_ACCOUNT_SHORT_DESC_1,'')"
             
         }
-        f = request["leftColumns"][0]["name"]
         data = snowpark_base.executeJoin(request) 
         
-        #print(json.dumps({"result":data}, indent=1))
+        print(json.dumps({"result":data}, indent=1))
 
         #self.assertTrue(obj["id"] == "test1")           
 

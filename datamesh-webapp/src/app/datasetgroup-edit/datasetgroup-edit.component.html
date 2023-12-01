@@ -1,5 +1,5 @@
 <div class="header">
-    <span>datasetgroup-edit </span><span>{{groupCollection}} Edit</span><span class="spacer"></span><span>{{id}}</span><button *ngIf="datasetGroup" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+    <span>datasetgroup-edit </span><span>{{groupCollection}} Edit</span><span class="spacer"></span><span class="id">{{id}}</span><button *ngIf="datasetGroup" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
 </div>
 <div [formGroup]="FG">
     <div class="example-container">

@@ -63,7 +63,7 @@ class TestFireStore(unittest.TestCase):
     "joinColumns": [
         "SUBSCRIPTION_SRC_NUM"
     ],
-    "filter": " "
+    "filter": ""
 }
         
         data = snowpark_base.executeJoin(request) 

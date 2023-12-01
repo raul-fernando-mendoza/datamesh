@@ -15,6 +15,8 @@ export class DatatypesModule { }
 export class DatasetGroup{
   id:string = ""
   label:string = ""
+  createon? = new Date();
+  updateon? = new Date();  
 }
 
 

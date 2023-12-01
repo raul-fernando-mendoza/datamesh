@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SqlJupiter, JupiterDoc, TextJupiter } from '../datatypes/datatypes.module';
+import { SqlJupiter, JupiterDoc, TextJupiter, DatasetGroup } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot} from "firebase/firestore"; 
 import { db } from '../../environments/environment'
@@ -22,6 +22,7 @@ export class SqlJupiterDocComponent {
   submitting = false
   parentCollection:string|null = null
 
+  sqlJupiterGroup:DatasetGroup|null = null
 
   FG = this.fb.group({
     id:[''],
@@ -55,6 +56,13 @@ export class SqlJupiterDocComponent {
                 if( docRef.exists()){
                   this.sqlJupiterDoc=docRef.data() as JupiterDoc
                   this.FG.controls.label.setValue( this.sqlJupiterDoc.label!)
+
+                  var thiz = this
+                  this.firebaseService.getdoc("SqlJupiterGroup",this.sqlJupiterDoc.groupId).then( data =>{
+                    thiz.sqlJupiterGroup = data.data() as DatasetGroup
+                     
+
+                  })
                 }
           },
           (reason:any) =>{

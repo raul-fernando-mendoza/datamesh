@@ -1,4 +1,5 @@
 <div class="header">
+    <span *ngIf="sqlJupiterGroup">{{ sqlJupiterGroup.label }} </span>
     <span>sqlJupiterDoc Edit</span><span class="spacer"></span><span class="id">{{id}}</span><button *ngIf="sqlJupiterDoc" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
 </div> 
 <div [formGroup]="FG">
