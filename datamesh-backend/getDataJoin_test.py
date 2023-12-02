@@ -45,11 +45,11 @@ class TestFireStore(unittest.TestCase):
                 },
                 {
                     "name":"ACCOUNT_SHORT_DESC"
-                    ,"alias":"DA_ACCOUNT_SHORT_DESC_1"
+                    ,"alias":"ACCOUNT_SHORT_DESC"
                 }
             ],
             "joinColumns":["ACCOUNT_NUM"],
-            "filter":"nvl(ACCOUNT_SHORT_DESC,'') != nvl(DA_ACCOUNT_SHORT_DESC_1,'')"
+            "filter":"nvl(ACCOUNT_SHORT_DESC,'') != nvl(ACCOUNT_SHORT_DESC_r,'')"
             
         }
         data = snowpark_base.executeJoin(request) 

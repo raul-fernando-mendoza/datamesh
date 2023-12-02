@@ -186,7 +186,7 @@ select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('9012
        
         request:Request = {
             "parentData":{
-                "ACCOUNT_ID":901231,
+                "ACCOUNT_NUM":901231,
                 "ACCOUNT_SHORT_DESC":"NS/AGV/Basic/Region/M/Ret$",
                 "Owner":"Brian"
             },
@@ -195,7 +195,7 @@ select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('9012
             "leftColumns":[
                 {
                     "name":'ACCOUNT_NUM'
-                    ,"alias":"ACCOUNT_ID"
+                    ,"alias":"ACCOUNT_NUM"
                 },
                 {
                     "name":'ACCOUNT_SHORT_DESC'
@@ -205,21 +205,21 @@ select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('9012
             "rightColumns":[
                 {
                     "name":'ACCOUNT_NUM'
-                    ,"alias":"ACCOUNT_ID"
+                    ,"alias":"ACCOUNT_NUM"
                 },
                 {
                     "name":'ACCOUNT_SHORT_DESC'
-                    ,'alias':'ACCOUNT_SHORT_DESC_1'
+                    ,'alias':'ACCOUNT_SHORT_DESC'
                 }
             ],
-            "joinColumns":["ACCOUNT_ID"]
+            "joinColumns":["ACCOUNT_NUM"]
         }
         print( list(map( lambda x: x + x, ["a","b"])) )
         
         leftCols = request["leftColumns"]
         print( list(map( lambda column: ( column['alias'] if 'alias' in column else column['name'] ),leftCols)) )
         
-        data = snowpark_base.executeChildJoin(qry2) 
+        data = snowpark_base.executeChildJoin(request) 
         
         #print(json.dumps({"result":data}, indent=1))
 

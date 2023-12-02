@@ -93,11 +93,16 @@ def executeJoin( req):
             fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
             
             #append the column with its alias if it does not exist in the left  
-            firstOcurr = next( (lc for lc in leftCols if lc["name"] == fa), None)
-            if firstOcurr == None:
-                rightColsSelected.append( rightDF[fn].alias(fa) )
-            else: #here the column exist in the left then append with suffix 
-                rightColsSelected.append( rightDF[fn].alias(fa + "_right") )
+            firstOcurrLeft = next( (jc for jc in joinColumns if (jc == fn)), None)
+            if firstOcurrLeft == None: #only add the righ column is if it is not part of the join
+            
+                firstOcurr = next( (lc for lc in leftCols 
+                                    if ( lc["alias"] if "alias" in lc else lc["name"]) == fa
+                                    ), None)
+                if firstOcurr == None:
+                    rightColsSelected.append( rightDF[fn].alias(fa) )
+                else: #here the column exist in the left then append with suffix 
+                    rightColsSelected.append( rightDF[fn].alias(fa + "_r") )
                 
         leftColsSelected.extend(rightColsSelected)
         print( "allColumns")
@@ -203,54 +208,54 @@ def executeChildJoin( req ):
     parentDF.show()
     
     print("left query")
-    leftOnlyDF = sess.sql(leftQry)\
-        .select( list(map( lambda column: col(column["name"]).alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) ) 
-    
+    leftOnlyDF = sess.sql(leftQry)        
     print(leftOnlyDF.schema)
     leftOnlyDF.show()
+    
     print("right query")
-    rightOnlyDF = sess.sql(rightQry)\
-        .select( list(map( lambda column: col(column["name"]).alias( column['alias'] if 'alias' in column else column['name'] ), rightColumns)) ) 
+    rightOnlyDF = sess.sql(rightQry)
     print(rightOnlyDF.schema)
     rightOnlyDF.show()
         
     
-    print("prepare the names fot the inner join")
+    print("prepare the names fot the left inner join")
     
     leftJoinColumns = [] #join columns vs parent
+    leftColumnsNames = [] #all the columns in the left
     leftColumnsAliasArray = [] #names overwritten to the parent join
     for ct in leftColumns:
         fn:str = ct["name"] 
         fa:str = ct["alias"] if "alias" in ct  else ct["name"] 
-        firstOcurr = next( (parentColumn for parentColumn in parentDF.columns if parentColumn == fa), None)
+        firstOcurr = next( (parentColumn for parentColumn in joinColumns if parentColumn == fn), None)
         if firstOcurr != None:
-            leftJoinColumns.append( fa )
-        else: 
-            leftColumnsAliasArray.append( fa )
+            leftJoinColumns.append( fn )
+        leftColumnsNames.append( leftOnlyDF[fn] )   
+        leftColumnsAliasArray.append( leftOnlyDF[fn].alias(fa) )
         
-    #first join the parent with the left and with the right
+    #first join the parent with the left using all the common fields
     print("parent join left")
     print("join columns:" + str(leftJoinColumns))
     leftDF = parentDF \
         .join( right=leftOnlyDF,
               using_columns=leftJoinColumns,
           join_type= "inner")\
-        .select( list(map( lambda column: leftOnlyDF[ column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) ) 
+              .select( leftColumnsNames )
 
     print("left Dataframe")    
     leftDF.show() 
     print("left count:" + str(leftDF.count()) ) 
     
-    rightJoinColumns = []   
+    rightJoinColumns = []  
+    rightColumnNames = [] 
     rightColumnsAliasArray = [] 
     for ct in rightColumns:
         fn:str = ct["name"] 
         fa:str = ct["alias"] if "alias" in ct else ct["name"] 
-        firstOcurr = next( (parentColumn for parentColumn in parentDF.columns if parentColumn == fa), None)
+        firstOcurr = next( (parentColumn for parentColumn in joinColumns if parentColumn == fn), None)
         if firstOcurr != None:
-            rightJoinColumns.append( fa )
-        else: 
-            rightColumnsAliasArray.append( fa )
+            rightJoinColumns.append( fn )
+        rightColumnNames.append( rightOnlyDF[fn] )
+        rightColumnsAliasArray.append( rightOnlyDF[fn].alias(fa) )
             
     print("parent join right")
     print("joinclumns:" + str(rightJoinColumns))
@@ -258,34 +263,30 @@ def executeChildJoin( req ):
         .join( right=rightOnlyDF
         ,using_columns=rightJoinColumns,
           join_type= "inner")\
-        .select( list(map( lambda column: rightOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ),rightColumns)) ) 
+        .select( rightColumnNames ) 
     
     print("right data")
-    print(rightOnlyDF.schema)
+    print(rightDF.schema)
     rightDF.show()    
     print("right count:" + str(rightDF.count())) 
     
     #prepare the names of the outerjoin
-    joinColumnsRigh = [] #pick from right only those that does not exist in left 
+    leftRighJoinColumns = leftColumnsAliasArray #pick from right only those that does not exist in left 
     
     for ct in rightColumns:
         fn:str = ct["name"] 
         fa:str = ct["alias"] if "alias" in ct else ct["name"]
         
         
-        #print("searching:" + fa)
+        firstOcurrLeft = next( (jc for jc in joinColumns if (jc == fn)), None)
+        if firstOcurrLeft == None: #only add the righ column is if it is not part of the join
 
-        firstOcurrJoin = next( (jc for jc in joinColumns if (jc == fa)), None)
-        if firstOcurrJoin == None: #if column is not in the list of joins then if exist append _rigth
-            #print("key:" + fa + "not found in join columns")
             firstOcurrLeft = next( (lc for lc in leftColumns if (lc["alias"] if "alias" in lc else lc["name"] == fa)), None)
-            if firstOcurrLeft == None:
-                #print("key:" + fa + " not found in left_columns")
-                joinColumnsRigh.append( ct )
+            if firstOcurrLeft == None: #the righ column does not exist in left so pick it.
+                leftRighJoinColumns.append( rightOnlyDF[fn].alias(fa) )
             else:
-                #print("key:" + fa + "found in left_columns")
-                ct["alias"] = fa + "_right" 
-                joinColumnsRigh.append( ct )   
+                #the righ column exist in left add the
+                leftRighJoinColumns.append( rightOnlyDF[fn].alias(fa + "_r") )   
         
     #now do an ounter join between both resulting columns
     print("left join right")
@@ -295,8 +296,7 @@ def executeChildJoin( req ):
         ,using_columns=joinColumns
           ,join_type= "full") \
          .select( 
-                 list(map( lambda    column: leftOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ), leftColumns)) 
-                 + list(map( lambda column: rightOnlyDF[column['alias'] if 'alias' in column else column['name'] ].alias( column['alias'] if 'alias' in column else column['name'] ),joinColumnsRigh))  
+                 leftRighJoinColumns
                 )
              
     df.show()
