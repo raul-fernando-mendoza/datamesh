@@ -1,7 +1,7 @@
 import unittest
 import json
 import logging
-import snowpark_base
+from datamesh_flask.datamesh_base import executeChildJoin
 from typing import List, Optional
 
 log = logging.getLogger("datamesh")
@@ -219,7 +219,7 @@ select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('9012
         leftCols = request["leftColumns"]
         print( list(map( lambda column: ( column['alias'] if 'alias' in column else column['name'] ),leftCols)) )
         
-        data = snowpark_base.executeChildJoin(request) 
+        data = executeChildJoin(request) 
         
         #print(json.dumps({"result":data}, indent=1))
 

@@ -1,7 +1,7 @@
 import unittest
 import json
 import logging
-import snowpark_base
+from datamesh_flask.datamesh_base import database
 
 log = logging.getLogger("datamesh")
 
@@ -14,7 +14,7 @@ class TestFireStore(unittest.TestCase):
         request = {
             
         }
-        data = snowpark_base.database() 
+        data = database() 
         
         print(json.dumps({"result":data}))
 

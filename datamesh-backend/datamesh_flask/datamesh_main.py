@@ -14,7 +14,7 @@ log.addHandler(ch)
 app = Flask(__name__)
 FlaskJSON(app)
 
-import snowpark_base
+import datamesh_flask.datamesh_base as datamesh_base
 import snowflake_odbc
 
 
@@ -103,7 +103,7 @@ def getQueryFields():
     print("data:"+ str(request.data))
     try:
         req = request.get_json(force=True)
-        data = snowpark_base.database()
+        data = datamesh_base.database()
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
         return ({"error":str(e)}, 200, headers)
@@ -133,7 +133,7 @@ def getFielsForQuery():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = snowpark_base.getFielsForQuery(req)
+        data = datamesh_base.getFielsForQuery(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
@@ -167,7 +167,7 @@ def executeJoin():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = snowpark_base.executeJoin(req)
+        data = datamesh_base.executeJoin(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
@@ -198,7 +198,7 @@ def executeChildJoin():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = snowpark_base.executeChildJoin(req)
+        data = datamesh_base.executeChildJoin(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))

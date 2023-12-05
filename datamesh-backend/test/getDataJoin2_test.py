@@ -1,7 +1,7 @@
 import unittest
 import json
 import logging
-import snowpark_base
+from datamesh_flask.datamesh_base import executeJoin
 from typing import List, Optional
 
 log = logging.getLogger("datamesh")
@@ -66,7 +66,7 @@ class TestFireStore(unittest.TestCase):
     "filter": ""
 }
         
-        data = snowpark_base.executeJoin(request) 
+        data = executeJoin(request) 
         
         #print(json.dumps({"result":data}, indent=1))
 

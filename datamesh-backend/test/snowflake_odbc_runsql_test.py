@@ -1,7 +1,7 @@
 import unittest
 import json
 import logging
-import snowflake_odbc
+import datamesh_flask.snowflake_odbc as snowflake_odbc
 
 class TestFireStore(unittest.TestCase):
 
