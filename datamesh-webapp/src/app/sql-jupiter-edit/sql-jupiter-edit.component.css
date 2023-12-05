@@ -7,6 +7,11 @@ mat-form-field{
     width:90%;
 }
 
+sql-edit{
+    width: 300;
+    height: 300;
+}
+
 .result-table {
     width: 100%;
 }

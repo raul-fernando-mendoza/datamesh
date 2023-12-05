@@ -44,6 +44,11 @@ import { SqlJupiterEditComponent } from './sql-jupiter-edit/sql-jupiter-edit.com
 import { TextJupiterComponent } from './text-jupiter/text-jupiter.component'
 import { QuillModule } from 'ngx-quill';
 
+import { EditorState } from '@codemirror/state';
+import { EditorView } from '@codemirror/view';
+import { sql } from "@codemirror/lang-sql";
+import { SqlEditComponent } from './sql-edit/sql-edit.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -57,7 +62,8 @@ import { QuillModule } from 'ngx-quill';
     ComparisonGroupEditComponent,
     SqlJupiterDocComponent,
     SqlJupiterEditComponent,
-    TextJupiterComponent
+    TextJupiterComponent,
+    SqlEditComponent
   ],
   imports: [
     HttpClientModule,
@@ -92,6 +98,7 @@ import { QuillModule } from 'ngx-quill';
     MatExpansionModule,
     NgDragDropModule.forRoot(),
     QuillModule
+    
   ],
   providers: [],
   bootstrap: [AppComponent]

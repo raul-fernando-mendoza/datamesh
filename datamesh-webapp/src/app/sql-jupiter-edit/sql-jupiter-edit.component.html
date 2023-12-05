@@ -3,17 +3,24 @@
     collection:{{ collection }}
     id:{{ id }}
 </div>
+
 <div *ngIf="sqlJupiter" [formGroup]="FG" >
     <div class="header">
         <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
         <button  [disabled]="submitting" (click)="onExportCsv()"><mat-icon>topic</mat-icon></button>
     </div>    
     <div>
+        <!--
         <mat-form-field class="sql" appearance="fill">
             <mat-label>sql</mat-label> 
-            <textarea class="sql" matInput rows="{{rows}}" formControlName="sql" (change)="onSqlChange($event)"></textarea>
+            <textarea  class="sql" matInput rows="{{rows}}" formControlName="sql" (change)="onSqlChange($event)"></textarea> 
+            
         </mat-form-field>
+        -->
+        <sql-edit formControlName="sql" (change)="onSqlChange($event)"></sql-edit>
     </div>
+
+
     <section *ngIf="sqlJupiter.result" class="result-container" >
         <table class="result-table" mat-table [dataSource]="sqlJupiter.result['resultSet']">
 

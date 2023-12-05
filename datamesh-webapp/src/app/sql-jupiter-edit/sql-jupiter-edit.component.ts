@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, EventEmitter, Input ,OnDestroy, OnInit, Output} from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Inject, Input ,OnDestroy, OnInit, Output, ViewChild, ViewRef} from '@angular/core';
 import { SqlJupiter } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot, Unsubscribe} from "firebase/firestore"; 
@@ -6,27 +6,9 @@ import { db } from '../../environments/environment'
 import { FormBuilder } from '@angular/forms';
 import { UrlService } from '../url.service';
 import { ngxCsv } from 'ngx-csv/ngx-csv';
+import { DOCUMENT } from '@angular/common';
 
 
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-  {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
-  {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
-  {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-  {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
-  {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
-  {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-  {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-  {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-  {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
-];
 
 
 @Component({
@@ -46,12 +28,13 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   rows = this.MIN_ROWS
 
   displayedColumns = ['position', 'name', 'weight', 'symbol'];
-  dataSource = ELEMENT_DATA;
+  dataSource = [];
 
   submitting = false
   FG = this.fb.group({
     sql:[''],
   })
+
 
   constructor(
     public firebaseService:FirebaseService,
@@ -64,6 +47,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     console.log( this.parentCollection )
     console.log( this.collection )
     console.log( this.id )
+
     this.update()
   }
   ngOnDestroy(): void {
@@ -102,7 +86,9 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     })
   }
   ngOnInit(): void {
-  }
+
+  }    
+  
   onSqlChange($event:any){
     console.log($event)
     var sql:string|null = this.FG.controls.sql.value
