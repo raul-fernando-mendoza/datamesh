@@ -50,9 +50,13 @@ export class SqlEditComponent  implements AfterViewInit, ControlValueAccessor {
     var thiz = this
     this.myExt = [
       basicSetup, sql(),
+      
       EditorView.updateListener.of(function(e) {
         var str = e.state.doc.toString();
-        thiz.valueChange.emit(str);
+        if( e.focusChanged && !e.view.hasFocus  ){
+          thiz.valueChange.emit(str);
+        }
+        thiz._onChange(str)
     })     
     ];
     let state!: EditorState;

@@ -1,16 +1,22 @@
 <div class="container">
   <mat-toolbar class="header" color="primary">
-    <button *ngIf="!(isHandset$ | async)">
-      <span aria-label="Title">Database analysis</span>
-    </button>
-    <span class="spacer"></span>
+    <button mat-button (click)="sidenav.toggle()">
+      <mat-icon *ngIf="sidenav.opened">menu_open</mat-icon>
+      <mat-icon *ngIf="!sidenav.opened">menu_close</mat-icon>
+    </button>    
     <button mat-button [matMenuTriggerFor]="menu">Menu</button>
     <mat-menu #menu="matMenu">
       <a href="jupiter-sql" mat-menu-item>Item 1</a>
     </mat-menu>    
+    <span class="spacer"></span>
+    <button *ngIf="!(isHandset$ | async)">
+      <span aria-label="Title">Database analysis</span>
+    </button>
+
+
   </mat-toolbar>
   <mat-drawer-container autosize>
-    <mat-drawer mode="side" opened >
+    <mat-drawer  #sidenav mode="side" opened >
       <mat-accordion>
         <mat-expansion-panel>
           <mat-expansion-panel-header>

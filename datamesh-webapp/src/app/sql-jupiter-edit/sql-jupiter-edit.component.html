@@ -17,7 +17,7 @@
             
         </mat-form-field>
         -->
-        <sql-edit formControlName="sql" (change)="onSqlChange($event)"></sql-edit>
+        <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
     </div>
 
 
@@ -28,7 +28,7 @@
             <ng-container *ngFor="let col of displayedColumns" matColumnDef="{{col}}">
             <th mat-header-cell *matHeaderCellDef>{{col}} </th>
             <td mat-cell *matCellDef="let element; let i = index;"> 
-                <div *ngIf="col=='idx'"> {{i}}</div>
+                <div *ngIf="col=='idx'"> {{i + 1}}</div>
                 <div *ngIf="col!='idx'"> {{element[col]}} </div>
                  
             </td>

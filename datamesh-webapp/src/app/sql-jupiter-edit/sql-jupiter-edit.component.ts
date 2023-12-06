@@ -92,7 +92,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   onSqlChange($event:any){
     console.log($event)
     var sql:string|null = this.FG.controls.sql.value
-    if( this.sqlJupiter && sql){
+    if( this.sqlJupiter && this.sqlJupiter.sql != sql){
       let obj = {
         sql:sql
       }

@@ -1,3 +1,7 @@
+
+# for codemirror integration follow example at
+https://stackblitz.com/edit/ngx-editor-codemirror?file=src%2Fmain.ts,src%2Fdoc.ts
+
 # DatameshWebapp
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.4.
