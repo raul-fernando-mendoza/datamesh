@@ -43,11 +43,8 @@ import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.compon
 import { SqlJupiterEditComponent } from './sql-jupiter-edit/sql-jupiter-edit.component';
 import { TextJupiterComponent } from './text-jupiter/text-jupiter.component'
 import { QuillModule } from 'ngx-quill';
-
-import { EditorState } from '@codemirror/state';
-import { EditorView } from '@codemirror/view';
-import { sql } from "@codemirror/lang-sql";
 import { SqlEditComponent } from './sql-edit/sql-edit.component';
+import { DialogNameDialog } from './name-dialog/name-dlg';
 
 @NgModule({
   declarations: [
@@ -63,7 +60,8 @@ import { SqlEditComponent } from './sql-edit/sql-edit.component';
     SqlJupiterDocComponent,
     SqlJupiterEditComponent,
     TextJupiterComponent,
-    SqlEditComponent
+    SqlEditComponent,
+    DialogNameDialog
   ],
   imports: [
     HttpClientModule,
@@ -81,7 +79,6 @@ import { SqlEditComponent } from './sql-edit/sql-edit.component';
     MatPaginatorModule,
     MatSortModule,  
     MatProgressSpinnerModule,
-    MatDialogModule,
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -97,7 +94,8 @@ import { SqlEditComponent } from './sql-edit/sql-edit.component';
     MatGridListModule,
     MatExpansionModule,
     NgDragDropModule.forRoot(),
-    QuillModule
+    QuillModule,
+    MatDialogModule
     
   ],
   providers: [],

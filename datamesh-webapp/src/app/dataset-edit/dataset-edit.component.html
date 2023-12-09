@@ -16,7 +16,14 @@
                 <mat-option [value]="null"></mat-option>
                 <mat-option *ngFor="let t of typeList" [value]="t">{{t}}</mat-option>
             </mat-select>  
-        </mat-form-field>                    
+        </mat-form-field> 
+        <mat-form-field class="dataset" appearance="fill">
+            <mat-label>connection</mat-label> 
+            <mat-select formControlName="connectionName" [value]="dataset.connectionName" (selectionChange)="onConnectionChange($event)">
+                <mat-option [value]="null"></mat-option>
+                <mat-option *ngFor="let connectionName of connectionNames" [value]="connectionName">{{connectionName}}</mat-option>
+            </mat-select>  
+        </mat-form-field>                             
     </p>    
     <div *ngIf="FG.controls.type.value == 'SnowFlakeDataset' " >
         <p>

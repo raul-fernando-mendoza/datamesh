@@ -7,6 +7,14 @@
 <div *ngIf="sqlJupiter" [formGroup]="FG" >
     <div class="header">
         <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+        <mat-form-field class="dataset" appearance="fill">
+            <mat-label>connection</mat-label> 
+            <mat-select formControlName="connectionName" [value]="sqlJupiter.connectionName" (selectionChange)="onConnectionChange($event)">
+                <mat-option [value]="null"></mat-option>
+                <mat-option *ngFor="let connectionName of connectionNames" [value]="connectionName">{{connectionName}}</mat-option>
+            </mat-select>  
+        </mat-form-field>          
+
         <button  [disabled]="submitting" (click)="onExportCsv()"><mat-icon>topic</mat-icon></button>
     </div>    
     <div>

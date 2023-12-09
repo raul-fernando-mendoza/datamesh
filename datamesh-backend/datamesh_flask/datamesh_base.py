@@ -3,24 +3,27 @@ from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col, sql_expr, lit, Column
 import pandas as pd
 import json
+from datamesh_credentials import getCredentials
 
-dev_connection_parameters = {
-      "type": "snowflake",
-      "account": "twentyfourhourfit.east-us-2.azure",
-      "user": "rmendoza@24hourfit.com",
-      "authenticator": "externalbrowser",
-      "role": "DA_ANALYTICS_RO_PRD",
-      "database": "DA_PRD_V1",
-      "warehouse": "BI_WH",
-      "schema": "DA_DW",
-      "threads": "1",
-      "client_session_keep_alive": "False",
-      "query_tag": "daily" 
+sessions = {
 }
-sess = Session.builder.configs(dev_connection_parameters).create()
 
-def database():
-    r = sess.sql("select current_warehouse() warehouse, current_database() database, current_schema() schema").collect()
+def getSession( connectionName ):
+    print("retriving session for:" + connectionName)
+    if connectionName in sessions:
+        print("session found:")
+        return sessions[connectionName]
+    else:
+        print("creating new session")
+        credentials = getCredentials(connectionName)
+        print( "credentials:" + str(credentials))
+        sess = Session.builder.configs(getCredentials(connectionName)).create()
+        print("session generated:" + str(sess))
+        sessions[connectionName] = sess       
+        return sess 
+    
+def database(connectionName):
+    r = getSession( connectionName ).sql("select current_warehouse() warehouse, current_database() database, current_schema() schema").collect()
     return {
         "warehouse":r[0]['WAREHOUSE'],
         "database":r[0]['DATABASE'],
@@ -34,6 +37,7 @@ def database():
 def getFielsForQuery(req):
     print("getFielsForQuery called")
     print(json.dumps(req))
+    sess = getSession( req["connectionname"] )
     qry = req["qry"] if "qry" in req else None
     csvfile:str = req["csvfile"] if "csvfile" in req else None
     fields = []
@@ -57,6 +61,7 @@ def getFielsForQuery(req):
 def executeJoin( req):
     print("executeJoin called")
     print(json.dumps(req,indent=4))
+    sess = getSession( req["connectionname"] )
 
     leftQry:str = req["leftQry"] if "leftQry" in req else None
     rightQry:str = req["rightQry"] if "rightQry" in req else None
@@ -182,6 +187,7 @@ def executeJoin( req):
 def executeChildJoin( req ):
     print("executeChildJoin: called")
     print(json.dumps(req,indent=4))
+    sess = getSession( req["connectionname"] )
     parentData = req["parentData"]
     leftQry:str = req["leftQry"]
     rightQry:str = req["rightQry"]
@@ -309,5 +315,4 @@ def executeChildJoin( req ):
     return obj 
 
 if __name__ == '__main__':
-    jsonDatabase = database()
-    print(jsonDatabase)
+    print("datamesh_base compiled")

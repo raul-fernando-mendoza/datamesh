@@ -2,6 +2,10 @@ import logging
 from datetime import datetime
 from flask import Flask, request
 from flask_json import FlaskJSON, JsonError, json_response, as_json
+import datamesh_base
+import snowflake_odbc
+import datamesh_credentials
+
 logging.basicConfig(filename='datamesh.log', format='**** -- %(asctime)-15s %(message)s', level=logging.DEBUG)
 log = logging.getLogger("datamesh")
 log.setLevel(logging.DEBUG)
@@ -13,10 +17,6 @@ log.addHandler(ch)
 
 app = Flask(__name__)
 FlaskJSON(app)
-
-import datamesh_flask.datamesh_base as datamesh_base
-import snowflake_odbc
-
 
 def handleCors(request):
     # We use 'force' to skip mimetype checking to have shorter curl command.
@@ -103,11 +103,45 @@ def getQueryFields():
     print("data:"+ str(request.data))
     try:
         req = request.get_json(force=True)
-        data = datamesh_base.database()
+        data = datamesh_base.database(req)
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
         return ({"error":str(e)}, 200, headers)
     return ({"result":data}, 200, headers)
+
+@app.route('/getConnectionNames', methods=['POST','OPTIONS'])
+@as_json
+def getConnectionNames():
+    if request.method == 'OPTIONS':
+        # Allows GET requests from any origin with the Content-Type
+        # header and caches preflight response for an 3600s
+        headers = {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '3600'
+        }
+        return ('Options accepted', 204, headers)
+
+    # Set CORS headers for the main request
+    headers = {
+        'Access-Control-Allow-Origin': '*'
+    } 
+        
+    log.debug("data:"+ str(request.data))
+    try:
+        req = request.get_json(force=True)
+        log.debug( str(req) )
+        data = datamesh_credentials.getConnectionNames(req)
+        
+    except Exception as e:
+        log.error("**** processRequest Exception:" + str(e))
+        return ({"error":str(e)}, 400, headers)
+    except:
+        msg = "**** something went wrong:"
+        log.error( msg)
+        return ({"error":str(msg)}, 400, msg)  
+    return (data, 200, headers)
 
 
 @app.route('/getFielsForQuery', methods=['POST','OPTIONS'])

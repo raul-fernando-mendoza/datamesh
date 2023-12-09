@@ -31,6 +31,7 @@ export class SnowFlakeDataset{
   datasetGroupId:string = ""
   label:string = ""
   sql:string = ""
+  connectionName:string = ""
   ports:Port[] = []
 }
 export class FileDataset{
@@ -38,11 +39,12 @@ export class FileDataset{
   type:string = "FileDataset"
   label:string = ""
   groupId:string = ""
+  connectionName:string = ""  
   fileName:string = ""
   ports:Port[] = []
 }
 
-export type Dataset = FileDataset|SnowFlakeDataset
+export type Dataset = SnowFlakeDataset | FileDataset
 
 export class ComparisonGroup{
   id:string = ""
@@ -121,6 +123,7 @@ export class SqlJupiter{
   className!:string
   sql:string = ""
   result:any|null
+  connectionName:string|null = null
 }
 export class TextJupiter{
   id!:string

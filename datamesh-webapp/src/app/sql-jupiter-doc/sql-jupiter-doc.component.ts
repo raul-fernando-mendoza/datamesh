@@ -75,8 +75,11 @@ export class SqlJupiterDocComponent {
   onDelete(){
     if( this.sqlJupiterDoc ){
       if( confirm("are you sure to delete:" + this.sqlJupiterDoc.label) ){
-        this.firebaseService.deleteDoc(this.sqlJupiterDoc.label, this.sqlJupiterDoc.id ).then( ()=>{
+        this.firebaseService.deleteDoc("SqlJupiterDoc", this.sqlJupiterDoc.id ).then( ()=>{
           this.router.navigate(["/"])
+        },
+        reason=>{
+          alert("error deleting doc:" + reason)
         })
       }
     }
@@ -112,7 +115,8 @@ export class SqlJupiterDocComponent {
         id: uuid.v4(),
         className: "SqlJupiter",
         sql: "",
-        result: null
+        result: null,
+        connectionName:null
       }
       this.firebaseService.setDoc( 'SqlJupiterDoc/'+this.id+"/SqlJupiter", newSqlJupiter.id, newSqlJupiter).then( () =>  {      
         thiz.sqlJupiterDoc!.itemList.splice(idx,0,{className:"SqlJupiter", id:newSqlJupiter.id})

@@ -3,6 +3,51 @@ import json
 import logging
 import snowflake.connector
 import types
+from datamesh_base import getSession
+from datamesh_credentials import getCredentials
+
+odbcsessions ={
+    
+}
+def getOdbcSession( connectionName ):   
+    print("retriving odbcsession for:" + connectionName)
+    if connectionName in odbcsessions:
+        print("session found:")
+        return odbcsessions[connectionName]
+    else:
+        print("session not found")
+        credentials = getCredentials(connectionName)
+        if "authenticator" in credentials:
+            sess = snowflake.connector.connect(
+                        type= credentials["type"],
+                        account= credentials["account"],
+                        user= credentials["user"],
+                        authenticator= credentials["authenticator"],
+                        role= credentials["role"],
+                        database= credentials["database"],
+                        warehouse= credentials["warehouse"],
+                        schema= credentials["schema"],
+                        threads= credentials["threads"],
+                        client_session_keep_alive= credentials["client_session_keep_alive"],
+                        query_tag= credentials["query_tag"]        
+                )
+        else:
+            sess = snowflake.connector.connect(
+                        type= credentials["type"],
+                        account= credentials["account"],
+                        user= credentials["user"],
+                        password= credentials["password"],
+                        role= credentials["role"],
+                        database= credentials["database"],
+                        warehouse= credentials["warehouse"],
+                        schema= credentials["schema"],
+                        threads= credentials["threads"],
+                        client_session_keep_alive= credentials["client_session_keep_alive"],
+                        query_tag= credentials["query_tag"]
+            )          
+        print("session generated:" + str(sess))
+        odbcsessions[connectionName] = sess       
+        return sess      
 
 class ResultMetadataDao:
     def __init__(
@@ -52,27 +97,18 @@ class ResultSetDao:
         return json        
     
 
-conn = snowflake.connector.connect(
-            type= "snowflake",
-            account= "twentyfourhourfit.east-us-2.azure",
-            user= "rmendoza@24hourfit.com",
-            authenticator= "externalbrowser",
-            role= "DA_ANALYTICS_RO_PRD",
-            database= "DA_PRD_V1",
-            warehouse= "BI_WH",
-            schema= "DA_DW",
-            threads= "1",
-            client_session_keep_alive= "False",
-            query_tag= "daily" 
-        )
 
-def getConnection():
-    return conn
+
     
+   
 def executeSql(data:dict):
         sql = data["sql"]
-        connection = getConnection()
-        cur = connection.cursor()
+        connectionName = data["connectionname"]
+        print("connectionName:" + connectionName)
+        sess = getOdbcSession(connectionName)
+   
+        print("using session:" + str(sess)) 
+        cur = sess.cursor()
         try:
             desc = cur.describe(sql)
             
