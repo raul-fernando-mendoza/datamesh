@@ -18,6 +18,9 @@ log.addHandler(ch)
 app = Flask(__name__)
 FlaskJSON(app)
 
+#this function handle the cors option request 
+#return Null if the request is not "option" so the processing should continue
+#if the return is not null the response should be returned to the browser
 def handleCors(request):
     # We use 'force' to skip mimetype checking to have shorter curl command.
     print("getQueryFields called")

@@ -16,7 +16,9 @@ import { firstValueFrom } from 'rxjs';
 
 interface ComparisonRequest extends Comparison{
   leftQry:string,
+  left_connectionname:string,
   rightQry:string,
+  right_connectionname:string,
   joinColumns:string[]
 }
 
@@ -182,6 +184,8 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         return getDoc( doc( db,"Dataset", this.comparison.leftDatasetId )).then( docSnap =>{
           let dataset = docSnap.data() as SnowFlakeDataset
           this.req!.leftQry = this.stringUtilService.removeNonPrintable((dataset.sql!))
+          this.req!.left_connectionname = dataset.connectionName
+          
         })
       }
       else{
@@ -193,6 +197,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         return getDoc( doc( db,"Dataset", this.comparison.rightDatasetId )).then( docSnap =>{
           let dataset = docSnap.data() as SnowFlakeDataset
           this.req!.rightQry = this.stringUtilService.removeNonPrintable((dataset.sql))
+          this.req!.right_connectionname = dataset.connectionName
         })
       }
       else{
@@ -383,7 +388,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         }
         else{
           var newPort:Port = { 
-            name:rport.name + "_RIGHT", 
+            name:rport.name + "_r", 
             type:rport.type
           }
           allPorts.push( newPort )

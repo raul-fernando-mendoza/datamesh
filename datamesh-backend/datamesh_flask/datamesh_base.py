@@ -61,7 +61,8 @@ def getFielsForQuery(req):
 def executeJoin( req):
     print("executeJoin called")
     print(json.dumps(req,indent=4))
-    sess = getSession( req["connectionname"] )
+    left_sess = getSession( req["left_connectionname"] )
+    right_sess = getSession( req["right_connectionname"] )
 
     leftQry:str = req["leftQry"] if "leftQry" in req else None
     rightQry:str = req["rightQry"] if "rightQry" in req else None
@@ -76,12 +77,12 @@ def executeJoin( req):
     
     if leftQry and rightQry:
         print("run query left")
-        leftDF = sess.sql(leftQry)
+        leftDF = left_sess.sql(leftQry)
         #leftDF.show()
         print( leftDF.schema.fields)
 
         print("run query right")
-        rightDF = sess.sql(rightQry)      
+        rightDF = right_sess.sql(rightQry)      
         #rightDF.show()
         print( rightDF.schema.fields)        
 
@@ -98,13 +99,14 @@ def executeJoin( req):
             fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
             
             #append the column with its alias if it does not exist in the left  
-            firstOcurrLeft = next( (jc for jc in joinColumns if (jc == fn)), None)
-            if firstOcurrLeft == None: #only add the righ column is if it is not part of the join
-            
-                firstOcurr = next( (lc for lc in leftCols 
-                                    if ( lc["alias"] if "alias" in lc else lc["name"]) == fa
+            firstOcurrJoin = next( (jc for jc in joinColumns if (jc == fn)), None)
+            if firstOcurrJoin == None: #only add the righ column if it is not part of the join
+                #now search for the right column in the left columns 
+                firstOcurrLeft = next( (lc for lc in leftCols 
+                                    if ( lc["alias"] if "alias" in lc and lc["alias"] != "" else lc["name"]) == fa
                                     ), None)
-                if firstOcurr == None:
+                if firstOcurrLeft == None:
+                    print("Not found in left:" + fa + " " + str(firstOcurrLeft) )
                     rightColsSelected.append( rightDF[fn].alias(fa) )
                 else: #here the column exist in the left then append with suffix 
                     rightColsSelected.append( rightDF[fn].alias(fa + "_r") )
@@ -142,7 +144,7 @@ def executeJoin( req):
         
         print( leftDF.head(10) )
         print("run query right")
-        r_Dataframe = sess.sql(rightQry)
+        r_Dataframe = right_sess.sql(rightQry)
         r_Dataframe.show()
         rightDF = pd.DataFrame(data=r_Dataframe.collect())
         
