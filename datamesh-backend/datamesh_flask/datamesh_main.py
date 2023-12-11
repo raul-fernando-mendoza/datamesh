@@ -21,6 +21,11 @@ FlaskJSON(app)
 #this function handle the cors option request 
 #return Null if the request is not "option" so the processing should continue
 #if the return is not null the response should be returned to the browser
+
+ALLOW_ORIGIN_HEADERS = {
+        'Access-Control-Allow-Origin': '*'
+} 
+
 def handleCors(request):
     # We use 'force' to skip mimetype checking to have shorter curl command.
     print("getQueryFields called")
@@ -61,47 +66,11 @@ def get_time():
 @app.route('/database', methods=['POST','OPTIONS'])
 def getQueryFields():
     # We use 'force' to skip mimetype checking to have shorter curl command.
-    print("getQueryFields called")
-    log.error("**** receive:" + str(request))
-    log.error("**** type:" + str(type(request)))
-    log.error("**** method:" + str(request.method))
-    log.error("**** content-type:" + str(request.content_type))
-    log.error("**** mimetype:" + str(request.mimetype))    
-    log.error("**** is_json:" + str(request.is_json))      
-    log.error("**** get content_encoding:" + str(request.content_encoding))    
-    log.error("**** get data:" + str(type(request.get_data())))
-    log.error("**** decode:" + str(request.get_data().decode()))
-        
-    log.error("**** receive:" + str(request))
-    log.error("**** type:" + str(type(request)))
-    log.error("**** method:" + str(request.method))
-    log.error("**** content-type:" + str(request.content_type))
-    log.error("**** mimetype:" + str(request.mimetype))    
-    log.error("**** is_json:" + str(request.is_json))      
-    log.error("**** get content_encoding:" + str(request.content_encoding))    
-    log.error("**** get data:" + str(type(request.get_data())))
-    log.error("**** decode:" + str(request.get_data().decode()))
-
-    # For more information about CORS and CORS preflight requests, see:
-    # https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request
-
-    # Set CORS headers for the preflight request
-    if request.method == 'OPTIONS':
-        # Allows GET requests from any origin with the Content-Type
-        # header and caches preflight response for an 3600s
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Max-Age': '3600'
-        }
-
-        return ('Options accepted', 204, headers)
-
-    # Set CORS headers for the main request
-    headers = {
-        'Access-Control-Allow-Origin': '*'
-    }
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
         
     print("data:"+ str(request.data))
     try:
@@ -115,21 +84,11 @@ def getQueryFields():
 @app.route('/getConnectionNames', methods=['POST','OPTIONS'])
 @as_json
 def getConnectionNames():
-    if request.method == 'OPTIONS':
-        # Allows GET requests from any origin with the Content-Type
-        # header and caches preflight response for an 3600s
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Max-Age': '3600'
-        }
-        return ('Options accepted', 204, headers)
-
-    # Set CORS headers for the main request
-    headers = {
-        'Access-Control-Allow-Origin': '*'
-    } 
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
         
     log.debug("data:"+ str(request.data))
     try:
@@ -150,21 +109,11 @@ def getConnectionNames():
 @app.route('/getFielsForQuery', methods=['POST','OPTIONS'])
 @as_json
 def getFielsForQuery():
-    if request.method == 'OPTIONS':
-        # Allows GET requests from any origin with the Content-Type
-        # header and caches preflight response for an 3600s
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Max-Age': '3600'
-        }
-        return ('Options accepted', 204, headers)
-
-    # Set CORS headers for the main request
-    headers = {
-        'Access-Control-Allow-Origin': '*'
-    } 
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
         
     log.debug("data:"+ str(request.data))
     try:
@@ -184,21 +133,11 @@ def getFielsForQuery():
 @app.route('/executeJoin', methods=['POST','OPTIONS'])
 @as_json
 def executeJoin():
-    if request.method == 'OPTIONS':
-        # Allows GET requests from any origin with the Content-Type
-        # header and caches preflight response for an 3600s
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Max-Age': '3600'
-        }
-        return ('Options accepted', 204, headers)
-
-    # Set CORS headers for the main request
-    headers = {
-        'Access-Control-Allow-Origin': '*'
-    } 
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
         
     log.debug("data:"+ str(request.data))
     try:
@@ -215,21 +154,11 @@ def executeJoin():
 @app.route('/executeChildJoin', methods=['POST','OPTIONS'])
 @as_json
 def executeChildJoin():
-    if request.method == 'OPTIONS':
-        # Allows GET requests from any origin with the Content-Type
-        # header and caches preflight response for an 3600s
-        headers = {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST,GET,OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Max-Age': '3600'
-        }
-        return ('Options accepted', 204, headers)
-
-    # Set CORS headers for the main request
-    headers = {
-        'Access-Control-Allow-Origin': '*'
-    } 
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
         
     log.debug("data:"+ str(request.data))
     try:
@@ -249,9 +178,7 @@ def executeSql():
     if headers:
         return headers
         # Set CORS headers for the main request
-    headers = {
-        'Access-Control-Allow-Origin': '*'
-    } 
+    headers = ALLOW_ORIGIN_HEADERS
     log.debug("*** runQuery Start data:"+ str(request.data))
     try:
         req = request.get_json(force=True)
