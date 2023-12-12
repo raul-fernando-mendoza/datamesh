@@ -53,7 +53,7 @@ export class ComparisonGroup{
 
 export interface ComparisonPort{
   name:string,
-  type:string,
+  datatype:string,
   alias:string,
   isSelected:boolean
 }

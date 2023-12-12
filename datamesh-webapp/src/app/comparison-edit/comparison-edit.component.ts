@@ -334,7 +334,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.leftDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.datatype,
+                datatype: port.datatype,
                 alias: "",
                 isSelected: true
               }
@@ -352,7 +352,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.rightDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.datatype,
+                datatype: port.datatype,
                 alias: "",
                 isSelected: true
               }
@@ -383,7 +383,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.leftDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.datatype,
+                datatype: port.datatype,
                 alias: "",
                 isSelected: true
               }
@@ -402,7 +402,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.rightDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.datatype,
+                datatype: port.datatype,
                 alias: "",
                 isSelected: true
               }
@@ -424,10 +424,10 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
           if( found ){
             let newRow:KeyLeftRight ={
               leftPortName: lport.name,
-              leftPortType: lport.type,
+              leftPortType: lport.datatype,
               leftPortAlias: lport.alias,
               rightPortName: found.name,
-              rightPortType: found.type,
+              rightPortType: found.datatype,
               rightPortAlias: found.alias,
               isSelected:true
             }
