@@ -1,5 +1,9 @@
 <div class="header">
-    <span>Dataset Edit</span><span class="spacer"></span><span>{{id}}</span><button *ngIf="dataset" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+    <span>Dataset Edit</span>
+    <span class="spacer"></span>
+    <span *ngIf="dataset">{{id}}</span>
+    <button *ngIf="dataset" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+    }
 </div>
 
 <div [formGroup]="FG">
@@ -19,7 +23,7 @@
         </mat-form-field> 
         <mat-form-field class="dataset" appearance="fill">
             <mat-label>connection</mat-label> 
-            <mat-select formControlName="connectionName" [value]="dataset.connectionName" (selectionChange)="onConnectionChange($event)">
+            <mat-select formControlName="connectionName"  (selectionChange)="onConnectionChange($event)">
                 <mat-option [value]="null"></mat-option>
                 <mat-option *ngFor="let connectionName of connectionNames" [value]="connectionName">{{connectionName}}</mat-option>
             </mat-select>  
@@ -74,12 +78,6 @@
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>    
-    <!--
-        <p>sql:{{FG.controls.sql.valid}}</p>
-        <p>filename:{{FG.controls.fileName.valid}}</p>
-        <button mat-button>Sample</button>
-    -->   
-        
     </div> 
     <div *ngIf="!dataset">
         <button mat-raised-button (click)="onCancel()">Cancelar</button>     

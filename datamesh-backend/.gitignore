@@ -22,6 +22,7 @@ speed-measure-plugin*.json
 *.launch
 .settings/
 *.sublime-workspace
+datamesh_flask/__pycache__/
 
 # IDE - VSCode
 .vscode/*

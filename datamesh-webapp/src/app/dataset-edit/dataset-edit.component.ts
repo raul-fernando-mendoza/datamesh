@@ -15,7 +15,7 @@ import { ConnectionsService } from 'app/connections.service';
   templateUrl: './dataset-edit.component.html',
   styleUrls: ['./dataset-edit.component.css']
 })
-export class DatasetEditComponent implements OnInit, OnDestroy{
+export class DatasetEditComponent implements OnInit{
 
   displayedColumns: string[] = ['name', 'datatype' ];
   portdatatypes:string[] = [
@@ -31,13 +31,11 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
     label:['',[Validators.required]],
     sql:['',[]],
     fileName:['',[]],
-    connectionName:[""]
-
+    connectionName:[""],
   })
 
   id:string | null = null
   groupId:string | null = null
-  unsubscribe:any
   
   dataset!:FileDataset|SnowFlakeDataset
 
@@ -58,9 +56,6 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
       this.activatedRoute.params.subscribe(res => {
         if("id" in res){
           this.id = res["id"]
-          if( this.unsubscribe ){
-            this.unsubscribe()
-          }  
           this.update()
         }  
         else if("groupId" in res){
@@ -68,45 +63,41 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
         }
       })      
   }
-  ngOnDestroy(): void {
-    if( this.unsubscribe ){
-      this.unsubscribe()
-    }
-  }
   ngOnInit(): void {
-    this.connectionsService.getConnectionNames().then( (connectionNames) => this.connectionNames = connectionNames)
+    this.connectionsService.getConnectionNames().then( (connectionNames) => {
+      this.connectionNames = connectionNames
+    },
+    reason=>{
+      alert("Error readin connection:" + reason)
+    })
     this.update()
 
   }
 
   update(){
     if( this.id ){
-      this.unsubscribe = this.firebaseService.onsnapShot("Dataset", this.id, {
-        "next":((doc)=>{
-          if( doc.exists()){
-            let dataset:Dataset = doc.data() as Dataset
+      this.firebaseService.getdoc("Dataset", this.id).then( doc =>{
+          let dataset:Dataset = doc.data() as Dataset
 
-            this.FG.controls.type.setValue( dataset.type )
-            this.FG.controls.label.setValue( dataset.label )
+          this.FG.controls.type.setValue( dataset.type )
+          this.FG.controls.label.setValue( dataset.label )
 
-            if( dataset.type === "FileDataset"){
-              let fileDataset = doc.data() as FileDataset
-              this.FG.controls.fileName.setValue( fileDataset.fileName )
-              this.dataset = fileDataset
-            }
-            else{
-              let snowFlakeDataset:SnowFlakeDataset = doc.data() as SnowFlakeDataset
-              this.FG.controls.connectionName.setValue( snowFlakeDataset.connectionName )              
-              this.FG.controls.sql.setValue( snowFlakeDataset.sql )
-              this.dataset = snowFlakeDataset
-            }
-
-            this.datasource = this.dataset.ports
+          if( dataset.type === "FileDataset"){
+            let fileDataset = doc.data() as FileDataset
+            this.FG.controls.fileName.setValue( fileDataset.fileName )
+            this.dataset = fileDataset
           }
-        }),
-        "error":((reason)=>{
-          alert("ERROR:" + reason)
-        })
+          else{
+            let snowFlakeDataset:SnowFlakeDataset = doc.data() as SnowFlakeDataset
+            this.FG.controls.connectionName.setValue( snowFlakeDataset.connectionName )              
+            this.FG.controls.sql.setValue( snowFlakeDataset.sql )
+            this.dataset = snowFlakeDataset
+          }
+
+          this.datasource = this.dataset.ports
+        },
+        reason=>{
+          alert("ERROR:" + reason)        
       })
     }
   }
@@ -133,7 +124,7 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
     }
     return this.firebaseService.setDoc( "Dataset", dataset.id, dataset).then( () =>{
       this.id = dataset.id
-      this.router.navigate(["Dataset-edit",this.id])
+      this.router.navigate(["Dataset","edit",this.id])
     })
   }
 
@@ -205,6 +196,9 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
       
       let param:any
       if( this.dataset!.type == "SnowFlakeDataset"  ){
+        let sql = this.FG.controls.sql.value 
+        let dataset:SnowFlakeDataset = (this.dataset as SnowFlakeDataset)
+        dataset.sql = sql ? sql : ""
         param = {
           "qry":(this.dataset! as SnowFlakeDataset).sql,
           "connectionname":(this.dataset! as SnowFlakeDataset).connectionName,
@@ -237,22 +231,28 @@ export class DatasetEditComponent implements OnInit, OnDestroy{
 
   onPortChange($event:any, port:Port){
     port.type = $event.value
-    this.firebaseService.updateDoc( "Dataset", this.id!, {ports:this.dataset!.ports})
+    if( this.id ){
+      this.firebaseService.updateDoc( "Dataset", this.id!, {
+        ports:this.dataset!.ports
+      })
+    }
   }
   onConnectionChange(event:MatSelectChange){
-    var connectionName:string|null = this.FG.controls.connectionName.value
-    
-    var obj ={
-      connectionName:connectionName
-    }
+    if( this.dataset ){
+      var connectionName = this.FG.controls.connectionName.value  
+      
+      var obj ={
+        connectionName:connectionName?connectionName:""
+      }
 
-    this.firebaseService.updateDoc( "Dataset", this.dataset.id, obj ).then( ()=>{
-      console.log("save connecton")
-      this.dataset.connectionName = connectionName?connectionName:""
-    },
-    reason =>{
-      alert("ERROR saving sql:" + reason)
-    })
+      this.firebaseService.updateDoc( "Dataset", this.dataset.id, obj ).then( ()=>{
+        console.log("save connecton")
+        this.dataset.connectionName = connectionName?connectionName:""
+      },
+      reason =>{
+        alert("ERROR saving sql:" + reason)
+      })
+    }
   }   
 }
 

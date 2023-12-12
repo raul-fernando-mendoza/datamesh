@@ -26,30 +26,36 @@ class TestFireStore(unittest.TestCase):
         print(json.dumps({"result":[]}))
        
         request:Request = {
-            "leftQry":"select * from im_prd.dw_24hr.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
+            "leftQry":"select ACCOUNT_NUM as ACCOUNT_NUM_IM, ACCOUNT_SHORT_DESC as ACCOUNT_SHORT_DESC_IM from im_prd.dw_24hr.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
+            "left_connectionname":"TRANSFORMER_DEV_ADMIN",
             "rightQry":"select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
+            "right_connectionname":"TRANSFORMER_DEV_ADMIN",
             "leftPorts":[
                 {
-                    'name':'ACCOUNT_NUM',
-                    'alias':'ACCOUNT_NUM'
+                    'name':'ACCOUNT_NUM_IM',
+                    'alias':'ACCOUNT_NUM',
+                    "isSelected":True
                 },
                 {
-                    'name':'ACCOUNT_SHORT_DESC',
-                    'alias':'ACCOUNT_SHORT_DESC'
+                    'name':'ACCOUNT_SHORT_DESC_IM',
+                    'alias':"ACCOUNT_SHORT_DESC",
+                    "isSelected":True
                 }
             ],
             "rightPorts":[
                 {
                     "name":"ACCOUNT_NUM"
-                    ,"alias":"ACCOUNT_NUM_1"
+                    ,"alias":"ACCOUNT_NUM"
+                    ,"isSelected":True
                 },
                 {
                     "name":"ACCOUNT_SHORT_DESC"
                     ,"alias":"ACCOUNT_SHORT_DESC"
+                    ,"isSelected":True
                 }
             ],
             "joinColumns":["ACCOUNT_NUM"],
-            "filter":"nvl(ACCOUNT_SHORT_DESC,'') != nvl(ACCOUNT_SHORT_DESC_r,'')"
+            "filter":"nvl(ACCOUNT_SHORT_DESC,'') != nvl(ACCOUNT_SHORT_DESC_R,'')"
             
         }
         data = executeJoin(request) 

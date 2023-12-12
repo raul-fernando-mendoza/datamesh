@@ -16,7 +16,7 @@ curl.exe http://localhost:5000/executeSql -H "Content-type:application/json" -X 
 
 //to run test 
 from main directory execute the following to create the package:
-pip install -e .
+python -m pip install -e .
 //open the test and execute.
 
 //login using keys

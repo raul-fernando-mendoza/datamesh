@@ -3,7 +3,7 @@ from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col, sql_expr, lit, Column
 import pandas as pd
 import json
-from datamesh_credentials import getCredentials
+from datamesh_flask.datamesh_credentials import getCredentials
 
 sessions = {
 }
@@ -76,51 +76,69 @@ def executeJoin( req):
     filter=req["filter"] if "filter" in req and len(req["filter"]) > 0 else None
     
     if leftQry and rightQry:
-        print("run query left")
-        leftDF = left_sess.sql(leftQry)
-        #leftDF.show()
-        print( leftDF.schema.fields)
 
-        print("run query right")
-        rightDF = right_sess.sql(rightQry)      
-        #rightDF.show()
-        print( rightDF.schema.fields)        
-
-        
         leftColsSelected = []
         for ct in leftCols:
-            fn:str = ct["name"] 
-            fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
-            leftColsSelected.append( leftDF[fn].alias(fa) )
+            if ct["isSelected"]:
+                fn:str = ct["name"] 
+                fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
+                leftColsSelected.append( col(fn).alias(fa) )
             
+        print("run query left")
+        leftDF = left_sess.sql(leftQry).select( leftColsSelected )
+        print( leftDF.schema.fields)        
+        leftDF.show()
+        
         rightColsSelected = []    
         for ct in rightCols:
-            fn:str = ct["name"] 
-            fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
-            
-            #append the column with its alias if it does not exist in the left  
-            firstOcurrJoin = next( (jc for jc in joinColumns if (jc == fn)), None)
-            if firstOcurrJoin == None: #only add the righ column if it is not part of the join
-                #now search for the right column in the left columns 
-                firstOcurrLeft = next( (lc for lc in leftCols 
-                                    if ( lc["alias"] if "alias" in lc and lc["alias"] != "" else lc["name"]) == fa
-                                    ), None)
-                if firstOcurrLeft == None:
-                    print("Not found in left:" + fa + " " + str(firstOcurrLeft) )
-                    rightColsSelected.append( rightDF[fn].alias(fa) )
-                else: #here the column exist in the left then append with suffix 
-                    rightColsSelected.append( rightDF[fn].alias(fa + "_r") )
+            if ct["isSelected"]:
+                fn:str = ct["name"] 
+                fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]
+                rightColsSelected.append( col(fn).alias(fa) )
+
+        print("run query right")
+        rightDF = right_sess.sql(rightQry).select(rightColsSelected)                  
+        rightDF.show()
+        print( rightDF.schema.fields)        
+
+        #here both sources fields have been replaced with aliases so proceed with the join  
+        #snowspark does not allow for for suffix as parameter so output has to be renamed manually for duplicated columns
+
+        finalColumns = []
+        
+        for ct in leftCols:
+            if ct["isSelected"]:
+                fn:str = ct["name"] 
+                fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"] 
+                finalColumns.append( leftDF[fa].alias(fa) )         
+        #append the column with its alias if it does not exist in the left  
+        for ct in rightCols:
+            if ct["isSelected"]:            
+                fn:str = ct["name"] 
+                fa:str = ct["alias"] if "alias" in ct and ct["alias"] != "" else ct["name"]            
+                firstOcurrJoin = next( (jc for jc in joinColumns if (jc == fa)), None)
+                if firstOcurrJoin == None: #only add the righ column if it is not part of the join
+                    #now search for the right column in the left columns 
+                    firstOcurrLeft = next( (lc for lc in leftCols 
+                                        if ( lc["alias"] if "alias" in lc and lc["alias"] != "" else lc["name"]) == fa
+                                        ), None)
+                    if firstOcurrLeft == None:
+                        print("Not found in left:" + fa + " " + str(firstOcurrLeft) )
+                        finalColumns.append( rightDF[fn].alias(fa) )
+                    else: #here the column exist in the left then append with suffix 
+                        finalColumns.append( rightDF[fn].alias(fa + "_r") )
                 
-        leftColsSelected.extend(rightColsSelected)
         print( "allColumns")
-        print( leftColsSelected )
+        print( finalColumns )
+    
                 
         print("left join right 1")   
         df = leftDF \
             .join( right=rightDF, 
                 using_columns=joinColumns,
-            join_type= "leftouter") \
-                .select( leftColsSelected ) \
+                join_type= "full"
+                )  \
+                .select( finalColumns ) \
                 .sort( joinColumns )
             
         df.show()    
