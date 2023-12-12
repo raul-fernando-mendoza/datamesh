@@ -389,7 +389,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         else{
           var newPort:Port = { 
             name:rport.name + "_r", 
-            type:rport.type
+            datatype:rport.datatype
           }
           allPorts.push( newPort )
         }

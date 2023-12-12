@@ -304,6 +304,9 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     
     this.firebaseService.updateDoc("Comparison",this.id!, {leftDatasetId:this.comparison.leftDatasetId }).then( ()=>{
       this.updatePorts()
+    },
+    reason=>{
+      alert("error loading left:" + reason)
     })
 
     
@@ -313,6 +316,9 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     this.comparison.rightDatasetId = e.dragData
     this.firebaseService.updateDoc("Comparison",this.id!, {rightDatasetId:this.comparison.rightDatasetId }).then( ()=>{
       this.updatePorts()
+    },
+    reason=>{
+      alert("Error loading right:" + reason)
     })
     
   }
@@ -328,7 +334,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.leftDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.type,
+                type: port.datatype,
                 alias: "",
                 isSelected: true
               }
@@ -346,7 +352,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.rightDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.type,
+                type: port.datatype,
                 alias: "",
                 isSelected: true
               }
@@ -377,7 +383,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.leftDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.type,
+                type: port.datatype,
                 alias: "",
                 isSelected: true
               }
@@ -396,7 +402,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
             this.rightDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
                 name: port.name,
-                type: port.type,
+                type: port.datatype,
                 alias: "",
                 isSelected: true
               }
@@ -432,6 +438,9 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
         this.table.dataSource = []
         this.table.dataSource = this.comparison.keyLeftRight
         this.table.renderRows()
+      },
+      reason=>{
+        alert("Error updating ports:" + reason)
       })
     })   
   }  
