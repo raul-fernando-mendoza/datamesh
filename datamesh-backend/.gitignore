@@ -55,3 +55,6 @@ __pycache__/*
 .firebaserc
 .vscode
 .angular
+
+./datamesh-backend/keys/
+./datamesh_flask.egg-info
