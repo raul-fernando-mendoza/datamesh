@@ -3,7 +3,7 @@ from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col, sql_expr, lit, Column
 import pandas as pd
 import json
-from datamesh_flask.datamesh_credentials import getCredentials
+import firebase_admin
 
 sessions = {
 }
@@ -333,6 +333,11 @@ def executeChildJoin( req ):
     #print(json.dumps({"result":obj},indent=4))
     print("executeChildJoin END")
     return obj 
+
+def addEncryptedDocument(self):
+    
+    obj = addEncryptedDocument( "connections", "owner", "==", "abc")
+    print(json.dumps(obj))
 
 if __name__ == '__main__':
     print("datamesh_base compiled")

@@ -2,13 +2,10 @@ import unittest
 import json
 import logging
 import snowflake.connector
-import types
-from datamesh_base import getSession
-from datamesh_credentials import getCredentials
+from datamesh_flask.datamesh_credentials import getCredentials
 
-odbcsessions ={
-    
-}
+odbcsessions ={}
+
 def getOdbcSession( connectionName ):   
     print("retriving odbcsession for:" + connectionName)
     if connectionName in odbcsessions:
@@ -100,7 +97,10 @@ class ResultSetDao:
 
 
     
-   
+# usage executeSql({
+#  sql:"select * from dual" 
+#  connectionname:"DA_DEV"
+# })   
 def executeSql(data:dict):
         sql = data["sql"]
         connectionName = data["connectionname"]

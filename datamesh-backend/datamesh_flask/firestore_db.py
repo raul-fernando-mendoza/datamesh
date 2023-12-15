@@ -1,70 +1,73 @@
 from firebase_admin import firestore
+from google.cloud.firestore_v1.base_query import FieldFilter
 import logging
+from datamesh_flask.encrypt_lib import encrypt,decrypt
 
 import base64
-import os
 
-from Crypto.PublicKey import RSA
-from Crypto.Random import get_random_bytes
-from Crypto.Cipher import AES, PKCS1_OAEP
 
 
 log = logging.getLogger("cheneque")
 
 db = firestore.client()
 
-def addSingleEncryptedDocumentValue( collectionId, id, data ):
-
-    recipient_key = RSA.import_key(open("./../keys/publickey.pem").read())
-    session_key = get_random_bytes(16)
-
-    # Encrypt the session key with the public RSA key
-    cipher_rsa = PKCS1_OAEP.new(recipient_key)
-    enc_session_key = cipher_rsa.encrypt(session_key)
-
-    # Encrypt the data with the AES session key
-    cipher_aes = AES.new(session_key, AES.MODE_EAX)
-    ciphertext, tag = cipher_aes.encrypt_and_digest(data.encode('utf-8'))
+#store a document with all its fields encrypted, 
+#Eonly the fields listed in unecryptedFields will be left plain text
+def addEncryptedDocument( collectionId, id, data , unencryptedFields):
+    
+# get the current working directory
     
     obj = {
-        "enc_session_key":enc_session_key, 
-        "nonce":cipher_aes.nonce, 
-        "tag":tag, 
-        "ciphertext":ciphertext        
     }
+    for key in data:
+        if key not in unencryptedFields if unencryptedFields else []:
+            obj[key]=encrypt(data[key])
+        else:
+            obj[key]=data[key]
+    
     doc_ref = db.collection(collectionId).document(id)
-    doc_ref.set(obj)    
+    doc = doc_ref.get()
+    if doc.exists:
+        doc_ref.update(obj)
+    else:
+        doc_ref.set(obj)    
     return obj
     
 
-
-def getSingleEncryptedDocumentValue(collectionId, id):
-    private_key = RSA.import_key(open("./../keys/privatekey.pem").read())
+#get a json replacing the attributes: ciphertext, enc_session, nonce, tag for text attribute decrypted
+def getEncryptedDocument(collectionId, id):
+    
     
     doc_ref = db.collection(collectionId).document(id)
 
     doc = doc_ref.get()
-    data = None 
     
+    data = None 
     if doc.exists:
         data = doc.to_dict()
     else:
-        return None   
+        return None  
+    
+    result = {}
+    
+    for key in data:
+        if "ciphertext" in data[key]:
+            result[key] = decrypt( data[key] )
+        else:
+            result[key] = data[key]
+    
+    return result
 
-    enc_session_key = data["enc_session_key"]
-    nonce =  data["nonce"]
-    tag = data["tag"]
-    ciphertext = data["ciphertext"]
-
-    # Decrypt the session key with the private RSA key
-    cipher_rsa = PKCS1_OAEP.new(private_key)
-    session_key = cipher_rsa.decrypt(enc_session_key)
-
-    # Decrypt the data with the AES session key
-    cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
-    data = cipher_aes.decrypt_and_verify(ciphertext, tag)
-    print(data.decode("utf-8"))
-    return data 
+def decryptDocument( data ):
+    result = {}
+    
+    for key in data:
+        if "ciphertext" in data[key]:
+            result[key] = decrypt( data[key] )
+        else:
+            result[key] = data[key]
+    
+    return result    
   
 
 def addSingleDocument(collectionId, id, data):
@@ -87,5 +90,30 @@ def getSingleDocument(collectionId, id):
     else:
         return None
     
+    
+    
+def getEncryptedDocuments(collectionId, filters = []):
+    try:
+        query = db.collection(collectionId)
+        
+        for filter in filters:
+            field, comp, val = (filter)
+            query = query.where(filter=FieldFilter(field, comp, val))
+        
+        docs = query.get()
+
+        result = []
+        for doc in docs:
+            data = decryptDocument( doc.to_dict() )            
+            result.append(data)
+        return data
+
+    except Exception as e:
+        log.error("**** getDocsIDs Exception:" + str(e))
+        raise e
+    
+
+             
+      
 if __name__ == '__main__':
     print("firestore_db ran nothing")

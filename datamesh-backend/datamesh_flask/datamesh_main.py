@@ -2,9 +2,10 @@ import logging
 from datetime import datetime
 from flask import Flask, request
 from flask_json import FlaskJSON, JsonError, json_response, as_json
+import firebase_admin
+firebase_admin.initialize_app( )
 import datamesh_base
 import snowflake_odbc
-import datamesh_credentials
 
 logging.basicConfig(filename='datamesh.log', format='**** -- %(asctime)-15s %(message)s', level=logging.DEBUG)
 log = logging.getLogger("datamesh")
@@ -81,7 +82,7 @@ def getQueryFields():
         return ({"error":str(e)}, 200, headers)
     return ({"result":data}, 200, headers)
 
-@app.route('/getConnectionNames', methods=['POST','OPTIONS'])
+@app.route('/addEncryptedDocument', methods=['POST','OPTIONS'])
 @as_json
 def getConnectionNames():
     headers = handleCors(request)
@@ -94,7 +95,7 @@ def getConnectionNames():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = datamesh_credentials.getConnectionNames(req)
+        data = datamesh_base.addEncryptedDocument(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
@@ -190,6 +191,6 @@ def executeSql():
         log.error("**** processRequest Exception:" + str(e))
         return ({"error":str(e)}, 400, headers)
     return (data, 200, headers)     
-    
+
 if __name__ == '__main__':
     app.run()
