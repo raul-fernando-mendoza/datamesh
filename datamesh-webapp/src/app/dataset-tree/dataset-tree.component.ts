@@ -5,7 +5,7 @@ import {MatTreeFlatDataSource, MatTreeFlattener} from '@angular/material/tree';
 import {BehaviorSubject, firstValueFrom} from 'rxjs';
 import { FirebaseService, QryPar } from '../firebase.service';
 import { ActivatedRoute, Route, Router } from '@angular/router';
-import { FirestoreError } from 'firebase/firestore';
+import { doc, FirestoreError } from 'firebase/firestore';
 import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 
@@ -31,6 +31,7 @@ export interface Group{
 export interface TreeNode {
   children: TreeNode[];
   item: Group | Data;
+  id: string
 }
 
 
@@ -41,6 +42,7 @@ export interface FlatNode {
   item: Group | Data;
   level: number
   expandable: boolean
+  id:string
 }
 
 
@@ -132,7 +134,8 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
       var flatNode:FlatNode = {
         item: node.item,
         level: level,
-        expandable: node.children.length > 0 ? true : false
+        expandable: node.children.length > 0 ? true : false,
+        id:node.id
       }
     }
     this.flatNodeToNode.set(flatNode, node);
@@ -159,11 +162,12 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
         "next":( (set:any)=>{
           console.log("reload parent")
           var datasets:TreeNode[] = []
-          var transactions = set.docs.map( (item:any) =>{
-            var datasetGroup = item.data() as Group
+          var transactions = set.docs.map( (doc:any) =>{
+            var datasetGroup = doc.data() as Group
             let datasetNode:TreeNode = {
               children: [],
-              item: datasetGroup
+              item: datasetGroup,
+              id: doc.id
             }
             if( this.FG.controls.search.value != null && this.FG.controls.search.value.length > 0){
               if( datasetGroup.label.toUpperCase().indexOf(this.FG.controls.search.value.toUpperCase()) >= 0 ){
@@ -203,11 +207,19 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
             var data = doc.data() as Data
             let newDatasetNode:TreeNode = {
               children: [],
-              item: data
+              item: data,
+              id:doc.id
             }
             groupNode.children.push( newDatasetNode )            
           })
-          groupNode.children.sort( (a,b)=> a.item.updateon < b.item.updateon ? 1:-1)
+          groupNode.children.sort( (a,b)=>{
+            if( "label" in a.item && "label" in b.item )
+              return a.item.label > b.item.label ? 1:-1
+            else if( "updateon" in  a.item && "updateon" in b.item)
+              return a.item.updateon > b.item.updateon ? 1:-1
+            else 
+              return a.item.id > b.item.id ? 1:-1
+          })
           this.reload( groupNode.item.id )
 
           resolve()
@@ -257,16 +269,16 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
   addGroup() {
     this.router.navigate(["datasetgroup", this.groupCollection, "create"])
   }
-  onEditGroup( node:TreeNode ){
-    this.router.navigate(["datasetgroup", this.groupCollection, "edit", node.item.id]);
+  onEditGroup( node:FlatNode ){
+    this.router.navigate(["datasetgroup", this.groupCollection, "edit", node.id]);
   }
-  onAddData(node:TreeNode){
+  onAddData(node:FlatNode){
     let group = node.item as Group
-    this.router.navigate([this.dataCollection, "create", group.id])
+    this.router.navigate([this.dataCollection, "create", node.id])
   }
-  onEditData( node:TreeNode ){
+  onEditData( node:FlatNode ){
     let group = node.item as Group
-    this.router.navigate([this.dataCollection, "edit",  node.item.id]);
+    this.router.navigate([this.dataCollection, "edit",  node.id]);
   }
   drop(event: CdkDragDrop<string[]>) {
     if (event.previousContainer === event.container) {

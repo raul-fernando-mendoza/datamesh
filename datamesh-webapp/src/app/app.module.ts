@@ -45,6 +45,7 @@ import { TextJupiterComponent } from './text-jupiter/text-jupiter.component'
 import { QuillModule } from 'ngx-quill';
 import { SqlEditComponent } from './sql-edit/sql-edit.component';
 import { DialogNameDialog } from './name-dialog/name-dlg';
+import { ConnectionEditComponent } from './connection-edit/connection-edit.component';
 
 @NgModule({
   declarations: [
@@ -61,7 +62,8 @@ import { DialogNameDialog } from './name-dialog/name-dlg';
     SqlJupiterEditComponent,
     TextJupiterComponent,
     SqlEditComponent,
-    DialogNameDialog
+    DialogNameDialog,
+    ConnectionEditComponent
   ],
   imports: [
     HttpClientModule,

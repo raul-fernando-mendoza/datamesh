@@ -16,9 +16,9 @@ import { firstValueFrom } from 'rxjs';
 
 interface ComparisonRequest extends Comparison{
   leftQry:string,
-  left_connectionname:string,
+  left_connectionId:string,
   rightQry:string,
-  right_connectionname:string,
+  right_connectionId:string,
   joinColumns:string[]
 }
 
@@ -184,7 +184,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         return getDoc( doc( db,"Dataset", this.comparison.leftDatasetId )).then( docSnap =>{
           let dataset = docSnap.data() as SnowFlakeDataset
           this.req!.leftQry = this.stringUtilService.removeNonPrintable((dataset.sql!))
-          this.req!.left_connectionname = dataset.connectionName
+          this.req!.left_connectionId = dataset.connectionId
           
         })
       }
@@ -197,7 +197,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         return getDoc( doc( db,"Dataset", this.comparison.rightDatasetId )).then( docSnap =>{
           let dataset = docSnap.data() as SnowFlakeDataset
           this.req!.rightQry = this.stringUtilService.removeNonPrintable((dataset.sql))
-          this.req!.right_connectionname = dataset.connectionName
+          this.req!.right_connectionId = dataset.connectionId
         })
       }
       else{

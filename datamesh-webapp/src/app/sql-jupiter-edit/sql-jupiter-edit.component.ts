@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Inject, Input ,OnDestroy, OnInit, Output, ViewChild, ViewRef} from '@angular/core';
-import { SqlJupiter } from '../datatypes/datatypes.module';
+import { Connection, SqlJupiter } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot, Unsubscribe} from "firebase/firestore"; 
 import { db } from '../../environments/environment'
@@ -35,10 +35,10 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   submitting = false
   FG = this.fb.group({
     sql:[''],
-    connectionName:['']
+    connectionId:['']
   })
 
-  connectionNames:Array<string> = []
+  connections:Array<Connection> = []
   constructor(
     public firebaseService:FirebaseService,
     private fb:FormBuilder,
@@ -70,7 +70,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         this.sqlJupiter = doc.data() as SqlJupiter
         this.rows = this.sqlJupiter.sql.split('\n').length > this.MAX_ROWS ? this.MAX_ROWS : this.MIN_ROWS 
         this.FG.controls.sql.setValue( this.sqlJupiter.sql )
-        this.FG.controls.connectionName.setValue( this.sqlJupiter.connectionName )
+        this.FG.controls.connectionId.setValue( this.sqlJupiter.connectionId )
         this.displayedColumns = ["idx"]
         if( this.sqlJupiter.result ){
           var resultJson = this.sqlJupiter.result
@@ -91,7 +91,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     })
   }
   ngOnInit(): void {
-    this.connectionsService.getConnectionNames().then( (connectionNames) => this.connectionNames = connectionNames)
+    this.connectionsService.getConnections().then( (connections) => this.connections = connections)
 
 
   }    
@@ -118,7 +118,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     if( sql ){
       let param={
         "sql":sql,
-        "connectionname":this.sqlJupiter!.connectionName
+        "connectionId":this.sqlJupiter!.connectionId
       }  
       this.submitting = true
       this.urlService.post("executeSql",param).subscribe({ 
@@ -229,15 +229,15 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     
   }
   onConnectionChange(event:MatSelectChange){
-    var connectionName:string|null = this.FG.controls.connectionName.value
+    var connectionId:string|null = this.FG.controls.connectionId.value
     
     var obj ={
-      connectionName:connectionName
+      connectionId:connectionId
     }
 
     this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, obj ).then( ()=>{
       console.log("save connecton")
-      this.sqlJupiter!.connectionName = connectionName
+      this.sqlJupiter!.connectionId = connectionId
     },
     reason =>{
       alert("ERROR saving sql:" + reason)

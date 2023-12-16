@@ -5,7 +5,7 @@ import uuid
 import firebase_admin
 #takes the connection from the environment variable FIREBASE_CONFIG make sure is development
 firebase_admin.initialize_app( )
-from datamesh_flask.firestore_db import addEncryptedDocument
+from datamesh_flask.firestore_db import setEncryptedDocument
 
 log = logging.getLogger("datamesh")
 
@@ -29,7 +29,7 @@ class TestFireStore(unittest.TestCase):
         )
         id = str(uuid.uuid4())
         
-        addEncryptedDocument( 
+        setEncryptedDocument( 
                              "connections"
                             ,id
                             ,{

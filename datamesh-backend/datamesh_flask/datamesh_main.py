@@ -29,7 +29,7 @@ ALLOW_ORIGIN_HEADERS = {
 
 def handleCors(request):
     # We use 'force' to skip mimetype checking to have shorter curl command.
-    print("getQueryFields called")
+    print("handleCors called")
     log.info("**** receive:" + str(request))
     log.info("**** type:" + str(type(request)))
     log.info("**** method:" + str(request.method))
@@ -65,7 +65,7 @@ def get_time():
 
 
 @app.route('/database', methods=['POST','OPTIONS'])
-def getQueryFields():
+def database():
     # We use 'force' to skip mimetype checking to have shorter curl command.
     headers = handleCors(request)
     if headers:
@@ -82,9 +82,10 @@ def getQueryFields():
         return ({"error":str(e)}, 200, headers)
     return ({"result":data}, 200, headers)
 
-@app.route('/addEncryptedDocument', methods=['POST','OPTIONS'])
+@app.route('/setEncryptedDocument', methods=['POST','OPTIONS'])
 @as_json
-def getConnectionNames():
+def setEncryptedDocument():
+    log.debug("**** setEncryptedDocument called:" + str(request))
     headers = handleCors(request)
     if headers:
         return headers
@@ -95,7 +96,31 @@ def getConnectionNames():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = datamesh_base.addEncryptedDocument(req)
+        data = datamesh_base.setEncryptedDocument(req)
+        
+    except Exception as e:
+        log.error("**** processRequest Exception:" + str(e))
+        return ({"error":str(e)}, 400, headers)
+    except:
+        msg = "**** something went wrong:"
+        log.error( msg)
+        return ({"error":str(msg)}, 400, msg)  
+    return (data, 200, headers)
+
+@app.route('/getEncryptedDocument', methods=['POST','OPTIONS'])
+@as_json
+def getEncryptedDocument():
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
+        
+    log.debug("data:"+ str(request.data))
+    try:
+        req = request.get_json(force=True)
+        log.debug( str(req) )
+        data = datamesh_base.getEncryptedDocument(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))

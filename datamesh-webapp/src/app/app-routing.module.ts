@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { ComparisonEditComponent } from './comparison-edit/comparison-edit.component';
 import { ComparisonExecuteComponent } from './comparison-execute/comparison-execute.component';
 import { ComparisonGroupEditComponent } from './comparisongroup-edit/comparisongroup-edit.component';
+import { ConnectionEditComponent } from './connection-edit/connection-edit.component';
 import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
 import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
@@ -24,8 +25,12 @@ const routes: Routes = [
 
   { path: "Comparison/execute/:id", component: ComparisonExecuteComponent},
   { path: "DatasetGroup-edit", component: DatasetgroupEditComponent},
-  { path: '**', component: WelcomeComponent },
 
+  { path: 'Connection/create/:groupId', component: ConnectionEditComponent},
+  { path: 'Connection/edit/:id', component: ConnectionEditComponent},
+
+  //this should be the last one
+  { path: '**', component: WelcomeComponent }
 ];
 
 @NgModule({

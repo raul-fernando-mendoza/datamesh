@@ -31,7 +31,7 @@ export class SnowFlakeDataset{
   datasetGroupId:string = ""
   label:string = ""
   sql:string = ""
-  connectionName:string = ""
+  connectionId:string = ""
   ports:Port[] = []
 }
 export class FileDataset{
@@ -39,7 +39,7 @@ export class FileDataset{
   type:string = "FileDataset"
   label:string = ""
   groupId:string = ""
-  connectionName:string = ""  
+  connectionId:string = ""  
   fileName:string = ""
   ports:Port[] = []
 }
@@ -123,7 +123,7 @@ export class SqlJupiter{
   className!:string
   sql:string = ""
   result:any|null
-  connectionName:string|null = null
+  connectionId:string|null = null
 }
 export class TextJupiter{
   id!:string
@@ -136,5 +136,21 @@ export class JupiterDoc{
   label:string=""
   groupId:string=""
   itemList:Array<{className:string, id:string}> = []
+}
+
+export interface Connection{
+  id?:string
+  label?:string
+  description?:string
+  credentials?:string
+  owner?:string,
+  group?:string,
+  groupId?:string
+}
+export class ConnectionGroupCollection{
+  static collectionName = "ConnectionGroup"
+}
+export class ConnectionCollection{
+  static collectionName = "Connection"
 }
 

@@ -1,9 +1,8 @@
 import json
-from datamesh_flask.firestore_db import  getEncryptedDocuments
+from datamesh_flask.firestore_db import  getEncryptedDocument
 
-def getCredentials(connectionName):
-    connections = getEncryptedDocuments("connections",[( "name", "==", connectionName)])
-    if len(connections)>0:
-        return json.loads(connections["credentials"])
+def getCredentials(connectionId):
+    connection = getEncryptedDocument("Connection",connectionId)
+    return json.loads( connection["credentials"] )
     
     

@@ -1,8 +1,10 @@
+import datetime
 from firebase_admin import firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
 import logging
 from datamesh_flask.encrypt_lib import encrypt,decrypt
-
+from google.api_core.datetime_helpers import DatetimeWithNanoseconds
+from datetime import date
 import base64
 
 
@@ -13,9 +15,15 @@ db = firestore.client()
 
 #store a document with all its fields encrypted, 
 #Eonly the fields listed in unecryptedFields will be left plain text
-def addEncryptedDocument( collectionId, id, data , unencryptedFields):
+def setEncryptedDocument( collectionId, id, data , unencryptedFields):
     
-# get the current working directory
+    print("setEncryptedDocument")
+    print("collectionId:" + str(collectionId))
+    print("id:" + str(id))
+    print("data:" + str(data))
+    print("unencryptedFields" + str(unencryptedFields) )
+    
+    
     
     obj = {
     }
@@ -30,14 +38,18 @@ def addEncryptedDocument( collectionId, id, data , unencryptedFields):
     if doc.exists:
         doc_ref.update(obj)
     else:
-        doc_ref.set(obj)    
-    return obj
+        doc_ref.set(obj)  
+        
+    print("setEncryptedDocument end:" + str(obj))      
+    return { id:id }
     
 
 #get a json replacing the attributes: ciphertext, enc_session, nonce, tag for text attribute decrypted
 def getEncryptedDocument(collectionId, id):
     
-    
+    print("getEncryptedDocument")
+    print("collectionId:" + str(collectionId))
+    print("id:" + str(id))    
     doc_ref = db.collection(collectionId).document(id)
 
     doc = doc_ref.get()
@@ -51,10 +63,17 @@ def getEncryptedDocument(collectionId, id):
     result = {}
     
     for key in data:
-        if "ciphertext" in data[key]:
+        print( key + str( type( data[key]) ) )
+        if isinstance( data[key] , dict) and "ciphertext" in data[key]:
             result[key] = decrypt( data[key] )
+        elif isinstance( data[key] ,DatetimeWithNanoseconds):
+            print("convering to date")
+            t = data[key] 
+            result[key] =   f'{t.year}-{t.month:02}-{t.month:02}' 
         else:
             result[key] = data[key]
+            
+    print( "end getEncryptedDocument:" + str(result))        
     
     return result
 

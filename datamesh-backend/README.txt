@@ -1,7 +1,7 @@
 from datamesh_flask folder run
 python -m pip install Flask
 python -m pip install Flask-JSON
-flask --app datamesh_main run --debug
+flask --app datamesh_main run --debug --host=192.168.1.14 
 
 curl -UseBasicParsing http://127.0.0.1:5000/get_time
 
@@ -18,6 +18,9 @@ curl.exe http://localhost:5000/executeSql -H "Content-type:application/json" -X 
 from main directory execute the following to create the package:
 python -m pip install -e .
 //open the test and execute.
+
+//
+sudo ufw allow 5000
 
 //login using keys
 to generate the private key

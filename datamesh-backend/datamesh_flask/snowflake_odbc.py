@@ -6,14 +6,14 @@ from datamesh_flask.datamesh_credentials import getCredentials
 
 odbcsessions ={}
 
-def getOdbcSession( connectionName ):   
-    print("retriving odbcsession for:" + connectionName)
-    if connectionName in odbcsessions:
+def getOdbcSession( connectionId ):   
+    print("retriving odbcsession for:" + connectionId)
+    if connectionId in odbcsessions:
         print("session found:")
-        return odbcsessions[connectionName]
+        return odbcsessions[connectionId]
     else:
         print("session not found")
-        credentials = getCredentials(connectionName)
+        credentials = getCredentials(connectionId)
         if "authenticator" in credentials:
             sess = snowflake.connector.connect(
                         type= credentials["type"],
@@ -43,7 +43,7 @@ def getOdbcSession( connectionName ):
                         query_tag= credentials["query_tag"]
             )          
         print("session generated:" + str(sess))
-        odbcsessions[connectionName] = sess       
+        odbcsessions[connectionId] = sess       
         return sess      
 
 class ResultMetadataDao:
@@ -99,13 +99,13 @@ class ResultSetDao:
     
 # usage executeSql({
 #  sql:"select * from dual" 
-#  connectionname:"DA_DEV"
+#  connectionId:"123-3434324-234242-42432423"
 # })   
 def executeSql(data:dict):
         sql = data["sql"]
-        connectionName = data["connectionname"]
-        print("connectionName:" + connectionName)
-        sess = getOdbcSession(connectionName)
+        connectionId = data["connectionId"]
+        print("connectionId:" + connectionId)
+        sess = getOdbcSession(connectionId)
    
         print("using session:" + str(sess)) 
         cur = sess.cursor()

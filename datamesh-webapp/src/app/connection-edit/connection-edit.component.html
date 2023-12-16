@@ -1,0 +1,25 @@
+<div class="header">
+    <span>Connection Edit</span>
+    <span class="spacer"></span>
+    <span *ngIf="connection">{{id}}</span>
+    <button *ngIf="connection" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+</div>
+<div [formGroup]="FG">
+        <mat-form-field appearance="fill">
+            <mat-label>Connection name</mat-label>
+            <input matInput placeholder="connection name" formControlName="label" required (change)="firebaseService.onChange($event, 'Connection' ,id, 'label')">
+            <mat-error *ngIf="FG.controls.label.invalid">{{getErrorMessage()}}</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Credentials</mat-label>
+          <textarea  class="sql" matInput rows="10" formControlName="credentials" (change)="onCredentialsChange($event)"></textarea> 
+          <mat-error *ngIf="FG.controls.label.invalid">{{getErrorMessage()}}</mat-error>
+      </mat-form-field>        
+    
+      <div *ngIf="!connection">  
+        <button mat-raised-button (click)="onCancel()">Cancelar</button>     
+        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
+      </div>       
+</div>  
+

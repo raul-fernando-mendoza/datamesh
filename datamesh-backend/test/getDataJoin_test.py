@@ -27,9 +27,9 @@ class TestFireStore(unittest.TestCase):
        
         request:Request = {
             "leftQry":"select ACCOUNT_NUM as ACCOUNT_NUM_IM, ACCOUNT_SHORT_DESC as ACCOUNT_SHORT_DESC_IM from im_prd.dw_24hr.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
-            "left_connectionname":"TRANSFORMER_DEV_ADMIN",
+            "left_connectionId":"1234-1233-22334",
             "rightQry":"select * from da_prd_v1.da_mem.MEMSTATS_ACCOUNT_LIST where ACCOUNT_NUM in ('901227','901231')",
-            "right_connectionname":"TRANSFORMER_DEV_ADMIN",
+            "right_connectionId":"23324-432432-24324324",
             "leftPorts":[
                 {
                     'name':'ACCOUNT_NUM_IM',

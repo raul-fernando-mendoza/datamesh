@@ -30,7 +30,11 @@ def encrypt( str ):
     return obj
     
 def decrypt(data):
+    current_working_directory = os.getcwd()
 
+    # print output to the console
+    print("current_working_directory:" + current_working_directory)
+    
     enc_session_key = data["enc_session_key"]
     nonce =  data["nonce"]
     tag = data["tag"]

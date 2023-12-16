@@ -4,26 +4,26 @@ from snowflake.snowpark.functions import col, sql_expr, lit, Column
 import pandas as pd
 import json
 import firebase_admin
+import firestore_db
+from datamesh_credentials import getCredentials
 
 sessions = {
 }
 
-def getSession( connectionName ):
-    print("retriving session for:" + connectionName)
-    if connectionName in sessions:
+def getSession( connectionId ):
+    print("retriving session for:" + connectionId)
+    if connectionId in sessions:
         print("session found:")
-        return sessions[connectionName]
+        return sessions[connectionId]
     else:
         print("creating new session")
-        credentials = getCredentials(connectionName)
-        print( "credentials:" + str(credentials))
-        sess = Session.builder.configs(getCredentials(connectionName)).create()
+        sess = Session.builder.configs(getCredentials(connectionId)).create()
         print("session generated:" + str(sess))
-        sessions[connectionName] = sess       
+        sessions[connectionId] = sess       
         return sess 
     
-def database(connectionName):
-    r = getSession( connectionName ).sql("select current_warehouse() warehouse, current_database() database, current_schema() schema").collect()
+def database(connectionId):
+    r = getSession( connectionId ).sql("select current_warehouse() warehouse, current_database() database, current_schema() schema").collect()
     return {
         "warehouse":r[0]['WAREHOUSE'],
         "database":r[0]['DATABASE'],
@@ -37,7 +37,7 @@ def database(connectionName):
 def getFielsForQuery(req):
     print("getFielsForQuery called")
     print(json.dumps(req))
-    sess = getSession( req["connectionname"] )
+    sess = getSession( req["connectionId"] )
     qry = req["qry"] if "qry" in req else None
     csvfile:str = req["csvfile"] if "csvfile" in req else None
     fields = []
@@ -61,8 +61,8 @@ def getFielsForQuery(req):
 def executeJoin( req):
     print("executeJoin called")
     print(json.dumps(req,indent=4))
-    left_sess = getSession( req["left_connectionname"] )
-    right_sess = getSession( req["right_connectionname"] )
+    left_sess = getSession( req["left_connectionId"] )
+    right_sess = getSession( req["right_connectionId"] )
 
     leftQry:str = req["leftQry"] if "leftQry" in req else None
     rightQry:str = req["rightQry"] if "rightQry" in req else None
@@ -207,7 +207,7 @@ def executeJoin( req):
 def executeChildJoin( req ):
     print("executeChildJoin: called")
     print(json.dumps(req,indent=4))
-    sess = getSession( req["connectionname"] )
+    sess = getSession( req["connectionId"] )
     parentData = req["parentData"]
     leftQry:str = req["leftQry"]
     rightQry:str = req["rightQry"]
@@ -334,10 +334,25 @@ def executeChildJoin( req ):
     print("executeChildJoin END")
     return obj 
 
-def addEncryptedDocument(self):
+def setEncryptedDocument(req):
     
-    obj = addEncryptedDocument( "connections", "owner", "==", "abc")
+    collectionId = req["collectionId"]
+    id = req["id"]
+    data = req["data"]   
+    unencryptedFields= req["unencriptedFields"] 
+    
+    obj = firestore_db.setEncryptedDocument( collectionId , id, data, unencryptedFields)
     print(json.dumps(obj))
+    return obj
+    
+def getEncryptedDocument(req):
+    
+    collectionId = req["collectionId"]
+    id = req["id"]
+    
+    obj = firestore_db.getEncryptedDocument( collectionId , id)
+    print(json.dumps(obj)) 
+    return obj   
 
 if __name__ == '__main__':
     print("datamesh_base compiled")

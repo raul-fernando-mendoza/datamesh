@@ -1,4 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Connection } from './datatypes/datatypes.module';
+import { FirebaseService } from './firebase.service';
 import { UrlService } from './url.service';
 
 @Injectable({
@@ -6,34 +8,35 @@ import { UrlService } from './url.service';
 })
 export class ConnectionsService {
 
-  connectionNames:Array<string> | undefined = undefined
+  connections:Array<Connection> | undefined = undefined
 
-  constructor(private urlService:UrlService) { }
+  constructor(private urlService:UrlService,
+    private firebase:FirebaseService) { }
 
-  getConnectionNames():Promise<string[]>{
+  getConnections():Promise<Array<Connection>>{
     return new Promise(( resolve, reject ) => {
-      if( this.connectionNames == undefined){
+      if( this.connections == undefined){
         let param={}  
-        this.urlService.post("getConnectionNames",param).subscribe({ 
-          'next':(result)=>{
-            if(result instanceof Array<string>){
-              this.connectionNames = result
-              resolve( this.connectionNames )
-            }
+        this.firebase.getDocs("Connection").then(result=>{
+            this.connections = []
+            result.docs.map( doc=>{
+              let conn:Connection = doc.data() as Connection
+              this.connections!.push( conn )
+              
+            })
+            resolve( this.connections )
           },
-          'error':(reason)=>{
+          reason=>{
             let errorMessage = reason.message
             if( reason.error && reason.error.error ){
               errorMessage = reason.error.error
             }
             alert("ERROR:" + errorMessage)
             reject( reason )
-          }
         })
-    
       }
       else{
-        resolve( this.connectionNames)
+        resolve( this.connections)
       }
     })  
   } 

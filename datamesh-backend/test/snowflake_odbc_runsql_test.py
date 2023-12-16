@@ -12,7 +12,7 @@ class TestFireStore(unittest.TestCase):
         print("hello")
         data = {
             "sql":"select 'hola' ",
-            "connectionname":"DA_DBT_DEV_SVC"
+            "connectionId":"23432-423-432-24-32"
         }
         res = snowflake_odbc.executeSql(data)      
         print(json.dumps({"result":res}, indent=1))

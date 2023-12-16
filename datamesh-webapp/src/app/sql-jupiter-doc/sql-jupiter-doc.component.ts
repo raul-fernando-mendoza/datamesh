@@ -116,7 +116,7 @@ export class SqlJupiterDocComponent {
         className: "SqlJupiter",
         sql: "",
         result: null,
-        connectionName:null
+        connectionId:null
       }
       this.firebaseService.setDoc( 'SqlJupiterDoc/'+this.id+"/SqlJupiter", newSqlJupiter.id, newSqlJupiter).then( () =>  {      
         thiz.sqlJupiterDoc!.itemList.splice(idx,0,{className:"SqlJupiter", id:newSqlJupiter.id})

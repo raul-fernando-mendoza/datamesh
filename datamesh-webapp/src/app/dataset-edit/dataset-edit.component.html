@@ -23,9 +23,9 @@
         </mat-form-field> 
         <mat-form-field class="dataset" appearance="fill">
             <mat-label>connection</mat-label> 
-            <mat-select formControlName="connectionName"  (selectionChange)="onConnectionChange($event)">
+            <mat-select name="connectionId" formControlName="connectionId" (selectionChange)="onConnectionChange($event)">
                 <mat-option [value]="null"></mat-option>
-                <mat-option *ngFor="let connectionName of connectionNames" [value]="connectionName">{{connectionName}}</mat-option>
+                <mat-option *ngFor="let connection of connections" [value]="connection.id">{{connection.label}}</mat-option>
             </mat-select>  
         </mat-form-field>                             
     </p>    

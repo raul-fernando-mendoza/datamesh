@@ -8,10 +8,10 @@
     <div class="header">
         <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
         <mat-form-field class="dataset" appearance="fill">
-            <mat-label>connection</mat-label> 
-            <mat-select formControlName="connectionName" [value]="sqlJupiter.connectionName" (selectionChange)="onConnectionChange($event)">
+            <mat-label>connection </mat-label> 
+            <mat-select formControlName="connectionId" [value]="sqlJupiter.connectionId" (selectionChange)="onConnectionChange($event)">
                 <mat-option [value]="null"></mat-option>
-                <mat-option *ngFor="let connectionName of connectionNames" [value]="connectionName">{{connectionName}}</mat-option>
+                <mat-option *ngFor="let connection of connections" [value]="connection.id">{{connection.label}}</mat-option>
             </mat-select>  
         </mat-form-field>          
 

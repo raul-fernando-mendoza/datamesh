@@ -16,6 +16,8 @@ export const environment = {
   },
 };
 
+
+export const baseUrl = "http://192.168.1.14:5000/"
 // Initialize Firebase
 const app = initializeApp(environment.firebaseConfig);
 
