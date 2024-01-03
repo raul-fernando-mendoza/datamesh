@@ -13,9 +13,9 @@ export class ConnectionsService {
   constructor(private urlService:UrlService,
     private firebase:FirebaseService) { }
 
-  getConnections():Promise<Array<Connection>>{
+  getConnections(forceReload = false):Promise<Array<Connection>>{
     return new Promise(( resolve, reject ) => {
-      if( this.connections == undefined){
+      if( this.connections == undefined || forceReload){
         let param={}  
         this.firebase.getDocs("Connection").then(result=>{
             this.connections = []

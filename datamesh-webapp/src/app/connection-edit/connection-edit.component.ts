@@ -103,8 +103,9 @@ export class ConnectionEditComponent {
     this.urlService.post("setEncryptedDocument" , req).subscribe({
       'next':(data)=>{
         thiz.id = id
-        thiz.update()
-      
+        thiz.connectionsService.getConnections(true).then( ()=>{
+          thiz.update()
+        })
       },
       'error':(reason)=>{
         alert("Error:" + reason)
@@ -118,7 +119,9 @@ export class ConnectionEditComponent {
     if( this.id && this.connection){
       if( confirm("are you sure to delete:" + this.connection.label) ){
         this.firebaseService.deleteDoc(ConnectionCollection.collectionName, this.id ).then( ()=>{
-          this.router.navigate(["/"])
+          this.connectionsService.getConnections(true).then( ()=>{
+            this.router.navigate(["/"])
+          })           
         },
         reason =>{
           alert("Error removing connection:" + reason)
@@ -144,8 +147,9 @@ export class ConnectionEditComponent {
     this.urlService.post("setEncryptedDocument" , req).subscribe({
       'next':(data)=>{
         thiz.id = id
-        thiz.update()
-      
+        thiz.connectionsService.getConnections(true).then( ()=>{
+          this.router.navigate(["/"])
+        })    
       },
       'error':(reason)=>{
         alert("Error:" + reason)
