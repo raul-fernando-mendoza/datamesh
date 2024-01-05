@@ -10,16 +10,15 @@
 </div>
 <mat-tree  [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
-    <button mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+    
+    <button *ngIf="isGroup(node)" mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
     <mat-menu #menu="matMenu">
-      <button *ngIf="isGroup(node)" (click)="onEditGroup(node)" mat-menu-item>Edit</button>      
-      <button *ngIf="isGroup(node)" (click)="onAddData(node)" mat-menu-item>Add</button>
-      <button *ngIf="isData(node)" (click)="onEditData(node)" mat-menu-item>Edit</button>
+      <button  (click)="onAddData(node)" mat-menu-item>Add</button>
     </mat-menu>    
 
 <!--    <button mat-icon-button disabled></button> -->
-    <span *ngIf="!isData(node)">{{node.item.label}}</span>
-    <span *ngIf="isData(node)" draggable [dragData]="node.item.id">{{node.item.label}}</span>
+    <span *ngIf="!isData(node)" (click)="onEditGroup(node)">{{node.item.label}}</span>
+    <span *ngIf="isData(node)" draggable [dragData]="node.item.id" (click)="onEditData(node)">{{node.item.label}}</span>
     
   </mat-tree-node>
 
@@ -30,11 +29,12 @@
         {{treeControl.isExpanded(node) ? 'folder_open' : 'folder'}}
       </mat-icon>
     </button>
-    {{node.item.label}}
-    <button  mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+    <span *ngIf="!isData(node)" (click)="onEditGroup(node)">{{node.item.label}}</span>
+    <span *ngIf="isData(node)" draggable [dragData]="node.item.id" (click)="onEditData(node)">{{node.item.label}}</span>
+
+    <button *ngIf="isGroup(node)" mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
     <mat-menu #menu="matMenu">
-      <button *ngIf="isGroup(node)" (click)="onEditGroup(node)" mat-menu-item>Edit</button>      
-      <button *ngIf="isGroup(node)" (click)="onAddData(node)" mat-menu-item>Add</button>
+      <button  (click)="onAddData(node)" mat-menu-item>Add</button>
     </mat-menu>    
   </mat-tree-node>
 </mat-tree>
