@@ -147,7 +147,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
 
                   this.FG.controls.label.setValue( this.comparison.label!)
 
-                  //this.updateDataSources()
+                  this.updateDataSources()
 
                   this.table.dataSource = []
                   this.table.dataSource = this.comparison.keyLeftRight
