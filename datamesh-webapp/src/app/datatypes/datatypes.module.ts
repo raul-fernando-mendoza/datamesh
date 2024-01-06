@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
+import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
 
 
 
@@ -101,6 +102,9 @@ export class Comparison{
   keyParentLeft:KeyParentLeft[] = []
   keyParenRight:KeyParentRight[] = []
   keyLeftRight:KeyLeftRight[] = []
+
+  records:any
+  schema:any
 }
 
 export enum JoinType { "inner_join" , "left_join" , "outer_join" }

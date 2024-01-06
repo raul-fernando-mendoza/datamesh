@@ -1,6 +1,8 @@
 import unittest
 import json
 import logging
+import firebase_admin
+firebase_admin.initialize_app( )
 from datamesh_flask.datamesh_base import executeJoin
 from typing import List, Optional
 

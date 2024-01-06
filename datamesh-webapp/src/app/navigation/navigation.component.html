@@ -3,14 +3,14 @@
     <button mat-button (click)="sidenav.toggle()">
       <mat-icon *ngIf="sidenav.opened">menu_open</mat-icon>
       <mat-icon *ngIf="!sidenav.opened">menu_close</mat-icon>
-    </button>    
-    <button mat-button [matMenuTriggerFor]="menu">Menu</button>
-    <mat-menu #menu="matMenu">
-      <a href="jupiter-sql" mat-menu-item>Item 1</a>
-    </mat-menu>    
+    </button>  
+    <button [routerLink]="['/']" mat-icon-button><mat-icon>home</mat-icon></button>
     <span class="spacer"></span>
     <button *ngIf="!(isHandset$ | async)">
-      <span aria-label="Title">Database analysis</span>
+      <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+      <mat-menu #menu="matMenu">
+        <a href="jupiter-sql" mat-menu-item>Item 1</a>
+      </mat-menu>        
     </button>
 
 

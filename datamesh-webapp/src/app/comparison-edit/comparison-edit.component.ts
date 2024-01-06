@@ -252,15 +252,17 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
       label: this.FG.controls.label.value!,
       groupId: this.groupId,
       parentDatasetId: null,
-      parentPorts:[],
+      parentPorts: [],
       filter: "",
       leftDatasetId: null,
-      leftPorts:[],
+      leftPorts: [],
       rightDatasetId: null,
-      rightPorts:[],
-      keyLeftRight:[],
-      keyParenRight:[],
-      keyParentLeft:[]
+      rightPorts: [],
+      keyLeftRight: [],
+      keyParenRight: [],
+      keyParentLeft: [],
+      records: undefined,
+      schema: undefined
     }
     
     setDoc( doc(db, "Comparison" , comparison.id!), comparison).then( () =>{

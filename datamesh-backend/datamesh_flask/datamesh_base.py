@@ -151,7 +151,16 @@ def executeJoin( req):
         df.show()
         collected = df.limit(2000).collect()
         p_df = pd.DataFrame(data=collected)
-        obj = p_df.to_json(orient = "records")   
+        records = p_df.to_json(orient = "records")
+       
+        fields = []
+        for field in df.schema.fields:
+            fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} )         
+        obj ={
+            "records":records,
+            "schema":fields
+        } 
+         
         print(json.dumps({"result":obj},indent=4))
         print("executeJoin END")
         return obj 

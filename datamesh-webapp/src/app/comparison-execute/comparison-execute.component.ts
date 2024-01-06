@@ -6,7 +6,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { UrlService } from '../url.service';
 import { db } from '../../environments/environment'
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc} from "firebase/firestore"; 
-import { ChiildJoinRequest,  Comparison, Dataset, Port, PortListResponse, SnowFlakeDataset } from '../datatypes/datatypes.module';
+import { ChiildJoinRequest,  Comparison, ComparisonPort, Dataset, Port, PortListResponse, SnowFlakeDataset } from '../datatypes/datatypes.module';
 import { StringUtilService } from '../string-util.service';
 import { SelectionChange } from '@angular/cdk/collections';
 import { Call, splitNsName } from '@angular/compiler';
@@ -211,11 +211,17 @@ export class ComparisonExecuteComponent implements AfterViewInit{
       this.submmiting = true
 
        this.urlService.post("executeJoin",this.req!).subscribe({ 
-        'next':(result)=>{
+        'next':(result:any)=>{
           this.submmiting = false
           console.log( result )
-          let strJson:string =  String(result) 
-          var resultList:[] = JSON.parse( strJson ) 
+        
+           var resultList:[] = JSON.parse(result["records"])
+
+           this.comparison!.records = resultList
+
+           var schema = result["schema"]
+           this.comparison!.schema = schema
+           
 
           let nodeList:TreeNode[] = []
 
@@ -371,48 +377,8 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     }
     */
   }
-  joinPort( left:Port[], right:Port[], keyLeftRight:any[]):Port[]{
-
-
-    var allPorts:Port[] = []
-    left.map( p => allPorts.push( p ) )
-    right.map( rport =>{
-
-
-      let isKey = keyLeftRight.find( key => key.leftPortName == rport.name && key.isSelected == true)
-      if( isKey == undefined ){
-        let exists:Port|undefined = undefined
-        exists = left.find( lport => lport.name === rport.name)
-        if( exists == undefined ){
-          allPorts.push( rport )
-        }
-        else{
-          var newPort:Port = { 
-            name:rport.name + "_r", 
-            datatype:rport.datatype
-          }
-          allPorts.push( newPort )
-        }
-      } 
-      
-    })
-    allPorts.sort( (a, b) =>{
-      let a_left=left.indexOf(a)>0
-      let b_left=left.indexOf(b)>0
-      //if both ports are in the same array just compare the name
-      if( a_left == b_left ){
-        return a.name > b.name ? 1:-1
-      }
-      else{ //they are in different arrays pick the left one
-        if(  a.name == b.name && a_left && b_left==false ){
-          return -1
-        }
-        else{
-          return a.name > b.name ? 1:-1
-        }
-      }
-    }) 
-    return allPorts
+  joinPort( left:ComparisonPort[], right:ComparisonPort[], keyLeftRight:any[]):ComparisonPort[]{
+    return this.comparison!.schema
   }
   getChildrenIndex( node:TreeNode ):number{
     return node.parentNode!.children!.findIndex(x => x == node )
