@@ -3,12 +3,18 @@ from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col, sql_expr, lit, Column
 import pandas as pd
 import json
-import firebase_admin
-import firestore_db
-from datamesh_credentials import getCredentials
+
 
 sessions = {
 }
+
+
+def setSession( connectionId, credentials ):
+    print("setting session for:" + connectionId)
+    sess = Session.builder.configs(credentials).create()
+    print("session generated:" + str(sess))
+    sessions[connectionId] = sess       
+    return sess 
 
 def getSession( connectionId ):
     print("retriving session for:" + connectionId)
@@ -16,14 +22,11 @@ def getSession( connectionId ):
         print("session found:")
         return sessions[connectionId]
     else:
-        print("creating new session")
-        sess = Session.builder.configs(getCredentials(connectionId)).create()
-        print("session generated:" + str(sess))
-        sessions[connectionId] = sess       
-        return sess 
-    
-def database(connectionId):
-    r = getSession( connectionId ).sql("select current_warehouse() warehouse, current_database() database, current_schema() schema").collect()
+        return None
+
+
+def database(sess):
+    r = sess.sql("select current_warehouse() warehouse, current_database() database, current_schema() schema").collect()
     return {
         "warehouse":r[0]['WAREHOUSE'],
         "database":r[0]['DATABASE'],
@@ -34,12 +37,9 @@ def database(connectionId):
 # req = { "qry":"select * from dual"}
 # or
 # req = { "csvfile": "c://my_file.csv"}  
-def getFielsForQuery(req):
+def getFielsForQuery(sess, qry ):
     print("getFielsForQuery called")
-    print(json.dumps(req))
-    sess = getSession( req["connectionId"] )
-    qry = req["qry"] if "qry" in req else None
-    csvfile:str = req["csvfile"] if "csvfile" in req else None
+    
     fields = []
     
     if qry: 
@@ -47,7 +47,9 @@ def getFielsForQuery(req):
         for field in r.schema.fields:
             fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} ) 
         return {"fields":fields}
+"""
     else:
+        csvfile:str = req["csvfile"] if "csvfile" in req else None
         print("read csv")
         leftDF = pd.read_csv(csvfile, sep = ',', dtype = {'ACCOUNT': int,'CLUB': str,
                                                       'AMOUNT': float,'ACCOUNT_SHORT_DESC': str})
@@ -56,24 +58,12 @@ def getFielsForQuery(req):
         for columnName in leftDF.columns.tolist():
             fields.append( { "name":str(columnName) , "datatype":str(types[columnName].name)} ) 
         return {"fields":fields}               
+"""    
 
-
-def executeJoin( req):
-    print("executeJoin called")
-    print(json.dumps(req,indent=4))
-    left_sess = getSession( req["left_connectionId"] )
-    right_sess = getSession( req["right_connectionId"] )
-
-    leftQry:str = req["leftQry"] if "leftQry" in req else None
-    rightQry:str = req["rightQry"] if "rightQry" in req else None
-    
-    leftFile:str = req["leftFile"] if "leftFile" in req else None
-    righFile:str = req["rightFile"] if "rightFile" in req else None
-    
-    leftCols=req["leftPorts"]
-    rightCols=req["rightPorts"]
-    joinColumns=req["joinColumns"]
-    filter=req["filter"] if "filter" in req and len(req["filter"]) > 0 else None
+def executeJoin( leftSess, leftQry, leftCols,
+                            rightSess, rightQry, rightCols, 
+                            joinColumns,
+                            filter):
     
     if leftQry and rightQry:
 
@@ -85,7 +75,7 @@ def executeJoin( req):
                 leftColsSelected.append( col(fn).alias(fa) )
             
         print("run query left")
-        leftDF = left_sess.sql(leftQry).select( leftColsSelected )
+        leftDF = leftSess.sql(leftQry).select( leftColsSelected )
         print( leftDF.schema.fields)        
         leftDF.show()
         
@@ -97,7 +87,7 @@ def executeJoin( req):
                 rightColsSelected.append( col(fn).alias(fa) )
 
         print("run query right")
-        rightDF = right_sess.sql(rightQry).select(rightColsSelected)                  
+        rightDF = rightSess.sql(rightQry).select(rightColsSelected)                  
         rightDF.show()
         print( rightDF.schema.fields)        
 
@@ -157,7 +147,7 @@ def executeJoin( req):
         for field in df.schema.fields:
             fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} )         
         obj ={
-            "records":records,
+            "records":json.loads(records),
             "schema":fields
         } 
          
@@ -343,25 +333,7 @@ def executeChildJoin( req ):
     print("executeChildJoin END")
     return obj 
 
-def setEncryptedDocument(req):
-    
-    collectionId = req["collectionId"]
-    id = req["id"]
-    data = req["data"]   
-    unencryptedFields= req["unencriptedFields"] 
-    
-    obj = firestore_db.setEncryptedDocument( collectionId , id, data, unencryptedFields)
-    print(json.dumps(obj))
-    return obj
-    
-def getEncryptedDocument(req):
-    
-    collectionId = req["collectionId"]
-    id = req["id"]
-    
-    obj = firestore_db.getEncryptedDocument( collectionId , id)
-    print(json.dumps(obj)) 
-    return obj   
+
 
 if __name__ == '__main__':
     print("datamesh_base compiled")

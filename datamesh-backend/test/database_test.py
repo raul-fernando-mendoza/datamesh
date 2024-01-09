@@ -1,7 +1,11 @@
 import unittest
 import json
 import logging
-from datamesh_flask.datamesh_base import database
+import datamesh_flask.bsnrules as bsnrules
+
+import firebase_admin
+firebase_admin.initialize_app( )
+
 
 log = logging.getLogger("datamesh")
 
@@ -14,7 +18,7 @@ class TestFireStore(unittest.TestCase):
         request = {
             
         }
-        data = database() 
+        data = bsnrules.getDatabaseDetails("c3fe5c67-1a18-4aff-b6ef-5faef9b6b5d2") 
         
         print(json.dumps({"result":data}))
 

@@ -4,8 +4,8 @@ from flask import Flask, request
 from flask_json import FlaskJSON, JsonError, json_response, as_json
 import firebase_admin
 firebase_admin.initialize_app( )
-import datamesh_base
-import snowflake_odbc
+import datamesh_flask.bsnrules as bsnrules
+import json
 
 logging.basicConfig(filename='datamesh.log', format='**** -- %(asctime)-15s %(message)s', level=logging.DEBUG)
 log = logging.getLogger("datamesh")
@@ -64,7 +64,7 @@ def get_time():
     return json_response(time=now)
 
 
-@app.route('/database', methods=['POST','OPTIONS'])
+@app.route('/getDatabaseDetails', methods=['POST','OPTIONS'])
 def database():
     # We use 'force' to skip mimetype checking to have shorter curl command.
     headers = handleCors(request)
@@ -76,7 +76,8 @@ def database():
     print("data:"+ str(request.data))
     try:
         req = request.get_json(force=True)
-        data = datamesh_base.database(req)
+        
+        data = bsnrules.getDatabaseDetails(req)
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
         return ({"error":str(e)}, 200, headers)
@@ -96,7 +97,7 @@ def setEncryptedDocument():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = datamesh_base.setEncryptedDocument(req)
+        data = bsnrules.setEncryptedDocument(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
@@ -120,7 +121,7 @@ def getEncryptedDocument():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = datamesh_base.getEncryptedDocument(req)
+        data = bsnrules.getEncryptedDocument(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
@@ -145,7 +146,7 @@ def getFielsForQuery():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = datamesh_base.getFielsForQuery(req)
+        data = bsnrules.getFielsForQuery(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
@@ -169,14 +170,14 @@ def executeJoin():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = datamesh_base.executeJoin(req)
+        data = bsnrules.executeJoin(req)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
         return ({"error":str(e)}, 400, headers)
     return (data, 200, headers)
 
-
+"""
 @app.route('/executeChildJoin', methods=['POST','OPTIONS'])
 @as_json
 def executeChildJoin():
@@ -196,6 +197,7 @@ def executeChildJoin():
         log.error("**** processRequest Exception:" + str(e))
         return ({"error":str(e)}, 400, headers)
     return (data, 200, headers)
+"""
 
 @app.route('/executeSql', methods=['POST','OPTIONS'])
 @as_json
@@ -209,7 +211,7 @@ def executeSql():
     try:
         req = request.get_json(force=True)
         log.debug( str(req) )
-        data = snowflake_odbc.executeSql(req)
+        data = bsnrules.executeSql(req)
         log.debug("*** End runQuery:" + str(data))
         
     except Exception as e:

@@ -2,18 +2,23 @@ import unittest
 import json
 import logging
 import snowflake.connector
-from datamesh_flask.datamesh_credentials import getCredentials
 
-odbcsessions ={}
+odbcConnections ={}
 
-def getOdbcSession( connectionId ):   
+def getOdbcConnection( connectionId ):   
     print("retriving odbcsession for:" + connectionId)
-    if connectionId in odbcsessions:
+    if connectionId in odbcConnections:
         print("session found:")
-        return odbcsessions[connectionId]
+        return odbcConnections[connectionId]
+    else: None
+
+def setOdbcConnection( connectionId , credentials):   
+    print("retriving odbcsession for:" + connectionId)
+    if connectionId in odbcConnections:
+        print("session found:")
+        return odbcConnections[connectionId]
     else:
         print("session not found")
-        credentials = getCredentials(connectionId)
         if "authenticator" in credentials:
             sess = snowflake.connector.connect(
                         type= credentials["type"],
@@ -43,7 +48,7 @@ def getOdbcSession( connectionId ):
                         query_tag= credentials["query_tag"]
             )          
         print("session generated:" + str(sess))
-        odbcsessions[connectionId] = sess       
+        odbcConnections[connectionId] = sess       
         return sess      
 
 class ResultMetadataDao:
@@ -101,14 +106,8 @@ class ResultSetDao:
 #  sql:"select * from dual" 
 #  connectionId:"123-3434324-234242-42432423"
 # })   
-def executeSql(data:dict):
-        sql = data["sql"]
-        connectionId = data["connectionId"]
-        print("connectionId:" + connectionId)
-        sess = getOdbcSession(connectionId)
-   
-        print("using session:" + str(sess)) 
-        cur = sess.cursor()
+def executeSql(conn, sql):
+        cur = conn.cursor()
         try:
             desc = cur.describe(sql)
             

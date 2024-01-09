@@ -215,7 +215,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
           this.submmiting = false
           console.log( result )
         
-           var resultList:[] = JSON.parse(result["records"])
+           var resultList:[] = result["records"]
 
            this.comparison!.records = resultList
 

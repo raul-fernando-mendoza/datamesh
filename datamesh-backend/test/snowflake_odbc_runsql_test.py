@@ -3,18 +3,17 @@ import json
 import logging
 import firebase_admin
 firebase_admin.initialize_app( )
-from datamesh_flask.datamesh_credentials import getCredentials
-import datamesh_flask.snowflake_odbc as snowflake_odbc
+import datamesh_flask.bsnrules as bsnrules
 
 class TestFireStore(unittest.TestCase):
 
     def test01_testdatabase(self):
         print("hello")
-        data = {
+        req = {
             "sql":"select 'hola' ",
-            "connectionId":"23432-423-432-24-32"
+            "connectionId":"d6e07195-73d6-4702-a22f-e09adfbd088d"
         }
-        res = snowflake_odbc.executeSql(data)      
+        res = bsnrules.executeSql(req)      
         print(json.dumps({"result":res}, indent=1))
               
         

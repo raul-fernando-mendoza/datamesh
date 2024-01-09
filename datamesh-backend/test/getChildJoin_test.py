@@ -1,7 +1,7 @@
 import unittest
 import json
 import logging
-from datamesh_flask.datamesh_base import executeChildJoin
+from datamesh_flask.libraries.datamesh_base import executeChildJoin
 from typing import List, Optional
 
 log = logging.getLogger("datamesh")

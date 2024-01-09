@@ -12,7 +12,7 @@ class TestFireStore(unittest.TestCase):
 
     def test01_testdatabase(self):
         
-        obj = getEncryptedDocument( "connections", "hWPCiSFhhRdpnqwVC2jN")
+        obj = getEncryptedDocument( "connections", "c3fe5c67-1a18-4aff-b6ef-5faef9b6b5d2")
         print(json.dumps(obj))
 
 

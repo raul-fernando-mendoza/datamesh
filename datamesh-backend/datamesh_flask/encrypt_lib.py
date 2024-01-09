@@ -10,7 +10,7 @@ def encrypt( str ):
     # print output to the console
     print("current_working_directory:" + current_working_directory)
 
-    recipient_key = RSA.import_key(open("./keys/publickey.pem").read())
+    recipient_key = RSA.import_key(open("./datamesh_flask/keys/publickey.pem").read())
     # Encrypt the session key with the public RSA key
     cipher_rsa = PKCS1_OAEP.new(recipient_key)
     
@@ -40,7 +40,7 @@ def decrypt(data):
     tag = data["tag"]
     ciphertext = data["ciphertext"]   
 
-    private_key = RSA.import_key(open("./keys/privatekey.pem").read())
+    private_key = RSA.import_key(open("./datamesh_flask/keys/privatekey.pem").read())
     # Decrypt the session key with the private RSA key
     cipher_rsa = PKCS1_OAEP.new(private_key)
     session_key = cipher_rsa.decrypt(enc_session_key)

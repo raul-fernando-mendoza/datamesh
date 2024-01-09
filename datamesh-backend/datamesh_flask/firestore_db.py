@@ -1,17 +1,13 @@
-import datetime
 from firebase_admin import firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
 import logging
 from datamesh_flask.encrypt_lib import encrypt,decrypt
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
-from datetime import date
-import base64
-
+import json
 
 
 log = logging.getLogger("cheneque")
 
-db = firestore.client()
 
 #store a document with all its fields encrypted, 
 #Eonly the fields listed in unecryptedFields will be left plain text
@@ -33,7 +29,7 @@ def setEncryptedDocument( collectionId, id, data , unencryptedFields):
         else:
             obj[key]=data[key]
     
-    doc_ref = db.collection(collectionId).document(id)
+    doc_ref = firestore.client().collection(collectionId).document(id)
     doc = doc_ref.get()
     if doc.exists:
         doc_ref.update(obj)
@@ -50,7 +46,7 @@ def getEncryptedDocument(collectionId, id):
     print("getEncryptedDocument")
     print("collectionId:" + str(collectionId))
     print("id:" + str(id))    
-    doc_ref = db.collection(collectionId).document(id)
+    doc_ref = firestore.client().collection(collectionId).document(id)
 
     doc = doc_ref.get()
     
@@ -91,7 +87,7 @@ def decryptDocument( data ):
 
 def addSingleDocument(collectionId, id, data):
     try:
-        db.collection(collectionId).document(id).set(data)
+        firestore.client().collection(collectionId).document(id).set(data)
     except Exception as e:
         log.error("Exception addSubCollection:" + str(e) )
         raise
@@ -101,7 +97,7 @@ def addSingleDocument(collectionId, id, data):
 
 def getSingleDocument(collectionId, id):    
 
-    doc_ref = db.collection(collectionId).document(id)
+    doc_ref = firestore.client().collection(collectionId).document(id)
 
     doc = doc_ref.get()
     if doc.exists:
@@ -113,7 +109,7 @@ def getSingleDocument(collectionId, id):
     
 def getEncryptedDocuments(collectionId, filters = []):
     try:
-        query = db.collection(collectionId)
+        query = firestore.client().collection(collectionId)
         
         for filter in filters:
             field, comp, val = (filter)
@@ -130,9 +126,6 @@ def getEncryptedDocuments(collectionId, filters = []):
     except Exception as e:
         log.error("**** getDocsIDs Exception:" + str(e))
         raise e
-    
-
-             
       
 if __name__ == '__main__':
     print("firestore_db ran nothing")

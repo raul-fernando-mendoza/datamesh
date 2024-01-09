@@ -14,10 +14,15 @@ class TestFireStore(unittest.TestCase):
         
         req = {
             "collectionId":"Connection",
-            "id":"testABCD"            
+            "id":"testABCD",
+            "data":{
+                "label":"test1",
+                "password":"secret1",
+                "description":"esto no esta encriptado"
+            },
+            "unencriptedFields":["label","description"]
         }
-        
-        obj = bsnrules.getEncryptedDocument( req )
+        obj = bsnrules.setEncryptedDocument( req )
         print(json.dumps(obj))
 
 

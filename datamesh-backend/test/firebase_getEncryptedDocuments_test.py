@@ -4,7 +4,7 @@ import logging
 import firebase_admin
 #takes the connection from the environment variable FIREBASE_CONFIG make sure is development
 firebase_admin.initialize_app( )
-from datamesh_flask.firestore_db import getEncryptedDocuments
+from datamesh_flask.db.firestore_db import getEncryptedDocuments
 
 log = logging.getLogger("datamesh")
 
