@@ -28,7 +28,6 @@
         <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
     </div>
 
-    displayedColumns:{{ displayedColumns.length }}
 
     <section *ngIf="sqlJupiter.result && displayedColumns" class="result-container" >
         <table class="result-table" mat-table [dataSource]="sqlJupiter.result['resultSet']">
