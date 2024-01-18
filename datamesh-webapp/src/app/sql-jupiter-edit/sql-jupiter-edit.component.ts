@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, EventEmitter, Inject, Input ,OnDestroy, OnInit, Output, ViewChild, ViewRef} from '@angular/core';
-import { Connection, SqlJupiter } from '../datatypes/datatypes.module';
+import { Column, Connection, SqlJupiter } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot, Unsubscribe} from "firebase/firestore"; 
 import { db } from '../../environments/environment'
@@ -24,6 +24,8 @@ interface Transaction {
   item: string;
   cost: number;
 }
+
+const SUFFIX = "_2"
 
 @Component({
   selector: 'app-sql-jupiter-edit',
@@ -103,10 +105,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
           var resultJson = this.sqlJupiter.result
 
           for( var c=0; c<resultJson["metadata"].length; c++){
-            if( this.displayedColumns.indexOf(resultJson["metadata"][c]["name"]) < 0 ){
               this.displayedColumns.push(resultJson["metadata"][c]["name"])
-            }
-            
           }        
   
         }
@@ -158,22 +157,58 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         'next':(result)=>{
           this.submitting = false
 
-          var objResultSet = []
+
+
+          
 
           var resultJson = result as { [key: string]: any }
+          
+          
+          var objMetadata:Array<Column> = []
+
+          for( let i=0;i<resultJson["metadata"].length; i++){
+
+            let name 
+            let result = objMetadata.filter( e=> resultJson["metadata"][i]["name"] == e["name"])
+            if( result.length > 0 ){
+              name = result[0].name + SUFFIX
+            }
+            else{
+              name = resultJson["metadata"][i]["name"]
+            }
+            let column:Column = {
+              display_size: resultJson["metadata"][i]["display_size"],
+              internal_size: resultJson["metadata"][i]["display_size"],
+              is_nullable: resultJson["metadata"][i]["display_size"],
+              name: name,
+              precision: resultJson["metadata"][i]["display_size"],
+              scale: resultJson["metadata"][i]["display_size"],
+              type_code: 0
+            }
+            objMetadata.push(column)
+            
+          }          
+
+          var objResultSet = []
 
           var arr = resultJson["resultSet"] as Array<string>
-          for( var i=0; i< arr.length ; i++){
+          for( let i=0; i< arr.length ; i++){
             var rowRaw = arr[i]
             var rowObj:{ [key: string]: any } = {}
-            for( var c=0; c<rowRaw.length; c++){
-              rowObj[ resultJson["metadata"][c]["name"] ] = rowRaw[c]
+            for( let c=0; c<rowRaw.length; c++){
+              if ( !(resultJson["metadata"][c]["name"] in rowObj)){
+                rowObj[ resultJson["metadata"][c]["name"] ] = rowRaw[c]
+              }
+              else{
+                rowObj[ resultJson["metadata"][c]["name"]  + SUFFIX ] = rowRaw[c]
+              }
+              
             }         
             objResultSet.push(rowObj)
           } 
 
           var objResult = {
-            "metadata":resultJson["metadata"],
+            "metadata":objMetadata,
             "resultSet":objResultSet
           }
           

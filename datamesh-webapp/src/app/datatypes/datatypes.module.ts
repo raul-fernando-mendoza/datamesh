@@ -152,3 +152,12 @@ export class ConnectionCollection{
   static collectionName = "Connection"
 }
 
+export class Column{
+  display_size:number | null = null
+  internal_size:number | null = null
+  is_nullable!:boolean 
+  name!:string 
+  precision:string | null = null
+  scale:string | null = null
+  type_code!:number
+}
