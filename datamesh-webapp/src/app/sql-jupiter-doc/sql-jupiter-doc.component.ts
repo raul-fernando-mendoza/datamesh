@@ -6,12 +6,31 @@ import { FirebaseService } from '../firebase.service';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot} from "firebase/firestore"; 
 import { db } from '../../environments/environment'
 import * as uuid from 'uuid';
-
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { TextJupiterComponent } from 'app/text-jupiter/text-jupiter.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { SqlJupiterEditComponent } from 'app/sql-jupiter-edit/sql-jupiter-edit.component';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-sql-jupiter-doc',
   templateUrl: './sql-jupiter-doc.component.html',
-  styleUrls: ['./sql-jupiter-doc.component.css']
+  styleUrls: ['./sql-jupiter-doc.component.css'],
+  standalone: true,
+  imports:[
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    TextJupiterComponent,
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    SqlJupiterEditComponent
+  ]  
 })
 export class SqlJupiterDocComponent {
   

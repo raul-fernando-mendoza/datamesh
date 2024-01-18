@@ -12,7 +12,12 @@ import { SelectionChange } from '@angular/cdk/collections';
 import { Call, splitNsName } from '@angular/compiler';
 import { DatasetEditComponent } from '../dataset-edit/dataset-edit.component';
 import { firstValueFrom } from 'rxjs';
-
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatTreeModule} from '@angular/material/tree';
+import { MatButtonModule } from '@angular/material/button';
+import {MatProgressBarModule} from '@angular/material/progress-bar';
+import { MatIconModule } from '@angular/material/icon';
+import { CommonModule } from '@angular/common';
 
 interface ComparisonRequest extends Comparison{
   leftQry:string,
@@ -25,7 +30,16 @@ interface ComparisonRequest extends Comparison{
 @Component({
   selector: 'app-comparison-execute',
   templateUrl: './comparison-execute.component.html',
-  styleUrls: ['./comparison-execute.component.css']
+  styleUrls: ['./comparison-execute.component.css'],
+  standalone: true,
+  imports:[ 
+    CommonModule,
+    MatIconModule,    
+    MatButtonModule,
+    MatProgressSpinnerModule,
+    MatTreeModule,
+    MatProgressBarModule
+  ]    
 })
 export class ComparisonExecuteComponent implements AfterViewInit{
   @ViewChild(MatTree) tree!: MatTree<TreeNode> ; 

@@ -6,11 +6,28 @@ import { FirebaseApp } from 'firebase/app';
 import { ComparisonGroup } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import * as uuid from 'uuid';
+import { MatIconModule } from '@angular/material/icon';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
+
 
 @Component({
   selector: 'app-comparisongroup-edit',
   templateUrl: './comparisongroup-edit.component.html',
-  styleUrls: ['./comparisongroup-edit.component.css']
+  styleUrls: ['./comparisongroup-edit.component.css'],
+  standalone: true,
+  imports:[ 
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule
+  ]    
 })
 export class ComparisonGroupEditComponent implements OnInit,OnDestroy{
   id:string|null = null

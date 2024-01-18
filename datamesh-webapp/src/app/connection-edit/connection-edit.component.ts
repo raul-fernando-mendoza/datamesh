@@ -4,16 +4,37 @@ import * as uuid from 'uuid';
 import { StringUtilService } from '../string-util.service';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { FirebaseService } from '../firebase.service';
-import { MatSelectChange } from '@angular/material/select';
+import {MatSelectModule} from '@angular/material/select';
 import { UrlService } from '../url.service';
 import { ConnectionsService } from 'app/connections.service';
 import { Connection, ConnectionCollection } from 'app/datatypes/datatypes.module';
+
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { CommonModule } from '@angular/common';
 
 
 @Component({
   selector: 'app-connection-edit',
   templateUrl: './connection-edit.component.html',
-  styleUrls: ['./connection-edit.component.css']
+  styleUrls: ['./connection-edit.component.css'],
+  standalone: true,
+  imports:[ 
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,       
+    MatIconModule,
+    MatButtonModule,    
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatSelectModule
+  ]     
 })
 export class ConnectionEditComponent {
 

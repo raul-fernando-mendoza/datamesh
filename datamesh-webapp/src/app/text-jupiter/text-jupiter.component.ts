@@ -3,11 +3,27 @@ import { FormBuilder } from '@angular/forms';
 import { TextJupiter } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { UrlService } from '../url.service';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-text-jupiter',
   templateUrl: './text-jupiter.component.html',
-  styleUrls: ['./text-jupiter.component.css']
+  styleUrls: ['./text-jupiter.component.css'],
+  standalone: true,
+  imports:[
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule
+  ]    
 })
 export class TextJupiterComponent { 
   @Input() parentCollection!:string

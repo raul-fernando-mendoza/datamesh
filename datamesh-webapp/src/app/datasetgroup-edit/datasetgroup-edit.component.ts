@@ -6,11 +6,27 @@ import { FirebaseApp } from 'firebase/app';
 import { DatasetGroup } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import * as uuid from 'uuid';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-datasetgroup-edit',
   templateUrl: './datasetgroup-edit.component.html',
-  styleUrls: ['./datasetgroup-edit.component.css']
+  styleUrls: ['./datasetgroup-edit.component.css'],
+  standalone: true,
+  imports:[ 
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,      
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule
+  ]   
 })
 export class DatasetgroupEditComponent implements OnInit,OnDestroy{
   id:string|null = null

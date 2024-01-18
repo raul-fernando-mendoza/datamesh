@@ -6,17 +6,42 @@ import { db } from '../../environments/environment'
 import { FormBuilder } from '@angular/forms';
 import { UrlService } from '../url.service';
 import { ngxCsv } from 'ngx-csv/ngx-csv';
-import { DOCUMENT } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import { DialogNameDialog } from '../name-dialog/name-dlg';
 import { MatDialog } from '@angular/material/dialog';
 import { ConnectionsService } from 'app/connections.service';
+import { SqlEditComponent } from 'app/sql-edit/sql-edit.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import {MatSelectModule} from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
 
+interface Transaction {
+  item: string;
+  cost: number;
+}
 
 @Component({
   selector: 'app-sql-jupiter-edit',
   templateUrl: './sql-jupiter-edit.component.html',
-  styleUrls: ['./sql-jupiter-edit.component.css']
+  styleUrls: ['./sql-jupiter-edit.component.css'],
+  standalone: true,
+  imports:[
+    CommonModule,
+    MatButtonModule,
+    MatIconModule,    
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule, 
+    SqlEditComponent,
+    MatSelectModule ,
+    MatTableModule 
+  ]
 })
 export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy{
   @Input() parentCollection!:string
@@ -31,6 +56,8 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
 
   displayedColumns = ['position', 'name', 'weight', 'symbol'];
   dataSource = [];
+
+
 
   submitting = false
   FG = this.fb.group({
@@ -91,7 +118,13 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     })
   }
   ngOnInit(): void {
-    this.connectionsService.getConnections().then( (connections) => this.connections = connections)
+    this.connectionsService.getConnections().then( (connections) =>{
+      this.connections.length = 0
+      connections.map( e =>{
+        this.connections.push( e )
+      })
+       
+    } )
 
 
   }    

@@ -67,10 +67,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "datamesh-webapp:build:production"
+              "buildTarget": "datamesh-webapp:build:production"
             },
             "development": {
-              "browserTarget": "datamesh-webapp:build:development"
+              "buildTarget": "datamesh-webapp:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -78,7 +78,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "datamesh-webapp:build"
+            "buildTarget": "datamesh-webapp:build"
           }
         },
         "test": {

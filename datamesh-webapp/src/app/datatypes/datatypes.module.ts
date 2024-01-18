@@ -5,13 +5,7 @@ import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
 
 
 
-@NgModule({
-  declarations: [],
-  imports: [
-    CommonModule
-  ]
-})
-export class DatatypesModule { }
+
 
 export class DatasetGroup{
   id:string = ""

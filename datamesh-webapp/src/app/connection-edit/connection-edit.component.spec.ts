@@ -8,8 +8,8 @@ describe('ConnectionEditComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ConnectionEditComponent ]
-    })
+    declarations: [ConnectionEditComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(ConnectionEditComponent);

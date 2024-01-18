@@ -20,8 +20,17 @@ import { Portal } from '@angular/cdk/portal';
 import { FirebaseService } from '../firebase.service';
 import { CdkDragDrop, CdkDragEnter, CdkDragExit, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
 
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
-
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatGridListModule} from '@angular/material/grid-list';
+import {MatTableModule} from '@angular/material/table';
+import { CommonModule } from '@angular/common';
 
 const keyports = "keyports"
 
@@ -30,7 +39,21 @@ const keyports = "keyports"
 @Component({
   selector: 'app-comparison-edit',
   templateUrl: './comparison-edit.component.html',
-  styleUrls: ['./comparison-edit.component.css']
+  styleUrls: ['./comparison-edit.component.css'],
+  standalone: true,
+  imports:[ 
+    CommonModule ,
+    MatIconModule,
+    MatButtonModule,
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatCheckboxModule,
+    MatTabsModule,
+    MatGridListModule,
+    MatTableModule
+  ]      
 })
 export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, OnDestroy{
 

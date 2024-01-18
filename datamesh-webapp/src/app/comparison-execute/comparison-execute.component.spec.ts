@@ -8,8 +8,8 @@ describe('ComparisonExecuteComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ComparisonExecuteComponent ]
-    })
+    declarations: [ComparisonExecuteComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(ComparisonExecuteComponent);

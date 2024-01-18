@@ -6,9 +6,18 @@ import {BehaviorSubject, firstValueFrom} from 'rxjs';
 import { FirebaseService, QryPar } from '../firebase.service';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { doc, FirestoreError } from 'firebase/firestore';
-import { CdkDragDrop, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDrag, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import {MatTreeModule} from '@angular/material/tree';
+import { CommonModule } from '@angular/common';
+import { MatMenuModule } from '@angular/material/menu';
+import {DragDropModule} from '@angular/cdk/drag-drop';
 
 export interface Data{
   id:string
@@ -52,7 +61,21 @@ export interface FlatNode {
 @Component({
   selector: 'app-dataset-tree',
   templateUrl: './dataset-tree.component.html',
-  styleUrls: ['./dataset-tree.component.css']
+  styleUrls: ['./dataset-tree.component.css'],
+  standalone: true,
+  imports:[ 
+    CommonModule,
+    MatIconModule,
+    MatButtonModule,    
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatTreeModule,
+    MatMenuModule,
+    DragDropModule
+  ]   
+
 })
 export class DatasetTreeComponent implements OnInit, OnDestroy {
 

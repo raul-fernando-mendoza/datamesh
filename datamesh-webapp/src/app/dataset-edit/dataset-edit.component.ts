@@ -8,12 +8,31 @@ import { FirebaseService } from '../firebase.service';
 import { MatSelectChange } from '@angular/material/select';
 import { UrlService } from '../url.service';
 import { ConnectionsService } from 'app/connections.service';
-
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import {MatSelectModule} from '@angular/material/select';
+import {MatTableModule} from '@angular/material/table';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-dataset-edit',
   templateUrl: './dataset-edit.component.html',
-  styleUrls: ['./dataset-edit.component.css']
+  styleUrls: ['./dataset-edit.component.css'],
+  standalone: true,
+  imports:[ 
+    CommonModule ,
+    MatIconModule,
+    MatButtonModule,    
+    FormsModule, 
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatTableModule
+  ]   
 })
 export class DatasetEditComponent implements OnInit{
 

@@ -29,23 +29,18 @@
     </div>
 
 
-    <section *ngIf="sqlJupiter.result" class="result-container" >
+    <section *ngIf="sqlJupiter.result && displayedColumns" class="result-container" >
         <table class="result-table" mat-table [dataSource]="sqlJupiter.result['resultSet']">
-
-        
             <ng-container *ngFor="let col of displayedColumns" matColumnDef="{{col}}">
             <th mat-header-cell *matHeaderCellDef>{{col}} </th>
             <td mat-cell *matCellDef="let element; let i = index;"> 
                 <div *ngIf="col=='idx'"> {{i + 1}}</div>
                 <div *ngIf="col!='idx'"> {{element[col]}} </div>
-                 
             </td>
             </ng-container>
-            
-        
             <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table> 
     </section>  
-    
+  
 </div>  
