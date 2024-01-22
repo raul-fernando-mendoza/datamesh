@@ -7,6 +7,10 @@
           <mat-label>Name</mat-label>
           <input matInput formControlName="label" required (change)="firebaseService.onChange($event,'Comparison',id,'label')" required>
       </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>filter</mat-label>
+        <input matInput formControlName="filter" required (change)="firebaseService.onChange($event,'Comparison',id,'filter')">
+      </mat-form-field>      
       <div *ngIf="!id">
         <button mat-raised-button (click)="onCancel()">Cancelar</button>     
         <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>

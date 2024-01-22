@@ -169,6 +169,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
                   this.comparison=docRef.data() as Comparison
 
                   this.FG.controls.label.setValue( this.comparison.label!)
+                  this.FG.controls.filter.setValue( this.comparison.filter )
 
                   this.updateDataSources()
 
