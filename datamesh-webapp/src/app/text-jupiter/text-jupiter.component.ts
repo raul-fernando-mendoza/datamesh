@@ -9,6 +9,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-text-jupiter',
@@ -22,7 +23,8 @@ import { CommonModule } from '@angular/common';
     FormsModule, 
     ReactiveFormsModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    QuillModule
   ]    
 })
 export class TextJupiterComponent { 
@@ -67,9 +69,7 @@ export class TextJupiterComponent {
       "next":( (doc) =>{
         this.textJupiter = doc.data() as TextJupiter
         this.rows = this.textJupiter.txt.split('\n').length
-        this.FG = this.fb.group({
-          txt:[this.textJupiter.txt]
-        })
+        this.FG.controls.txt.setValue( this.textJupiter.txt)
       }),
       "error":( (reason)=>{
         alert("Error:" + reason)
