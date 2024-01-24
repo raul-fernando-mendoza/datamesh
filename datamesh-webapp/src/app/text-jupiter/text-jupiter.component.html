@@ -1,5 +1,5 @@
 <form *ngIf="textJupiter" [formGroup]="FG" >
     <div >
-        <quill-editor  formControlName="txt" (focusout)="onBlur('txt', $event)" ></quill-editor>
+        <textarea class="description" matInput [rows]="rows" formControlName="txt" (focusout)="onBlur('txt', $event)" ></textarea>
     </div>
 </form>
