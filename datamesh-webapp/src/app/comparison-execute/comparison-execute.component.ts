@@ -392,7 +392,32 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     */
   }
   joinPort( left:ComparisonPort[], right:ComparisonPort[], keyLeftRight:any[]):ComparisonPort[]{
-    return this.comparison!.schema
+    let keys:Array<ComparisonPort> = []
+    let notKeys:Array<ComparisonPort> = []
+    this.comparison!.schema.map( (s: any) => {
+      this.comparison?.keyLeftRight.map( e =>{
+        if( e.isSelected && (e.leftPortName == s.name || e.rightPortName == s.name) ){
+          keys.push( s )
+        }
+      })
+    })
+    this.comparison!.schema.map( (s: any) => {
+      let idx = this.comparison!.keyLeftRight.findIndex( e =>{
+        if( e.isSelected && (e.leftPortName == s.name || e.rightPortName == s.name)){
+          return true
+        }
+        else return false
+      })
+      if( idx < 0){
+        notKeys.push( s )
+      }      
+
+    })    
+    notKeys.sort( (a,b) =>{
+      return a.name > b.name ? 1 : -1
+    })
+    
+    return keys.concat( notKeys ) 
   }
   getChildrenIndex( node:TreeNode ):number{
     return node.parentNode!.children!.findIndex(x => x == node )
@@ -444,5 +469,16 @@ export class ComparisonExecuteComponent implements AfterViewInit{
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);  
     }, 0);     
+  }
+
+  getColor(node:TreeNode, port_name:string ){
+    console.log( node, port_name)
+    if( port_name.endsWith("_R")  ){
+      let left_name = port_name.substring( 0, port_name.length - 2)
+      if( node.obj[ port_name] != node.obj[ left_name ] ){
+        return "yellow"
+      }
+    }
+    return "white"
   }
 }

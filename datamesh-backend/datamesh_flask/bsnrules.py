@@ -14,7 +14,9 @@ def getSnowparkSession( connectionId ):
      
     sess = datamesh_base.getSession( connectionId )
     if sess == None:
-        credentials = getCredentials( connectionId ) 
+        credentials = getCredentials( connectionId )
+        print("connection" + str(credentials["database"])) 
+        print("role" + str(credentials["role"])) 
         sess = datamesh_base.setSession( connectionId, credentials)
     return sess
 

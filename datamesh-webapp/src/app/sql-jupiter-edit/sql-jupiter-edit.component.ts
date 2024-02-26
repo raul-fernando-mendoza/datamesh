@@ -105,7 +105,21 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
           var resultJson = this.sqlJupiter.result
 
           for( var c=0; c<resultJson["metadata"].length; c++){
-              this.displayedColumns.push(resultJson["metadata"][c]["name"])
+            let colName = resultJson["metadata"][c]["name"]
+            let newCol = colName
+            let tryNum = 0
+            while( this.displayedColumns.find(e=>e==newCol) ){
+              tryNum++;
+              newCol = colName + "_" + tryNum
+            }
+            console.log("cols:" + c + ":" + colName + " " +  newCol)
+            if( this.displayedColumns.findIndex( e=>e==newCol) <0 ){
+              this.displayedColumns.push(newCol)
+            }
+            else{
+              console.log("duplicated name")
+            }
+
           }        
   
         }

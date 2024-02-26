@@ -1,6 +1,8 @@
 from datamesh_flask folder run
 python -m pip install Flask
 python -m pip install Flask-JSON
+
+from datamesh_backend folder run
 flask --app datamesh_main run --debug --host=192.168.1.14 
 
 curl -UseBasicParsing http://127.0.0.1:5000/get_time

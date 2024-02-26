@@ -17,6 +17,7 @@
             <div ><!-- first comparison show-->
               <div class="cell">{{port.name}}</div>
               <div class="cell">{{port.datatype}}</div>
+
              </div> 
           </td>
         </tr>         
@@ -24,8 +25,8 @@
           <td class="index">
             {{ getChildrenIndex(node) + 1}}
           </td>           
-          <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="port.datatype.split('(')[0]">
-             <div class="cell">{{node.obj[port.name]}}</div>   
+          <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="port.datatype.split('(')[0]" [style.background-color]="getColor(node, port.name )">
+             <div class="cell">{{node.obj[port.name]}}</div>  
           </td>
         </tr>                                  
       </div> 
