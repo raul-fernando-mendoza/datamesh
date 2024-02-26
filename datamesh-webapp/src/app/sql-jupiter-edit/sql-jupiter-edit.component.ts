@@ -170,22 +170,14 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       this.urlService.post("executeSql",param).subscribe({ 
         'next':(result)=>{
           this.submitting = false
-
-
-
-          
-
           var resultJson = result as { [key: string]: any }
-          
-          
           var objMetadata:Array<Column> = []
 
           for( let i=0;i<resultJson["metadata"].length; i++){
-
             let name 
-            let result = objMetadata.filter( e=> resultJson["metadata"][i]["name"] == e["name"])
-            if( result.length > 0 ){
-              name = result[0].name + SUFFIX
+            let result = objMetadata.find( e=> resultJson["metadata"][i]["name"] == e["name"])
+            if( result ){
+              name = result.name + SUFFIX
             }
             else{
               name = resultJson["metadata"][i]["name"]
@@ -210,12 +202,9 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
             var rowRaw = arr[i]
             var rowObj:{ [key: string]: any } = {}
             for( let c=0; c<rowRaw.length; c++){
-              if ( !(resultJson["metadata"][c]["name"] in rowObj)){
-                rowObj[ resultJson["metadata"][c]["name"] ] = rowRaw[c]
-              }
-              else{
-                rowObj[ resultJson["metadata"][c]["name"]  + SUFFIX ] = rowRaw[c]
-              }
+
+                rowObj[ c ] = rowRaw[c]
+
               
             }         
             objResultSet.push(rowObj)

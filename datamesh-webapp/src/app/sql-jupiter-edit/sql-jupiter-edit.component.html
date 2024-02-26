@@ -31,11 +31,11 @@
 
     <section *ngIf="sqlJupiter.result && displayedColumns" class="result-container" >
         <table class="result-table" mat-table [dataSource]="sqlJupiter.result['resultSet']">
-            <ng-container *ngFor="let col of displayedColumns" matColumnDef="{{col}}">
+            <ng-container *ngFor="let col of displayedColumns; let icol = index" matColumnDef="{{col}}">
             <th mat-header-cell *matHeaderCellDef>{{col}} </th>
-            <td mat-cell *matCellDef="let element; let i = index;"> 
-                <div *ngIf="col=='idx'"> {{i + 1}}</div>
-                <div *ngIf="col!='idx'"> {{element[col]}} </div>
+            <td mat-cell *matCellDef="let element; let row = index;"> 
+                <div *ngIf="col=='idx'"> {{row + 1}}</div>
+                <div *ngIf="col!='idx'"> {{element[icol-1]}} </div>
             </td>
             </ng-container>
             <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
