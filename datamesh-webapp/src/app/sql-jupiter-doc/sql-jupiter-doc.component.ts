@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SqlJupiter, JupiterDoc, TextJupiter, DatasetGroup } from '../datatypes/datatypes.module';
+import { SqlJupiter, JupiterDoc, TextJupiter, DatasetGroup, SqlJupiterObj } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot} from "firebase/firestore"; 
 import { db } from '../../environments/environment'
@@ -130,12 +130,17 @@ export class SqlJupiterDocComponent {
   onAddSqlJupiter(idx:number){
     if( this.sqlJupiterDoc ){
       let thiz = this
-      var newSqlJupiter:SqlJupiter = {
+      var newSqlJupiter:SqlJupiterObj = {
         id: uuid.v4(),
         className: "SqlJupiter",
         sql: "",
-        result: null,
-        connectionId:null
+        connectionId: null,
+        request_id: null,
+        request_status: "",
+        request_start_time: null,
+        request_completion_time: null,
+        result_set: null,
+        result_metadata: null
       }
       this.firebaseService.setDoc( 'SqlJupiterDoc/'+this.id+"/SqlJupiter", newSqlJupiter.id, newSqlJupiter).then( () =>  {      
         thiz.sqlJupiterDoc!.itemList.splice(idx,0,{className:"SqlJupiter", id:newSqlJupiter.id})

@@ -6,7 +6,9 @@
 
 <div *ngIf="sqlJupiter" [formGroup]="FG" >
     <div class="header">
-        <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+
+        <button *ngIf="!activeStatuses.has(sqlJupiter.request_status)" mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+        <button *ngIf="activeStatuses.has(sqlJupiter.request_status)" mat-raised-button color="warn" [disabled]="submitting" (click)="onAbort()">Aborta</button>
         <mat-form-field class="dataset" appearance="fill">
             <mat-label>connection </mat-label> 
             <mat-select formControlName="connectionId" [value]="sqlJupiter.connectionId" (selectionChange)="onConnectionChange($event)">
@@ -16,7 +18,13 @@
         </mat-form-field>          
 
         <button  [disabled]="submitting" (click)="onExportCsv()"><mat-icon>topic</mat-icon></button>
-    </div>    
+    </div>  
+    <div *ngIf="activeStatuses.has(sqlJupiter.request_status)">
+        status:{{ sqlJupiter.request_status }} request_time:{{ elapsedTime }}
+        <span class="ids">
+            request_id::{{ sqlJupiter.request_id }} 
+        </span>
+    </div>
     <div>
         <!--
         <mat-form-field class="sql" appearance="fill">
@@ -27,20 +35,16 @@
         -->
         <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
     </div>
-
-
-    <section *ngIf="sqlJupiter.result && displayedColumns" class="result-container" >
-        <table class="result-table" mat-table [dataSource]="sqlJupiter.result['resultSet']">
-            <ng-container *ngFor="let col of displayedColumns; let icol = index" matColumnDef="{{col}}">
-            <th mat-header-cell *matHeaderCellDef>{{col}} </th>
-            <td mat-cell *matCellDef="let element; let row = index;"> 
-                <div *ngIf="col=='idx'"> {{row + 1}}</div>
-                <div *ngIf="col!='idx'"> {{element[icol-1]}} </div>
-            </td>
-            </ng-container>
-            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table> 
-    </section>  
+   <table *ngIf="this.sqlJupiter.result_set && this.sqlJupiter.result_metadata">
+    <tr>
+        <td> idx </td>
+        <th *ngFor="let h of this.sqlJupiter.result_metadata">{{ h.name }}</th>
+    </tr>
+    
+    <tr *ngFor="let row of this.sqlJupiter.result_set; index as i">
+        <td>{{ i }}</td>
+        <td *ngFor="let key of getKeys(row)">{{ row[key] }}</td> 
+    </tr>
+   </table>  
   
 </div>  

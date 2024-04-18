@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { db } from '../environments/environment'
-import {  collection, doc, limit, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp, orderBy, QueryConstraint, Query, QueryNonFilterConstraint, startAt, OrderByDirection} from "firebase/firestore"; 
+import { Timestamp as FirebaseTimeStamp, collection, doc, limit, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp, orderBy, QueryConstraint, Query, QueryNonFilterConstraint, startAt, OrderByDirection} from "firebase/firestore"; 
 import { Directionality } from '@angular/cdk/bidi';
 import { MatSelectChange } from '@angular/material/select';
 
@@ -176,4 +176,10 @@ export class FirebaseService {
       alert("ERROR removing:" + reason)
     })
   }
+
+  getDate( t:FirebaseTimeStamp ):Date{
+   let d:Date = t.toDate()
+    return d
+  }  
+   
 }

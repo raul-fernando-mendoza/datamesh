@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
 import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
+import { Timestamp } from 'firebase/firestore';
+
 
 
 
@@ -116,11 +118,30 @@ export interface ChiildJoinRequest{
   rightColumns:Port[],
 }
 
-export class SqlJupiter{
+
+export interface SqlJupiter{
+  id?:string
+  className?:string
+  sql?:string 
+  request_id?:  string  | null 
+  request_start_time?: Timestamp | null
+  request_completion_time?: Timestamp | null
+  request_status?: "" | "requested" | "assigned" | "inprogress" | "aborted" | "completed" 
+  result_metadata?: any|null
+  result_set?: any|null
+  connectionId?:string|null 
+}
+
+export class SqlJupiterObj implements SqlJupiter{
   id!:string
   className!:string
   sql:string = ""
-  result:any|null
+  request_id?:  string  | null  = null
+  request_start_time?: Timestamp | null = null
+  request_completion_time?: Timestamp | null = null
+  request_status: "" | "requested" | "assigned" | "inprogress" | "aborted" | "completed"  = ""
+  result_set: any|null= null
+  result_metadata: any|null= null
   connectionId:string|null = null
 }
 export class TextJupiter{

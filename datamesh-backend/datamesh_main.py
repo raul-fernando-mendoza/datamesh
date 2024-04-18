@@ -219,5 +219,25 @@ def executeSql():
         return ({"error":str(e)}, 400, headers)
     return (data, 200, headers)     
 
+@app.route('/executeSqlByPath', methods=['POST','OPTIONS'])
+@as_json
+def executeSqlByPath():
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
+    log.debug("*** executeSqlByPath:"+ str(request.data))
+    try:
+        req = request.get_json(force=True)
+        log.debug( str(req) )
+        data = bsnrules.executeSqlByPath(req)
+        log.debug("*** End runQuery:" + str(data))
+        
+    except Exception as e:
+        log.error("**** processRequest Exception:" + str(e))
+        return ({"error":str(e)}, 400, headers)
+    return (data, 200, headers)   
+
 if __name__ == '__main__':
     app.run()

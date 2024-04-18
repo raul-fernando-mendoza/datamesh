@@ -3,8 +3,9 @@ import datamesh_flask.firestore_db as firestore_db
 import datamesh_flask.datamesh_base as datamesh_base
 import datamesh_flask.snowflake_odbc as snowflake_odbc
 
+from firebase_admin import firestore
 
-
+db = firestore.client()
 
 def getCredentials(connectionId):
     connection = firestore_db.getEncryptedDocument("Connection",connectionId)
@@ -94,6 +95,58 @@ def getFielsForQuery(req):
     qry = req["qry"] if "qry" in req else None
     
     return datamesh_base.getFielsForQuery( sess, qry )
+
+#run as req = { 
+# path:'SqlJupiterDoc/b8d2a095-2bda-4bef-9d56-8130280f43e1/SqlJupiter/34a89c65-ad66-4b5e-b0e4-2c737c1faa97'
+# }
+def executeSqlByPath(req):
+        path = req["path"]
+        
+        basepathArr = path.split("/")
+        
+        id = basepathArr[-1]
+
+        basepath = "/".join( map(str,basepathArr[:-1]) )        
+        
+        doc_ref = db.collection(basepath).document(id)
+        doc = doc_ref.get()
+        
+        data = doc.to_dict() 
+        
+        connectionId = data["connectionId"]
+        print("connectionId:" + connectionId)
+        
+        sql = data["sql"]
+        
+        conn = getOdbcConnection(connectionId)
+   
+        print("using session:" + str(conn)) 
+        
+        updateObj = {
+            "request_status":"inprogress",
+        }
+        
+        doc_ref.update( updateObj )        
+        print("**** status set to inprogress")
+            
+        result = snowflake_odbc.executeSql(conn, sql)
+        
+        resultSetStr = []
+        
+        for row in result["resultSet"]:
+            obj={}
+            for i in range(len(row)):
+                obj[str(i)]=row[i]
+            resultSetStr.append( obj )
+        
+        updateObj = {
+            "request_status":"completed",
+            "result_metadata":result["metadata"],
+            "result_set":resultSetStr
+        }
+        doc_ref.update( updateObj )
+        
+        return { "status":"success"}
 
 if __name__ == '__main__':
     print("datamesh_base compiled")    
