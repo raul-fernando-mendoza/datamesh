@@ -1,3 +1,6 @@
+create the requirements.txt 
+python -m pip freeze > requirements.txt
+
 from datamesh_flask folder run
 python -m pip install Flask
 python -m pip install Flask-JSON
