@@ -4,3 +4,6 @@
 .spacer {
     flex: 1;
 }
+.label{
+    white-space: nowrap ;
+}

@@ -17,8 +17,8 @@
     </mat-menu>    
 
 <!--    <button mat-icon-button disabled></button> -->
-    <span *ngIf="!isData(node)" (click)="onEditGroup(node)">{{node.item.label}}</span>
-    <span *ngIf="isData(node)" cdkDrag [cdkDragData]="node.item.id" (click)="onEditData(node)">{{node.item.label}}</span>
+    <span class="label" *ngIf="!isData(node)" (click)="onEditGroup(node)">{{node.item.label}}</span>
+    <span class="label" *ngIf="isData(node)" cdkDrag [cdkDragData]="node.item.id" (click)="onEditData(node)">{{node.item.label}}</span>
     
   </mat-tree-node>
 
@@ -29,10 +29,11 @@
         {{treeControl.isExpanded(node) ? 'folder_open' : 'folder'}}
       </mat-icon>
     </button>
-    <span *ngIf="!isData(node)" (click)="onEditGroup(node)">{{node.item.label}}</span>
-    <span *ngIf="isData(node)" cdkDrag [cdkDragData]="node.item.id" (click)="onEditData(node)">{{node.item.label}}</span>
 
     <button *ngIf="isGroup(node)" mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+    <span class="label" *ngIf="!isData(node)" (click)="onEditGroup(node)">{{node.item.label}}</span>
+    <span class="label" *ngIf="isData(node)" cdkDrag [cdkDragData]="node.item.id" (click)="onEditData(node)">{{node.item.label}}</span>
+
     <mat-menu #menu="matMenu">
       <button  (click)="onAddData(node)" mat-menu-item>Add</button>
     </mat-menu>    

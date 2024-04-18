@@ -8,7 +8,7 @@
     <div class="header">
 
         <button *ngIf="!activeStatuses.has(sqlJupiter.request_status)" mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
-        <button *ngIf="activeStatuses.has(sqlJupiter.request_status)" mat-raised-button color="warn" [disabled]="submitting" (click)="onAbort()">Aborta</button>
+        <button *ngIf="activeStatuses.has(sqlJupiter.request_status)" mat-raised-button color="warn" [disabled]="submitting" (click)="onAbort()">Abort</button>
         <mat-form-field class="dataset" appearance="fill">
             <mat-label>connection </mat-label> 
             <mat-select formControlName="connectionId" [value]="sqlJupiter.connectionId" (selectionChange)="onConnectionChange($event)">
@@ -25,6 +25,13 @@
             request_id::{{ sqlJupiter.request_id }} 
         </span>
     </div>
+    <div *ngIf="sqlJupiter.request_status == 'error'">
+        <div class="ids">
+            request_id::{{ sqlJupiter.request_id }} 
+        </div>
+        status:{{ sqlJupiter.request_status }} 
+        <span class="error_mesage">{{ sqlJupiter.request_error_message}}</span>
+    </div>    
     <div>
         <!--
         <mat-form-field class="sql" appearance="fill">
@@ -35,16 +42,18 @@
         -->
         <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
     </div>
-   <table *ngIf="this.sqlJupiter.result_set && this.sqlJupiter.result_metadata">
-    <tr>
-        <td> idx </td>
-        <th *ngFor="let h of this.sqlJupiter.result_metadata">{{ h.name }}</th>
-    </tr>
-    
-    <tr *ngFor="let row of this.sqlJupiter.result_set; index as i">
-        <td>{{ i }}</td>
-        <td *ngFor="let key of getKeys(row)">{{ row[key] }}</td> 
-    </tr>
-   </table>  
+    <div>
+        <table *ngIf="this.sqlJupiter.result_set && this.sqlJupiter.result_metadata">
+            <tr>
+                <td> idx </td>
+                <th *ngFor="let h of this.sqlJupiter.result_metadata">{{ h["name"] }}</th>
+            </tr>
+            
+            <tr *ngFor="let row of this.sqlJupiter.result_set; index as i">
+                <td>{{ i }}</td>
+                <td *ngFor="let key of getKeys(row)">{{ row[key] }}</td> 
+            </tr>
+        </table>  
+    </div>
   
 </div>  

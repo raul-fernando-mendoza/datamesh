@@ -28,4 +28,9 @@ table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
     padding: 2px;
-  }
+    font-size: small;
+}
+
+.error_mesage{
+    color:red
+}

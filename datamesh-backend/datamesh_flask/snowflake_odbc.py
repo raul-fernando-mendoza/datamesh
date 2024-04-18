@@ -112,8 +112,9 @@ def executeSql(conn, sql):
             desc = cur.describe(sql)
             
             metadata = []
+            print("sql fields:")
             for d in desc: 
-                print( "name:" + d.name + " type:" + str(d.type_code) + " precision:" + str(d.precision) + " scale:" + str(d.scale) + "\n")
+                print( "-name:" + d.name + " type:" + str(d.type_code) + " precision:" + str(d.precision) + " scale:" + str(d.scale) + "\n")
                 res = ResultMetadataDao(d)
                 metadata.append( res )
                 
@@ -137,9 +138,11 @@ def executeSql(conn, sql):
                         
                 resultSet.append(rowData)
         except Exception as e: 
+            print( "Exception executeSql:" + str(e) )
             raise e                           
         finally:
             cur.close()
         resultSetDao = ResultSetDao(sql, metadata, resultSet)
+        print( "executeSql ended OK" )
         return resultSetDao.toJson()
         

@@ -123,26 +123,28 @@ export interface SqlJupiter{
   id?:string
   className?:string
   sql?:string 
-  request_id?:  string  | null 
-  request_start_time?: Timestamp | null
-  request_completion_time?: Timestamp | null
-  request_status?: "" | "requested" | "assigned" | "inprogress" | "aborted" | "completed" 
-  result_metadata?: any|null
-  result_set?: any|null
-  connectionId?:string|null 
+  request_id?:  string 
+  request_start_time?: Timestamp 
+  request_completion_time?: Timestamp 
+  request_status?: "" | "requested" | "assigned" | "inprogress" | "aborted" | "completed" | "error"
+  request_error_message?:string
+  result_metadata?: [{ [key: string]: any }]
+  result_set?: { [key: string]: any }
+  connectionId?:string|null
 }
 
 export class SqlJupiterObj implements SqlJupiter{
   id!:string
   className!:string
-  sql:string = ""
-  request_id?:  string  | null  = null
-  request_start_time?: Timestamp | null = null
-  request_completion_time?: Timestamp | null = null
-  request_status: "" | "requested" | "assigned" | "inprogress" | "aborted" | "completed"  = ""
-  result_set: any|null= null
-  result_metadata: any|null= null
-  connectionId:string|null = null
+  sql!:string 
+  request_id?:  string  
+  request_start_time?: Timestamp 
+  request_completion_time?: Timestamp 
+  request_status!: "" | "requested" | "assigned" | "inprogress" | "aborted" | "completed" | "error" 
+  request_error_message?:string 
+  result_metadata?: [{ [key: string]: any }] 
+  result_set?: [{ [key: string]: any }] 
+  connectionId!:string|null
 }
 export class TextJupiter{
   id!:string

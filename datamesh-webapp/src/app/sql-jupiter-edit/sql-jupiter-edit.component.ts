@@ -320,18 +320,23 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   }
   onConnectionChange(event:MatSelectChange){
     var connectionId:string|null = this.FG.controls.connectionId.value
-    
-    var obj:SqlJupiter ={
-      connectionId:connectionId
-    }
 
-    this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, obj ).then( ()=>{
-      console.log("save connecton")
-      this.sqlJupiter!.connectionId = connectionId
-    },
-    reason =>{
-      alert("ERROR saving sql:" + reason)
-    })
+    if( this.sqlJupiter && connectionId ){
+    
+      var obj:SqlJupiter ={
+        connectionId:connectionId
+      }
+
+      this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, obj ).then( ()=>{
+        console.log("save connecton")
+        if( this.sqlJupiter ){
+          this.sqlJupiter.connectionId = connectionId
+        }
+      },
+      reason =>{
+        alert("ERROR saving sql:" + reason)
+      })
+    }
   } 
 
   updateElapsedTime(){

@@ -26,8 +26,9 @@ def on_snapshot(doc_snapshot, changes, read_time):
                 response = requests.post(url, json=payload)
                 response_json = response.json()
                 print(response_json)
-                if( response_json["status"] != "success"):
-                    doc.reference.update({"request_status": response_json["status"]})            
+                
+                #if( response_json["status"] != "success"):
+                #    doc.reference.update({"request_status": response_json["status"]})            
                 
             elif change.type.name == "MODIFIED":
                 print(f"Modified: {change.document.id}")

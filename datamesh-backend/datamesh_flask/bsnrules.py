@@ -100,6 +100,10 @@ def getFielsForQuery(req):
 # path:'SqlJupiterDoc/b8d2a095-2bda-4bef-9d56-8130280f43e1/SqlJupiter/34a89c65-ad66-4b5e-b0e4-2c737c1faa97'
 # }
 def executeSqlByPath(req):
+    basepath = ""
+    id = ""
+    doc_ref = None
+    try:
         path = req["path"]
         
         basepathArr = path.split("/")
@@ -109,6 +113,10 @@ def executeSqlByPath(req):
         basepath = "/".join( map(str,basepathArr[:-1]) )        
         
         doc_ref = db.collection(basepath).document(id)
+        
+    except Exception as e:
+        raise
+    try:
         doc = doc_ref.get()
         
         data = doc.to_dict() 
@@ -145,8 +153,16 @@ def executeSqlByPath(req):
             "result_set":resultSetStr
         }
         doc_ref.update( updateObj )
-        
         return { "status":"success"}
+    except Exception as e:
+        updateObj = {
+            "request_status":"error",
+            "request_error_message":str(e),
+            "result_set":[]
+        }
+        doc_ref.update( updateObj )        
+        raise
+        
 
 if __name__ == '__main__':
     print("datamesh_base compiled")    
