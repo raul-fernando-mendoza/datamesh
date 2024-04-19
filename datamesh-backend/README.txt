@@ -18,11 +18,12 @@ python3 -m pip install -r requirements.txt
 python -m pip install Flask
 python -m pip install Flask-JSON
 
-#install firebase-admin
-python -m pip install firebase-admin
+#run gunicorn: from datamesh_backend folder run
+gunicorn -w 4 'datamesh_main:app'
 
-#install 
-python -m pip install pycryptodome
+#run with flaks: from datamesh_backend folder run
+flask --app datamesh_main run --debug --host=192.168.1.14 
+
 
 #run the service
 python3 datamesh_persistent.py
@@ -30,8 +31,6 @@ python3 datamesh_persistent.py
 
 
 
-from datamesh_backend folder run
-flask --app datamesh_main run --debug --host=192.168.1.14 
 
 curl -UseBasicParsing http://127.0.0.1:5000/get_time
 

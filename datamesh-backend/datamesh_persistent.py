@@ -6,7 +6,10 @@ from firebase_admin import firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
 import requests
 
-url = "http://localhost:5000/executeSqlByPath"
+#using flask
+#url = "http://localhost:5000/executeSqlByPath"
+#using unicorn
+url = "http://127.0.0.1:8000/executeSqlByPath"
 
 
 callback_done = threading.Event()
