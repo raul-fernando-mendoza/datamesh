@@ -1,9 +1,34 @@
-create the requirements.txt 
-python -m pip freeze > requirements.txt
+####deploye instructions
+#create the requirements.txt 
+python -m pip freeze > requirements.txt 
 
-from datamesh_flask folder run
+#create the virtual environment
+python3 -m venv .venv
+
+#activate virtual environment
+. .venv/bin/activate
+
+#update pip 
+python3 -m pip install --upgrade pip
+
+#install requirements
+python3 -m pip install -r requirements.txt
+
+#Install Flask: from datamesh_flask folder run
 python -m pip install Flask
 python -m pip install Flask-JSON
+
+#install firebase-admin
+python -m pip install firebase-admin
+
+#install 
+python -m pip install pycryptodome
+
+#run the service
+python3 datamesh_persistent.py
+
+
+
 
 from datamesh_backend folder run
 flask --app datamesh_main run --debug --host=192.168.1.14 
