@@ -36,7 +36,8 @@ export class DatasetgroupEditComponent implements OnInit,OnDestroy{
   unsubscribe:any = null
 
   FG = this.fb.group({
-    label:["", [Validators.required]]
+    label:["", [Validators.required]],
+    description:[""]
   })
 
 
@@ -77,6 +78,7 @@ export class DatasetgroupEditComponent implements OnInit,OnDestroy{
           if( doc.exists() ){
             this.datasetGroup = doc.data() as DatasetGroup
             this.FG.controls.label.setValue( this.datasetGroup.label)
+            this.FG.controls.description.setValue( this.datasetGroup.description)
           }
         }),
         "error":((error)=>{
@@ -95,7 +97,8 @@ export class DatasetgroupEditComponent implements OnInit,OnDestroy{
   onCreateNew(){
     var datasetGroup:DatasetGroup = {
       id: uuid.v4(),
-      label: this.FG.controls.label.value!
+      label: this.FG.controls.label.value!,
+      description: ''
     }
     this.firebaseService.setDoc( this.groupCollection, datasetGroup.id, datasetGroup).then( ()=>{
       this.id = datasetGroup.id

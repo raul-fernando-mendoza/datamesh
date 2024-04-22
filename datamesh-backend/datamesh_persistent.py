@@ -7,12 +7,12 @@ from google.cloud.firestore_v1.base_query import FieldFilter
 import requests
 
 #using flask
-#url = "http://localhost:5000/executeSqlByPath"
+url = "http://localhost:5000/executeSqlByPath"
 #using unicorn
-url = "http://127.0.0.1:8000/executeSqlByPath"
+#url = "http://127.0.0.1:8000/executeSqlByPath"
 
 
-callback_done = threading.Event()
+#callback_done = threading.Event()
 
 # Create a callback on_snapshot function to capture changes
 def on_snapshot(doc_snapshot, changes, read_time):
@@ -37,7 +37,7 @@ def on_snapshot(doc_snapshot, changes, read_time):
                 print(f"Modified: {change.document.id}")
             elif change.type.name == "REMOVED":
                 print(f"Removed: {change.document.id}")
-    callback_done.set()
+    #callback_done.set()
     
 db = firestore.client()
 

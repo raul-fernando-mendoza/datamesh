@@ -22,8 +22,10 @@ python -m pip install Flask-JSON
 gunicorn -w 4 'datamesh_main:app'
 
 #run with flaks: from datamesh_backend folder run
-flask --app datamesh_main run --debug --host=192.168.1.14 
+flask --app datamesh_main run
 
+#run in a remote server
+flask --app datamesh_main run --debug --host=192.168.1.14 
 
 #run the service
 python3 datamesh_persistent.py

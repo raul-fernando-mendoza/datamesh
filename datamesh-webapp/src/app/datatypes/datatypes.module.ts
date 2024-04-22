@@ -12,6 +12,7 @@ import { Timestamp } from 'firebase/firestore';
 export class DatasetGroup{
   id:string = ""
   label:string = ""
+  description:string = ""
   createon? = new Date();
   updateon? = new Date();  
 }

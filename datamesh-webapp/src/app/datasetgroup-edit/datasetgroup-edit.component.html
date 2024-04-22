@@ -8,6 +8,10 @@
             <input matInput placeholder="PRD_V1" formControlName="label" required (change)="firebaseService.onChange($event, groupCollection ,id, 'label')">
             <mat-error *ngIf="FG.controls.label.invalid">{{getErrorMessage()}}</mat-error>
         </mat-form-field>
+        <mat-form-field class="sql" appearance="fill">
+            <mat-label>description</mat-label> 
+            <textarea  class="description" matInput rows="5" formControlName="description" (change)="firebaseService.onChange($event, groupCollection ,id, 'description')"></textarea> 
+        </mat-form-field>        
     </div>
     <div *ngIf="!id">
         <button mat-raised-button (click)="onCancel()">Cancelar</button>     
