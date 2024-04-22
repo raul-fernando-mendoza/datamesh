@@ -121,6 +121,9 @@ export class FirebaseService {
     if( id ){
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
+      },
+      error => {
+        alert("Error: updating document:" + collectionPath + "/" + id)
       })
     }
   }
