@@ -16,21 +16,23 @@
       <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
     </div>
     <div *ngIf="sqlJupiterDoc && sqlJupiterDoc.itemList">
-        <div *ngFor="let item of sqlJupiterDoc!.itemList; index as i; first as isFirst">
-            <div class="header">
-                <div class="spacer"></div>
-                <button mat-button (click)="onAddSqlJupiter(i)"><mat-icon>join_inner</mat-icon>sql</button>
-                <button mat-button (click)="onAddTextJupiter(i)"><mat-icon>description</mat-icon>text</button>
-                <span class="spacer"></span>
-                <button mat-raised-button [disabled]="submitting" (click)="onSqlDelete(i)"><mat-icon>remove</mat-icon></button>    
+        @for( item of sqlJupiterDoc!.itemList; track item.id; let i = $index ){
+            <div>
+                <div class="header">
+                    <div class="spacer"></div>
+                    <button mat-button (click)="onAddSqlJupiter(i)"><mat-icon>join_inner</mat-icon>sql</button>
+                    <button mat-button (click)="onAddTextJupiter(i)"><mat-icon>description</mat-icon>text</button>
+                    <span class="spacer"></span>
+                    <button mat-raised-button [disabled]="submitting" (click)="onSqlDelete(i)"><mat-icon>remove</mat-icon></button>    
 
+                </div>
+                <div >
+                    <!--parent id:{{i}} - {{item.id}}-->
+                    <app-sql-jupiter-edit *ngIf="item.className == 'SqlJupiter' " parentCollection="{{parentCollection}}" collection="{{item.className}}" id="{{item.id}}"></app-sql-jupiter-edit>
+                    <app-text-jupiter *ngIf="item.className == 'TextJupiter' " parentCollection="{{parentCollection}}" collection="{{item.className}}" id="{{item.id}}"> </app-text-jupiter>
+                </div>
             </div>
-            <div >
-                <!--parent id:{{i}} - {{item.id}}-->
-                <app-sql-jupiter-edit *ngIf="item.className == 'SqlJupiter' " parentCollection="{{parentCollection}}" collection="{{item.className}}" id="{{item.id}}"></app-sql-jupiter-edit>
-                <app-text-jupiter *ngIf="item.className == 'TextJupiter' " parentCollection="{{parentCollection}}" collection="{{item.className}}" id="{{item.id}}"> </app-text-jupiter>
-            </div>
-        </div>
+        }
         <div class="header">
             <div class="spacer"></div>
             <button mat-button (click)="onAddSqlJupiter(sqlJupiterDoc!.itemList.length)"><mat-icon>join_inner</mat-icon>sql</button>
