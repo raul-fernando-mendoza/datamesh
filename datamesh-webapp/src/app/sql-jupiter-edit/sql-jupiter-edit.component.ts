@@ -276,37 +276,53 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     })
   }
   exportCsv(filename:string){
-    /*
-    var options = { 
-      fieldSeparator: ',',
-      quoteStrings: '"',
-      decimalseparator: '.',
-      showLabels: true, 
-      showTitle: false,
-      title: filename,
-      useBom: true,
-      noDownload: false,
-      headers: this.displayedColumns.slice(1),
-      filename:filename
-    };    
-    if( this.sqlJupiter && this.sqlJupiter.result){
+    
+ 
+    if( this.sqlJupiter && this.sqlJupiter.result_set && this.sqlJupiter.result_metadata){
 
-      let json = this.sqlJupiter.result.resultSet
+      let json = this.sqlJupiter.result_set
       
 
-      let metadata:Array<any> = this.sqlJupiter.result.metadata
+      let metadata = this.sqlJupiter.result_metadata
       let keys:Array<string> = []
       for( let i=0; i<metadata.length; i ++){
         keys.push(metadata[i]["name"])
       }      
+
+      var options = { 
+        fieldSeparator: ',',
+        quoteStrings: '"',
+        decimalseparator: '.',
+        showLabels: true, 
+        showTitle: false,
+        title: filename,
+        useBom: true,
+        noDownload: false,
+        headers: keys,
+        filename:filename
+      };   
+
 
 
       let finalJsonArray = []
       for( let j of json){
         let new_j:any = {}
         for( let i=0; i < keys.length; i++){
-          let k = keys[i]
-          new_j[k] = j[k]
+          let val = j[i]
+          if( 8 == metadata[i]["type_code"] && val){
+            if( val.endsWith(' 00:00:00') ){
+              new_j[i] = "'" + val.substring( 0, val.length - 9 )
+            }
+            else{
+              new_j[i] = "'" + val
+            }
+          }
+          if( 3 == metadata[i]["type_code"] && val){
+              new_j[i] = "'" + val
+          }          
+          else{ 
+            new_j[i] = j[i]
+          }
         }
         finalJsonArray.push( new_j )
       }
@@ -315,7 +331,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
 
       new ngxCsv(finalJsonArray, filename, options);
     }
-    */
+    
     
   }
   onConnectionChange(event:MatSelectChange){

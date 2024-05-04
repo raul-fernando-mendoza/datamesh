@@ -10,7 +10,7 @@
         </mat-form-field>
         <mat-form-field class="sql" appearance="fill">
             <mat-label>description</mat-label> 
-            <textarea  class="description" matInput rows="5" formControlName="description" (change)="firebaseService.onChange($event, groupCollection ,id, 'description')"></textarea> 
+            <textarea  class="description" matInput rows="15" formControlName="description" (change)="firebaseService.onChange($event, groupCollection ,id, 'description')"></textarea> 
         </mat-form-field>        
     </div>
     <div *ngIf="!id">
