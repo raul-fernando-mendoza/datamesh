@@ -42,18 +42,23 @@
         -->
         <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
     </div>
-    <div>
-        <table *ngIf="this.sqlJupiter.result_set && this.sqlJupiter.result_metadata">
-            <tr>
-                <td> idx </td>
-                <th *ngFor="let h of this.sqlJupiter.result_metadata">{{ h["name"] }}</th>
-            </tr>
-            
-            <tr *ngFor="let row of this.sqlJupiter.result_set; index as i">
-                <td>{{ i }}</td>
-                <td *ngFor="let key of getKeys(row)">{{ row[key] }}</td> 
-            </tr>
-        </table>  
+    <div class="view">
+        <div class="wrapper">
+            <table *ngIf="this.sqlJupiter.result_set && this.sqlJupiter.result_metadata">
+                <thead>
+                    <tr>
+                        <td class="sticky-col first-col"> idx </td>
+                        <th *ngFor="let h of this.sqlJupiter.result_metadata">{{ h["name"] }}</th>
+                    </tr>
+                </thead>
+                <tbody>                
+                    <tr *ngFor="let row of this.sqlJupiter.result_set; index as i">
+                        <td class="sticky-col first-col">{{ i }}</td>
+                        <td *ngFor="let key of getKeys(row)">{{ row[key] }}</td> 
+                    </tr>
+                </tbody>                
+            </table>  
+        </div>
     </div>
   
 </div>  
