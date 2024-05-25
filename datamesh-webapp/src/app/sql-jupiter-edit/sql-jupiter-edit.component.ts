@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, EventEmitter, Inject, Input ,OnDestroy, OnInit, Output, ViewChild, ViewRef} from '@angular/core';
-import { Column, Connection, SqlJupiter, SqlJupiterObj } from '../datatypes/datatypes.module';
+import { AfterViewInit, Component, Input ,OnDestroy, OnInit} from '@angular/core';
+import { Connection, SqlJupiter, SqlJupiterObj, SqlResultCollection, SqlResultObj } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { db } from '../../environments/environment'
 import { FormBuilder } from '@angular/forms';
@@ -20,6 +20,7 @@ import { MatButtonModule } from '@angular/material/button';
 import * as uuid from 'uuid';
 import { Timestamp } from 'firebase/firestore';
 import { interval } from 'rxjs';
+import { highlightSpecialChars } from '@codemirror/view';
 
 
 interface Transaction {
@@ -54,7 +55,11 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   MIN_ROWS = 3
   MAX_ROWS = 20
   unsubscribe:any 
-  sqlJupiter:SqlJupiterObj|null = null 
+  unsubscribeResult:any
+  sqlJupiter:SqlJupiterObj | null = null 
+
+  sqlResult:SqlResultObj | null= null
+
   rows = this.MIN_ROWS
 
   displayedColumns = ['position', 'name', 'weight', 'symbol'];
@@ -71,15 +76,14 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   elapsedTime:string = ""
   elapsedSubscriber:any
 
-  
-  activeStatuses = new Set(['requested','assigned','inprogress']);
+  activeRequestStatuses = new Set(["requested","assigned"])
+  activeResultStatuses = new Set(['requested','assigned','inprogress']);
   
 
   connections:Array<Connection> = []
   constructor(
     public firebaseService:FirebaseService,
     private fb:FormBuilder,
-    private urlService:UrlService,
     public connectionsService:ConnectionsService,
     private dialog: MatDialog,
   ) {
@@ -95,6 +99,9 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     if( this.unsubscribe ){
       this.unsubscribe()
     }
+    if( this.unsubscribeResult ){
+      this.unsubscribeResult()
+    }
   }
 
   update(){
@@ -109,13 +116,16 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         this.FG.controls.sql.setValue( this.sqlJupiter.sql )
         this.FG.controls.connectionId.setValue( this.sqlJupiter.connectionId )
         this.displayedColumns = ["idx"]
-
+        if( this.sqlJupiter.request_id ){
+          this.readResults(this.sqlJupiter.request_id)
+        }
+        
 
         if( this.elapsedSubscriber ){
           clearInterval( this.elapsedSubscriber )
         }
 
-        if(this.activeStatuses.has(this.sqlJupiter.request_status)){
+        if(this.activeRequestStatuses.has(this.sqlJupiter.request_status)){
           this.elapsedSubscriber = interval(1000)
 
           let thiz = this
@@ -126,11 +136,33 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
             }
           }) 
         }
+        
       }),
       "error":( (reason)=>{
         alert("Error:" + reason)
       })
     })
+  }
+
+  readResults(request_id:string){
+    if( this.unsubscribeResult ){
+      this.unsubscribeResult()
+    }
+    if( this.sqlResult ){
+      this.sqlResult.result_set = [{}]
+    }
+    this.unsubscribeResult = this.firebaseService.onsnapShot( [this.parentCollection, this.collection, this.id, SqlResultCollection.collectionName].join("/"), request_id, 
+    {
+      "next":( (doc) =>{
+        if( doc.exists() ){
+          this.sqlResult = doc.data() as SqlResultObj
+          this.displayedColumns = ["idx"] 
+        }
+      })
+      ,"error":( (reason)=>{
+        alert("Errorr reading results:" + "")
+      })
+    })   
   }
   ngOnInit(): void {
     this.connectionsService.getConnections().then( (connections) =>{
@@ -140,8 +172,6 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       })
        
     } )
-
-
   }    
   
   onSqlChange($event:any){
@@ -161,12 +191,26 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     }   
   }
   onExecute(){
+
+    if( this.sqlJupiter && this.sqlJupiter.request_id){
+      this.firebaseService.deleteDoc( [this.parentCollection, this.collection, this.id, SqlResultCollection.collectionName].join("/"), this.sqlJupiter.request_id).then( ()=>{
+        console.log("remove all values")
+      },
+      reason =>{
+        alert("ERROR removing old results:" + reason)
+      })    
+    }
+
+    if( this.sqlResult ){
+      this.sqlResult.result_status = null
+    }
     
     var sql:string|null = this.FG.controls.sql.value
     let sqlJupiter:SqlJupiter = {
       request_id:uuid.v4(),
       request_status:"requested",
-      request_start_time:Timestamp.now()
+      request_start_time:Timestamp.now(),
+      request_error_message:""
     }
     this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, sqlJupiter).then( ()=>{
       console.log("request execution")
@@ -278,12 +322,12 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   exportCsv(filename:string){
     
  
-    if( this.sqlJupiter && this.sqlJupiter.result_set && this.sqlJupiter.result_metadata){
+    if( this.sqlResult && this.sqlResult.result_set && this.sqlResult.result_metadata){
 
-      let json = this.sqlJupiter.result_set
+      let json = this.sqlResult.result_set
       
 
-      let metadata = this.sqlJupiter.result_metadata
+      let metadata = this.sqlResult.result_metadata
       let keys:Array<string> = []
       for( let i=0; i<metadata.length; i ++){
         keys.push(metadata[i]["name"])
@@ -332,7 +376,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       new ngxCsv(finalJsonArray, filename, options);
     }
     
-    
+   
   }
   onConnectionChange(event:MatSelectChange){
     var connectionId:string|null = this.FG.controls.connectionId.value
@@ -356,6 +400,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   } 
 
   updateElapsedTime(){
+    
     if( this.sqlJupiter && this.sqlJupiter.request_start_time ){
       let st:Date = this.firebaseService.getDate(this.sqlJupiter.request_start_time)
       let n:Date = new Date()
@@ -363,6 +408,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       let diff = new Date( millisendsElapsed )
       this.elapsedTime =  diff.toISOString().slice(11,19)
     }
+    
   }
 
   onAbort(){

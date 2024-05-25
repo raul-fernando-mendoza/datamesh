@@ -4,61 +4,83 @@
     id:{{ id }}
 </div>
 
-<div *ngIf="sqlJupiter" [formGroup]="FG" >
-    <div class="header">
+@if( sqlJupiter ){
+    <div [formGroup]="FG" >
+        <div class="header">
 
-        <button *ngIf="!activeStatuses.has(sqlJupiter.request_status)" mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
-        <button *ngIf="activeStatuses.has(sqlJupiter.request_status)" mat-raised-button color="warn" [disabled]="submitting" (click)="onAbort()">Abort</button>
-        <mat-form-field class="dataset" appearance="fill">
-            <mat-label>connection </mat-label> 
-            <mat-select formControlName="connectionId" [value]="sqlJupiter.connectionId" (selectionChange)="onConnectionChange($event)">
-                <mat-option [value]="null"></mat-option>
-                <mat-option *ngFor="let connection of connections" [value]="connection.id">{{connection.label}}</mat-option>
-            </mat-select>  
-        </mat-form-field>          
+            @if( !activeRequestStatuses.has(sqlJupiter.request_status) ){
+                <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+            }
+            @if( activeRequestStatuses.has(sqlJupiter.request_status) ){
+                <button *ngIf="activeRequestStatuses.has(sqlJupiter.request_status)" mat-raised-button color="warn" [disabled]="submitting" (click)="onAbort()">Abort</button>
+            }
+            <mat-form-field class="dataset" appearance="fill">
+                <mat-label>connection </mat-label> 
+                <mat-select formControlName="connectionId" [value]="sqlJupiter.connectionId" (selectionChange)="onConnectionChange($event)">
+                    <mat-option [value]="null"></mat-option>
+                    <mat-option *ngFor="let connection of connections" [value]="connection.id">{{connection.label}}</mat-option>
+                </mat-select>  
+            </mat-form-field>          
 
-        <button  [disabled]="submitting" (click)="onExportCsv()"><mat-icon>topic</mat-icon></button>
-    </div>  
-    <div *ngIf="activeStatuses.has(sqlJupiter.request_status)">
-        status:{{ sqlJupiter.request_status }} request_time:{{ elapsedTime }}
-        <span class="ids">
-            request_id::{{ sqlJupiter.request_id }} 
-        </span>
-    </div>
-    <div *ngIf="sqlJupiter.request_status == 'error'">
-        <div class="ids">
-            request_id::{{ sqlJupiter.request_id }} 
+            <button  [disabled]="submitting" (click)="onExportCsv()"><mat-icon>topic</mat-icon></button>
+
+        </div>    
+        <div>
+            <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
         </div>
-        status:{{ sqlJupiter.request_status }} 
-        <span class="error_mesage">{{ sqlJupiter.request_error_message}}</span>
-    </div>    
-    <div>
-        <!--
-        <mat-form-field class="sql" appearance="fill">
-            <mat-label>sql</mat-label> 
-            <textarea  class="sql" matInput rows="{{rows}}" formControlName="sql" (change)="onSqlChange($event)"></textarea> 
+
+        @if( sqlResult == null || sqlResult.result_status == null ){
+            @if( sqlJupiter.request_id ){            
+                <div>
+                    <span>Request status:{{ sqlJupiter.request_status }}</span> 
+                    @if( activeRequestStatuses.has(sqlJupiter.request_status) ){
+                        <span>
+                            request_time:{{ elapsedTime }}
+                        </span>
+                    }                            
+                    <span class="id">
+                        request_id::{{ sqlJupiter.request_id }} 
+                    </span> 
+                    @if( sqlJupiter.request_status == "error"){
+                        <p><span class="error_mesage">Error:</span>{{ sqlJupiter.request_error_message }}</p>
+                    }
+                </div>
+            }
             
-        </mat-form-field>
-        -->
-        <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
-    </div>
-    <div class="view">
-        <div class="wrapper">
-            <table *ngIf="this.sqlJupiter.result_set && this.sqlJupiter.result_metadata">
-                <thead>
-                    <tr>
-                        <td class="sticky-col first-col"> idx </td>
-                        <th *ngFor="let h of this.sqlJupiter.result_metadata">{{ h["name"] }}</th>
-                    </tr>
-                </thead>
-                <tbody>                
-                    <tr *ngFor="let row of this.sqlJupiter.result_set; index as i">
-                        <td class="sticky-col first-col">{{ i }}</td>
-                        <td *ngFor="let key of getKeys(row)">{{ row[key] }}</td> 
-                    </tr>
-                </tbody>                
-            </table>  
-        </div>
-    </div>
+        }    
+        @else{
+            @if( sqlResult && sqlResult.result_status != "completed" ){
+                <div>
+                    @if( sqlResult.result_status ){
+                        Result status:{{ sqlResult.result_status }} 
+                    }
+                    @if( sqlResult.result_error_message ){
+                        <span class="error_mesage">{{ sqlResult.result_error_message}}</span>
+                    }
+                </div>
+            }
+        }          
+        
+        @if( sqlResult ){
+            <div class="view">
+                <div class="wrapper">
+                    <table *ngIf="sqlResult.result_set && sqlResult.result_metadata">
+                        <thead>
+                            <tr>
+                                <td class="sticky-col first-col"> idx </td>
+                                <th *ngFor="let h of sqlResult.result_metadata">{{ h["name"] }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>                
+                            <tr *ngFor="let row of sqlResult.result_set; index as i">
+                                <td class="sticky-col first-col">{{ i + 1 }}</td>
+                                <td *ngFor="let key of getKeys(row)">{{ row[key] }}</td> 
+                            </tr>
+                        </tbody>                
+                    </table>  
+                </div>
+            </div>
+        }
   
-</div>  
+    </div>  
+}

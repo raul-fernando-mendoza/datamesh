@@ -83,7 +83,9 @@ export class DatasetEditComponent implements OnInit{
       })      
   }
   ngOnInit(): void {
+
     this.connectionsService.getConnections().then( (connections) => {
+      this.connections.length = 0
       this.connections.push( ...connections )
     },
     reason=>{

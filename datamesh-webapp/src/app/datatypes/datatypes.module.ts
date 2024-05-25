@@ -120,33 +120,54 @@ export interface ChiildJoinRequest{
 }
 
 
+export class SqlJupiterCollection{
+  static readonly collectionName:string = "SqlJupiterCollection"
+}
+
 export interface SqlJupiter{
-  id?:string
   className?:string
   sql?:string 
-  request_id?:  string 
-  request_start_time?: Timestamp 
-  request_completion_time?: Timestamp 
-  request_status?: "" | "requested" | "assigned" | "inprogress" | "aborted" | "completed" | "error"
-  request_error_message?:string
-  result_metadata?: [{ [key: string]: any }]
-  result_set?: { [key: string]: any }
   connectionId?:string|null
+
+  request_id?:  string | null
+  request_status?:""|"requested"|"assigned"|"aborted"|"completed"|"error"
+  request_start_time?: Timestamp | null
+  request_completion_time?: Timestamp | null
+  request_error_message?:string 
+
 }
 
 export class SqlJupiterObj implements SqlJupiter{
-  id!:string
-  className!:string
   sql!:string 
-  request_id?:  string  
-  request_start_time?: Timestamp 
-  request_completion_time?: Timestamp 
-  request_status!: "" | "requested" | "assigned" | "inprogress" | "aborted" | "completed" | "error" 
-  request_error_message?:string 
+  connectionId!:string|null
+  request_id:string|null = null
+  request_status:""|"requested"|"assigned"|"aborted"|"completed"|"error"=""
+  request_start_time: Timestamp | null = null
+  request_completion_time: Timestamp | null = null
+  request_error_message:string = "" 
+}
+
+export class SqlResultCollection{
+  static readonly collectionName:string = "SqlResult"
+}
+export interface SqlResult{
+  result_status?: null | "inprogress" | "aborted" | "completed" | "error" 
+  result_start_time?: Timestamp | null
+  result_completion_time?: Timestamp | null
+  result_error_message?:string 
   result_metadata?: [{ [key: string]: any }] 
   result_set?: [{ [key: string]: any }] 
-  connectionId!:string|null
 }
+export class SqlResultObj implements SqlResult{
+  
+  result_status: null | "inprogress" | "aborted" | "completed" | "error" = "inprogress" 
+  result_start_time: Timestamp | null = null
+  result_completion_time?: Timestamp | null = null
+  result_error_message:string = "" 
+  result_metadata?: [{ [key: string]: any }] 
+  result_set?: [{ [key: string]: any }] 
+}
+
 export class TextJupiter{
   id!:string
   className!:string

@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if
+          request.time < timestamp.date(2022, 7, 6);
+    }
+    match /Dataset/{id} {
+    	allow read, write: if true
+    }
+    match /Comparison/{id} {
+    	allow read, write: if true
+      match /{document=**} {    
+        allow read, write: if true
+        allow read: if true
+      }         
+    }   
+    match /SqlJupiterDoc/{id} {
+    	allow read, write: if true
+      match /{document=**} {    
+        allow read, write: if true
+      }         
+    }      
+    match /DatasetGroup/{id} {
+    	allow read, write: if true
+      match /{document=**} {    
+        allow read, write: if true
+        allow read: if true
+      }         
+    } 
+    match /ComparisonGroup/{id} {
+    	allow read, write: if true
+      match /{document=**} {    
+        allow read, write: if true
+        allow read: if true
+      }         
+    }    
+    match /SqlJupiterGroup/{id} {
+    	allow read, write: if true
+      match /{document=**} {    
+        allow read, write: if true
+        allow read: if true
+      }         
+    }       
+    match /ConnectionGroup/{id} {
+    	allow read, write: if true
+      match /{document=**} {    
+        allow read, write: if true
+        allow read: if true
+      }         
+    }        
+    match /Connection/{id} {
+    	allow read, write: if true
+      match /{document=**} {    
+        allow read, write: if true
+        allow read: if true
+      }         
+    }        
+    
+  }
+}

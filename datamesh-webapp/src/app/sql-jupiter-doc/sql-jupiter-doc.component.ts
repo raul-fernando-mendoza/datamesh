@@ -130,23 +130,18 @@ export class SqlJupiterDocComponent {
   onAddSqlJupiter(idx:number){
     if( this.sqlJupiterDoc ){
       let thiz = this
+      let id =  uuid.v4()
       var newSqlJupiter:SqlJupiterObj = {
-        id: uuid.v4(),
-        className: "SqlJupiter",
         sql: "",
         connectionId: null,
-        request_status:""
-/*        
         request_id: null,
         request_status: "",
         request_start_time: null,
         request_completion_time: null,
-        result_set: null,
-        result_metadata: null
-        */
+        request_error_message: ''
       }
-      this.firebaseService.setDoc( 'SqlJupiterDoc/'+this.id+"/SqlJupiter", newSqlJupiter.id, newSqlJupiter).then( () =>  {      
-        thiz.sqlJupiterDoc!.itemList.splice(idx,0,{className:"SqlJupiter", id:newSqlJupiter.id})
+      this.firebaseService.setDoc( 'SqlJupiterDoc/'+this.id+"/SqlJupiter", id, newSqlJupiter).then( () =>  {      
+        thiz.sqlJupiterDoc!.itemList.splice(idx,0,{className:"SqlJupiter", id:id})
         thiz.submitting = false
         thiz.save().then( () =>{
           console.log("success saving data")
