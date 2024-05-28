@@ -76,7 +76,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   elapsedTime:string = ""
   elapsedSubscriber:any
 
-  activeRequestStatuses = new Set(["requested","assigned"])
+  activeRequestStatuses = new Set(["requested","assigned",'inprogress'])
   activeResultStatuses = new Set(['requested','assigned','inprogress']);
   
 
@@ -149,7 +149,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       this.unsubscribeResult()
     }
     if( this.sqlResult ){
-      this.sqlResult.result_set = [{}]
+      this.sqlResult.result_set = undefined
     }
     this.unsubscribeResult = this.firebaseService.onsnapShot( [this.parentCollection, this.collection, this.id, SqlResultCollection.collectionName].join("/"), request_id, 
     {

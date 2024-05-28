@@ -206,7 +206,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
             
           })
           Promise.all( transactions ).then( ()=>{
-            //datasets.sort( (a,b) => a.item.label.toUpperCase() >= b.item.label.toUpperCase() ? 1:-1 )
+            datasets.sort( (a,b) => a.item.createon >= b.item.createon ? -1:1 )
             this._database.next(datasets);
             resolve()
           })

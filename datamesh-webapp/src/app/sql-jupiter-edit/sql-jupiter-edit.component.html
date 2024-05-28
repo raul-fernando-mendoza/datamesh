@@ -8,11 +8,11 @@
     <div [formGroup]="FG" >
         <div class="header">
 
-            @if( !activeRequestStatuses.has(sqlJupiter.request_status) ){
-                <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+            @if( activeRequestStatuses.has(sqlJupiter.request_status) && ( this.sqlResult == null || this.sqlResult.result_set == undefined) ){
+                <button mat-raised-button color="warn" [disabled]="submitting" (click)="onAbort()">Abort</button>
             }
-            @if( activeRequestStatuses.has(sqlJupiter.request_status) ){
-                <button *ngIf="activeRequestStatuses.has(sqlJupiter.request_status)" mat-raised-button color="warn" [disabled]="submitting" (click)="onAbort()">Abort</button>
+            @else{
+                <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
             }
             <mat-form-field class="dataset" appearance="fill">
                 <mat-label>connection </mat-label> 
@@ -29,26 +29,33 @@
             <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
         </div>
 
-        @if( sqlResult == null || sqlResult.result_status == null ){
-            @if( sqlJupiter.request_id ){            
-                <div>
-                    <span>Request status:{{ sqlJupiter.request_status }}</span> 
-                    @if( activeRequestStatuses.has(sqlJupiter.request_status) ){
-                        <span>
-                            request_time:{{ elapsedTime }}
-                        </span>
-                    }                            
-                    <span class="id">
-                        request_id::{{ sqlJupiter.request_id }} 
-                    </span> 
-                    @if( sqlJupiter.request_status == "error"){
-                        <p><span class="error_mesage">Error:</span>{{ sqlJupiter.request_error_message }}</p>
-                    }
-                </div>
-            }
-            
+        <p>
+        sqlJupiter.request_status:{{sqlJupiter.request_status}}
+        this.sqlResult:{{this.sqlResult}}
+        this.sqlResult.result_set:{{ this.sqlResult?.result_set}}
+        </p>
+
+        @if( activeRequestStatuses.has(sqlJupiter.request_status) && ( this.sqlResult == null || this.sqlResult.result_set == undefined) ){
+            <div>
+                <span>Request status:{{ sqlJupiter.request_status }}</span> 
+                <span>
+                    request_time:{{ elapsedTime }}
+                </span>
+                <span class="id">
+                    request_id::{{ sqlJupiter.request_id }} 
+                </span> 
+
+            </div>
         }    
         @else{
+            @if( sqlJupiter.request_status && sqlJupiter.request_status == "error"){
+                <p><span class="error_mesage">Error:</span>{{ sqlJupiter.request_error_message }}</p>
+            }
+
+            @if( sqlJupiter.request_status && sqlJupiter.request_status == "aborted" ){
+                Result status:<span class="error_mesage">{{ sqlJupiter.request_status }}</span> 
+            }
+
             @if( sqlResult && sqlResult.result_status != "completed" ){
                 <div>
                     @if( sqlResult.result_status ){

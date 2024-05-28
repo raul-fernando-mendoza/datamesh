@@ -116,6 +116,7 @@ def executeSqlByPath(req):
         
     except Exception as e:
         raise
+    
     try:
         doc = doc_ref.get()
         
@@ -126,43 +127,51 @@ def executeSqlByPath(req):
         
         sql = data["sql"]
         request_id = data["request_id"]
+        request_status = data["request_status"]
         
-        conn = getOdbcConnection(connectionId)
-   
-        print("using session:" + str(conn)) 
+        if request_status == 'requested':
+            print("*** update to inprogress")
         
-        updateObj = {
-            "request_status":"inprogress",
-        }
-        doc_ref.update( updateObj )        
-        print("**** status set to inprogress")
-            
-        result = snowflake_odbc.executeSql(conn, sql)
-        
-        #verify if the doc is using the same request_id
-        doc_ref = db.collection(basepath).document(id)
-        doc = doc_ref.get()
-        data = doc.to_dict() 
-        if( request_id == data["request_id"]):
-            #update the result as success
-            resultSetStr = []
-            
-            for row in result["resultSet"]:
-                obj={}
-                for i in range(len(row)):
-                    obj[str(i)]=row[i]
-                resultSetStr.append( obj )
+            conn = getOdbcConnection(connectionId)
+    
+            print("using session:" + str(conn)) 
             
             updateObj = {
-                "result_status":"completed",
-                "result_metadata":result["metadata"],
-                "result_set":resultSetStr,
-                "request_error_message":""
+                "request_status":"inprogress",
             }
-        
-            doc_ref_result = db.collection(basepath + "/"+ id + "/SqlResult").document(request_id)
-            doc_ref_result.set( updateObj )
-            return { "status":"success"}
+            doc_ref.update( updateObj )        
+            print("**** status set to inprogress")
+                
+            result = snowflake_odbc.executeSql(conn, sql)
+            
+            #verify if the doc is using the same request_id
+            doc_ref = db.collection(basepath).document(id)
+            doc = doc_ref.get()
+            data = doc.to_dict() 
+            request_status = data["request_status"]
+            if request_id == data["request_id"] and request_status == 'inprogress':
+                #update the result as success
+                print("*** writting result")
+                resultSetStr = []
+                
+                for row in result["resultSet"]:
+                    obj={}
+                    for i in range(len(row)):
+                        obj[str(i)]=row[i]
+                    resultSetStr.append( obj )
+                
+                updateObj = {
+                    "result_status":"completed",
+                    "result_metadata":result["metadata"],
+                    "result_set":resultSetStr,
+                    "request_error_message":""
+                }
+            
+                doc_ref_result = db.collection(basepath + "/"+ id + "/SqlResult").document(request_id)
+                doc_ref_result.set( updateObj )
+                return { "status":"success"}
+            else:
+                return { "status":"failed" }
         else:
             return { "status":"failed" }
     except Exception as e:

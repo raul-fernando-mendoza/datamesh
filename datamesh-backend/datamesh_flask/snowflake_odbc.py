@@ -121,6 +121,8 @@ def executeSql(conn, sql):
             
             cur.execute(sql)
             
+            print(cur.sfqid)
+            
             ret = cur.fetchmany(1000)
             
             resultSet = []

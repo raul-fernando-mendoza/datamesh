@@ -165,7 +165,7 @@ export class SqlResultObj implements SqlResult{
   result_completion_time?: Timestamp | null = null
   result_error_message:string = "" 
   result_metadata?: [{ [key: string]: any }] 
-  result_set?: [{ [key: string]: any }] 
+  result_set?: [{ [key: string]: any }]  
 }
 
 export class TextJupiter{
