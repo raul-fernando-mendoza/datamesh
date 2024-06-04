@@ -29,11 +29,13 @@
             <sql-edit formControlName="sql" (valueChange)="onSqlChange($event)"></sql-edit>
         </div>
 
+        
         <p>
         sqlJupiter.request_status:{{sqlJupiter.request_status}}
         this.sqlResult:{{this.sqlResult}}
-        this.sqlResult.result_set:{{ this.sqlResult?.result_set}}
+        <!--this.sqlResult.result_set:{{ this.sqlResult?.result_set}}-->
         </p>
+        
 
         @if( activeRequestStatuses.has(sqlJupiter.request_status) && ( this.sqlResult == null || this.sqlResult.result_set == undefined) ){
             <div>
