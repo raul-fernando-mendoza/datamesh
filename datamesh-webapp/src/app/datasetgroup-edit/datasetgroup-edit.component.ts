@@ -98,7 +98,7 @@ export class DatasetgroupEditComponent implements OnInit,OnDestroy{
     var datasetGroup:DatasetGroup = {
       id: uuid.v4(),
       label: this.FG.controls.label.value!,
-      description: ''
+      description: this.FG.controls.description.value ? this.FG.controls.description.value : ""
     }
     this.firebaseService.setDoc( this.groupCollection, datasetGroup.id, datasetGroup).then( ()=>{
       this.id = datasetGroup.id
