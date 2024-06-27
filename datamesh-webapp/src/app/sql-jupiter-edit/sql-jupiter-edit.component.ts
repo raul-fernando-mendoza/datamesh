@@ -81,6 +81,9 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   
 
   connections:Array<Connection> = []
+
+  request_id:string | undefined = undefined
+
   constructor(
     public firebaseService:FirebaseService,
     private fb:FormBuilder,
@@ -116,7 +119,8 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         this.FG.controls.sql.setValue( this.sqlJupiter.sql )
         this.FG.controls.connectionId.setValue( this.sqlJupiter.connectionId )
         this.displayedColumns = ["idx"]
-        if( this.sqlJupiter.request_id ){
+        if( this.sqlJupiter.request_id && this.request_id != this.sqlJupiter.request_id){
+          this.request_id = this.sqlJupiter.request_id
           this.readResults(this.sqlJupiter.request_id)
         }
         
@@ -188,7 +192,8 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         alert("ERROR saving sql:" + reason)
       })
 
-    }   
+    } 
+    return true  
   }
   onExecute(){
 
@@ -218,90 +223,6 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     reason =>{
       alert("ERROR request execution:" + reason)
     })
- /*
-    var sql:string|null = this.FG.controls.sql.value
- 
-    if( sql ){
-      let param={
-        "sql":sql,
-        "connectionId":this.sqlJupiter!.connectionId
-      }  
-      this.submitting = true
-      this.urlService.post("executeSql",param).subscribe({ 
-        'next':(result)=>{
-          this.submitting = false
-          var resultJson = result as { [key: string]: any }
-          var objMetadata:Array<Column> = []
-
-          for( let i=0;i<resultJson["metadata"].length; i++){
-            let name 
-            let result = objMetadata.find( e=> resultJson["metadata"][i]["name"] == e["name"])
-            if( result ){
-              name = result.name + SUFFIX
-            }
-            else{
-              name = resultJson["metadata"][i]["name"]
-            }
-            let column:Column = {
-              display_size: resultJson["metadata"][i]["display_size"],
-              internal_size: resultJson["metadata"][i]["display_size"],
-              is_nullable: resultJson["metadata"][i]["display_size"],
-              name: name,
-              precision: resultJson["metadata"][i]["display_size"],
-              scale: resultJson["metadata"][i]["display_size"],
-              type_code: 0
-            }
-            objMetadata.push(column)
-            
-          }          
-
-          var objResultSet = []
-
-          var arr = resultJson["resultSet"] as Array<string>
-          for( let i=0; i< arr.length ; i++){
-            var rowRaw = arr[i]
-            var rowObj:{ [key: string]: any } = {}
-            for( let c=0; c<rowRaw.length; c++){
-
-                rowObj[ c ] = rowRaw[c]
-
-              
-            }         
-            objResultSet.push(rowObj)
-          } 
-
-          var objResult = {
-            "metadata":objMetadata,
-            "resultSet":objResultSet
-          }
-          
-          console.log(result)
-          this.sqlJupiter!.result = objResult
-
-          var obj ={
-            result:objResult
-          }
-
-          this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, obj ).then( ()=>{
-            console.log("save result")
-          },
-          reason =>{
-            alert("ERROR saving sql:" + reason)
-          })
-
-        },
-        'error':(reason)=>{
-          this.submitting = false
-
-          let errorMessage = reason.message
-          if( reason.error && reason.error.error ){
-            errorMessage = reason.error.error
-          }
-          alert("ERROR:" + errorMessage)
-        }
-      })
-    }  
-    */
   }
 
   onExportCsv(){
