@@ -154,10 +154,14 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
       var flatNode:FlatNode = existingNode
     }
     else{
+
+      var item:Group | Data = node.item 
+      var str = typeof( item )
+
       var flatNode:FlatNode = {
         item: node.item,
         level: level,
-        expandable: node.children.length > 0 ? true : false,
+        expandable: "groupId" in node.item ? false : true,
         id:node.id
       }
     }
@@ -186,7 +190,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
           console.log("reload parent")
           var datasets:TreeNode[] = []
           var transactions = set.docs.map( (doc:any) =>{
-            var datasetGroup = doc.data() as Group
+            var datasetGroup:Group = doc.data() as Group
             let datasetNode:TreeNode = {
               children: [],
               item: datasetGroup,
@@ -227,7 +231,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
           groupNode.children.length = 0
           console.log("childs for collections:" + this.dataCollection + ": " + groupNode.item.id + ":" + set.docs.length)
           set.docs.map( (doc:any) =>{
-            var data = doc.data() as Data
+            var data:Data = doc.data() as Data
             let newDatasetNode:TreeNode = {
               children: [],
               item: data,
