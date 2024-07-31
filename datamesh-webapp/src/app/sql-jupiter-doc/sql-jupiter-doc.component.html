@@ -9,7 +9,7 @@
 <div [formGroup]="FG">
     <mat-form-field appearance="fill">
         <mat-label>Name</mat-label>
-        <input matInput formControlName="label" required (change)="firebaseService.onChange($event,'SqlJupiterDoc',id,'label')" required>
+        <input matInput formControlName="label" required (change)="firebaseService.onChange($event,'SqlJupiterDoc',id,'label')">
     </mat-form-field>
     <div *ngIf="!id">
       <button mat-raised-button (click)="onCancel()">Cancelar</button>     
