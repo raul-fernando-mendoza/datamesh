@@ -12,6 +12,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import { DatasetTreeComponent } from 'app/dataset-tree/dataset-tree.component';
 import {MatMenuModule} from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
+import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
 
 @Component({
   selector: 'app-navigation',
@@ -28,7 +29,8 @@ import { CommonModule } from '@angular/common';
     MatExpansionModule,
     MatTreeModule,
     DatasetTreeComponent,
-    MatMenuModule
+    MatMenuModule,
+    TablesTreeComponent
   ]   
 })
 export class NavigationComponent {
