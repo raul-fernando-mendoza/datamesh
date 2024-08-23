@@ -15,8 +15,9 @@
 
 
   </mat-toolbar>
-  <mat-drawer-container autosize>
+  <mat-drawer-container cdkDropListGroup >
     <mat-drawer  #sidenav mode="side" opened >
+
       <mat-accordion>
         <mat-expansion-panel>
           <mat-expansion-panel-header>
@@ -41,7 +42,7 @@
               Dataset
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <app-dataset-tree title="Dataset" groupCollection="DatasetGroup" dataCollection="Dataset">
+          <app-dataset-tree title="Dataset" groupCollection="DatasetGroup" dataCollection="Dataset" [isItemDraggable]="true">
           </app-dataset-tree>
         </mat-expansion-panel>        
         <mat-expansion-panel >
@@ -74,8 +75,25 @@
       </mat-accordion>      
     </mat-drawer>
     <mat-drawer-content>
+      <!--
+      <div
+      cdkDropList
+      #doneList="cdkDropList"
+      [cdkDropListData]="done"
+      [cdkDropListConnectedTo]="[todoList]"
+      class="example-list"
+      (cdkDropListDropped)="drop($event)"
+      >
+        @for (item of done; track item) {
+          <div class="example-box" cdkDrag>{{item}}</div>
+        }
+      </div>
+      <div class="big" cdkDropList>
+        <div class="example-box" cdkDrag [cdkDragData]="123">321</div>
+      </div>
+      -->
       <router-outlet></router-outlet>
     </mat-drawer-content>
-</mat-drawer-container>    
+  </mat-drawer-container>    
     
 </div>

@@ -6,7 +6,7 @@ import {BehaviorSubject, firstValueFrom} from 'rxjs';
 import { FirebaseService, QryPar } from '../firebase.service';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { doc, FirestoreError } from 'firebase/firestore';
-import { CdkDragDrop, CdkDrag, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDrag, CdkDragEnter, CdkDragExit, moveItemInArray, transferArrayItem, CdkDropList } from '@angular/cdk/drag-drop';
 import { FormBuilder, FormControl, Validators } from '@angular/forms';
 
 import { MatIconModule } from '@angular/material/icon';
@@ -73,7 +73,7 @@ export interface FlatNode {
     MatInputModule,
     MatTreeModule,
     MatMenuModule,
-    DragDropModule
+    CdkDropList, CdkDrag
   ]   
 
 })
@@ -82,6 +82,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
   @Input() title:string ="Grupo" //displayName
   @Input() groupCollection:string = "INVALIDSET" //the folder where the file should be written
   @Input() dataCollection:string ="INVALIDDATA" //displayName
+  @Input() isItemDraggable:boolean = false 
 
   unsubscribe:any
   unsubscribeMap:Map<string, any> = new Map<string,any>()

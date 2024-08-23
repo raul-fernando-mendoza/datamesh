@@ -9,7 +9,7 @@
       </mat-form-field>
       <mat-form-field appearance="fill">
         <mat-label>filter</mat-label>
-        <input matInput formControlName="filter" required (change)="firebaseService.onChange($event,'Comparison',id,'filter')">
+        <input matInput formControlName="filter" (change)="firebaseService.onChange($event,'Comparison',id,'filter')">
       </mat-form-field>      
       <div *ngIf="!id">
         <button mat-raised-button (click)="onCancel()">Cancelar</button>     
@@ -18,11 +18,43 @@
 </div>   
 
 <div [style.display]="this.comparison ? 'block' : 'none'">
-  <div>Sources</div>
+
+
   <mat-grid-list cols="2" rowHeight="5em">
-    <mat-grid-tile droppable (onDrop)="onLeftSourceDrop($event)">left:{{leftDataset?.label}}</mat-grid-tile>
-    <mat-grid-tile droppable (onDrop)="onRightSourceDrop($event)">right:{{rightDataset?.label}}</mat-grid-tile>
+    <mat-grid-tile>
+      <h2>Left</h2>
+      <div class="example-container">
+        <div
+        cdkDropList
+        #doneList="cdkDropList"
+        class="example-list"
+        (cdkDropListDropped)="onLeftSourceDrop($event)"
+        [cdkDropListEnterPredicate]="acceptPredicate"
+        >
+          @if(left){
+            <div class="example-box" cdkDrag>{{left.label}}</div>
+          }
+        </div> 
+      </div>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <h2>right</h2>
+      <div class="example-container">
+        <div
+        cdkDropList
+        #doneList="cdkDropList"
+        class="example-list"
+        (cdkDropListDropped)="onRightSourceDrop($event)"
+        [cdkDropListEnterPredicate]="acceptPredicate"
+        >
+          @if(right){
+            <div class="example-box" cdkDrag>{{right.label}}</div>
+          }
+        </div> 
+      </div>
+    </mat-grid-tile>
   </mat-grid-list>
+
 
   <mat-tab-group>
     <mat-tab label="key">
@@ -121,5 +153,5 @@
   </mat-tab-group>  
 
   <button mat-raised-button (click)="onExecute()">Execute</button> 
-  
+ 
 </div>

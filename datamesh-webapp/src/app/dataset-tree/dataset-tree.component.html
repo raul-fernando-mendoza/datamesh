@@ -10,16 +10,41 @@
 </div>
 <mat-tree  [dataSource]="dataSource" [treeControl]="treeControl">
   <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle matTreeNodePadding>
-    
+    @if( isItemDraggable ){
+    <div cdkDropList class="example-list">
+      
+      <div class="example-box" cdkDrag [cdkDragData]="{groupCollection:groupCollection,dataCollection:dataCollection,id:node.item.id,label:node.item.label}">
+        <span class="label"  (click)="onEditData(node)">{{node.item.label}}</span>
+      </div>    
+    </div>
+    }
+    @else{
+      <span class="label"  (click)="onEditData(node)">{{node.item.label}}</span>
+    }
+<!--
     <button *ngIf="isGroup(node)" mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
     <mat-menu #menu="matMenu">
       <button  (click)="onAddData(node)" mat-menu-item>Add</button>
     </mat-menu>    
-
-<!--    <button mat-icon-button disabled></button> -->
+  -->
+<!--    <button mat-icon-button disabled></button> 
     <span class="label" *ngIf="!isData(node)" (click)="onEditGroup(node)">{{node.item.label}}</span>
+
     <span class="label" *ngIf="isData(node)" cdkDrag [cdkDragData]="node.item.id" (click)="onEditData(node)">{{node.item.label}}</span>
-    
+
+    <div *ngIf="!isData(node)" class="example-list" cdkDropList>
+      <div class="example-box" cdkDrag [cdkDragData]="node.item.id">
+        <span class="label"  (click)="onEditGroup(node)">{{node.item.label}}</span>
+      </div>
+    </div> 
+    <div *ngIf="isData(node)" class="example-list" cdkDropList>
+      <div cdkDropList class="example-list">
+        <div class="example-box" cdkDrag [cdkDragData]="{label:node.item.label, id:node.item.id}">
+          <span class="label"   (click)="onEditData(node)">{{node.item.label}}</span>
+        </div>
+      </div>      
+    </div>      
+  -->    
   </mat-tree-node>
 
   <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
@@ -31,11 +56,26 @@
     </button>
 
     <button *ngIf="isGroup(node)" mat-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
-    <span class="label" *ngIf="!isData(node)" (click)="onEditGroup(node)">{{node.item.label}}</span>
-    <span class="label" *ngIf="isData(node)" cdkDrag [cdkDragData]="node.item.id" (click)="onEditData(node)">{{node.item.label}}</span>
+    <mat-menu #menu="matMenu">
+      <button  (click)="onAddData(node)" mat-menu-item>Add</button>
+    </mat-menu>    
+
+    <span class="label"  (click)="onEditGroup(node)">{{node.item.label}}</span>
+    <!--
+    <div *ngIf="!isData(node)" class="example-list" cdkDropList>
+      <div class="example-box" cdkDrag [cdkDragData]="node.item.id">
+        <span class="label"  (click)="onEditGroup(node)">{{node.item.label}}</span>
+      </div>
+    </div> 
+    <div *ngIf="isData(node)" class="example-list" cdkDropList>
+      <div class="example-box" cdkDrag [cdkDragData]="node.item.id">
+        <span class="label"   (click)="onEditData(node)">{{node.item.label}}</span>
+      </div>
+    </div>     
 
     <mat-menu #menu="matMenu">
       <button  (click)="onAddData(node)" mat-menu-item>Add</button>
     </mat-menu>    
+  -->
   </mat-tree-node>
 </mat-tree>

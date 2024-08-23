@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { db } from '../../environments/environment'
 
-import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot} from "firebase/firestore"; 
+import { doc,  onSnapshot,  DocumentSnapshot} from "firebase/firestore"; 
 import { MatDialog } from '@angular/material/dialog';
 import { Comparison, PortListResponse, Dataset, Port, ComparisonPort, KeyLeftRight } from '../datatypes/datatypes.module';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,7 +18,7 @@ import { UrlService } from '../url.service';
 import { StringUtilService } from '../string-util.service';
 import { Portal } from '@angular/cdk/portal';
 import { FirebaseService } from '../firebase.service';
-import { CdkDragDrop, CdkDragEnter, CdkDragExit, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDropList, copyArrayItem, moveItemInArray } from '@angular/cdk/drag-drop';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -52,7 +52,8 @@ const keyports = "keyports"
     MatCheckboxModule,
     MatTabsModule,
     MatGridListModule,
-    MatTableModule
+    MatTableModule,
+    CdkDropList, CdkDrag    
   ]      
 })
 export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, OnDestroy{
@@ -113,6 +114,8 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   displayedColumns: string[] = ['idx','parent', 'left', 'right', 'selected'];
   portsSource = [];  
 
+  left:any|null = null
+  right:any|null = null
   leftDataset:Dataset | null = null
   rightDataset:Dataset | null = null
 
@@ -285,18 +288,18 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
       keyLeftRight: [],
       keyParenRight: [],
       keyParentLeft: [],
-      records: undefined,
-      schema: undefined
+      records: null,
+      schema: null
     }
     
-    setDoc( doc(db, "Comparison" , comparison.id!), comparison).then( () =>{
+    this.firebaseService.setDoc("Comparison" , comparison.id, comparison).then( () =>{
       console.log("created")
       this.id = comparison.id!
       this.comparison = comparison  
       this.router.navigate(["Comparison-edit",this.comparison.id])    
     },
     reason =>{
-      console.log("ERROR:" + reason )
+      alert("ERROR:" + reason )
     })
     
   }   
@@ -323,10 +326,18 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
   onExecute(){
     this.router.navigate(["Comparison","execute",this.comparison.id])
   }
-  onLeftSourceDrop(e: any) {
+
+  acceptPredicate(drag: CdkDrag, drop: CdkDropList) {
+    return true //drag.data.startsWith("G") ;
+  }  
+
+   onLeftSourceDrop(e: any) {
     // Get the dropped data here
-    console.log(e)
-    this.comparison.leftDatasetId = e.dragData
+    console.log(e.item.data)
+    //this.done.push( e.item.data.label)
+    this.left=e.item.data
+    
+    this.comparison.leftDatasetId = this.left.id
     
     this.firebaseService.updateDoc("Comparison",this.id!, {leftDatasetId:this.comparison.leftDatasetId }).then( ()=>{
       this.updatePorts()
@@ -338,8 +349,10 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
     
   }
   onRightSourceDrop(e:any){
-    console.log(e)
-    this.comparison.rightDatasetId = e.dragData
+    console.log(e.item.data)
+    //this.done.push( e.item.data.label)
+    this.right=e.item.data
+    this.comparison.rightDatasetId = this.right.id
     this.firebaseService.updateDoc("Comparison",this.id!, {rightDatasetId:this.comparison.rightDatasetId }).then( ()=>{
       this.updatePorts()
     },
@@ -356,6 +369,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
         let leftTransaction = this.firebaseService.getdoc("Dataset", this.comparison.leftDatasetId).then( (doc:DocumentSnapshot) =>{
           if( doc.exists() ){
             this.leftDataset = doc.data() as Dataset
+            this.left = { label:this.leftDataset.label }
             this.comparison.leftPorts = []
             this.leftDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
@@ -374,6 +388,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
         let rightTransaction = this.firebaseService.getdoc("Dataset", this.comparison.rightDatasetId).then( (doc:DocumentSnapshot) =>{
           if( doc.exists() ){
             this.rightDataset = doc.data() as Dataset
+            this.right = { label:this.rightDataset.label }
             this.comparison.rightPorts = []
             this.rightDataset.ports.map( port =>{
               let comparisonPort:ComparisonPort = {
@@ -470,4 +485,6 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
       })
     })   
   }  
+
+
 }
