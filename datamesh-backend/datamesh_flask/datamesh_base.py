@@ -120,40 +120,97 @@ def executeJoin( leftSess, leftQry, leftCols,
                 
         print( "allColumns")
         print( finalColumns )
-    
+        
+        print("join columns")
+        for jc in joinColumns:
+            print(jc)
+
+        if leftSess == rightSess :
                 
-        print("left join right 1")   
-        df = leftDF \
-            .join( right=rightDF, 
-                using_columns=joinColumns,
-                join_type= "full"
-                )  \
-                .select( finalColumns ) \
-                .sort( joinColumns )
+            print("left join right 1")   
+            df = leftDF \
+                .join( right=rightDF, 
+                    using_columns=joinColumns,
+                    join_type= "full",
+                    lsuffix='_l', rsuffix='_r'
+                    )  \
+                    .select( finalColumns ) \
+                    .sort( joinColumns )
+                
+            df.show()    
+                
+            #now apply filters if there is any
+            print("apply filter")
+            if filter and len(filter.strip())>0:
+                df = df.filter(filter)
+                
+            df.show()
+            collected = df.limit(2000).collect()
+            p_df = pd.DataFrame(data=collected)
+            records = p_df.to_json(orient = "records")
+        
+            fields = []
+            for field in df.schema.fields:
+                fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} )         
+            obj ={
+                "records":json.loads(records),
+                "schema":fields
+            } 
             
-        df.show()    
+            print(json.dumps({"result":obj},indent=4))
+            print("executeJoin END")
+            return obj 
+        else:
+            print("pandas left collect")
+            leftpDF = pd.DataFrame(data=leftDF.collect())
+            print( leftpDF.head() ) 
+            print("pandas right collect")           
             
-        #now apply filters if there is any
-        print("apply filter")
-        if filter and len(filter.strip())>0:
-            df = df.filter(filter)
+            rightpDF = pd.DataFrame(data=rightDF.collect())
+            if rightpDF.empty :
+                rightpDF = pd.DataFrame(columns = rightColsSelected)
+            print( rightpDF.head() )
             
-        df.show()
-        collected = df.limit(2000).collect()
-        p_df = pd.DataFrame(data=collected)
-        records = p_df.to_json(orient = "records")
-       
-        fields = []
-        for field in df.schema.fields:
-            fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} )         
-        obj ={
-            "records":json.loads(records),
-            "schema":fields
-        } 
-         
-        print(json.dumps({"result":obj},indent=4))
-        print("executeJoin END")
-        return obj 
+            print("left join pandas")
+            try:   
+                pDf = pd.merge( leftpDF, 
+                    rightpDF, 
+                    on=joinColumns,
+                    how = "outer",
+                    suffixes=('', '_r'))  
+            except:
+                print("using union:" + str(joinColumns))
+                for c in rightDF.columns:
+                    print(c)
+                    print(type(c))
+                    if c not in joinColumns:
+                       leftpDF[c + "_r"] = None 
+                pDf = leftpDF
+                      
+            print("check filter")
+            if filter and len(filter.strip())>0:
+                print("apply filter:" + filter)
+                pDf = pDf.query(filter)
+            
+            print("apply sort")   
+            pDf = pDf.sort_values(by = joinColumns)    
+                
+            print( pDf.head() )
+            records = pDf.iloc[:200].to_json(orient = "records")
+            
+            print("retrive datatype from panda dataframe")   
+            fields = []
+            
+            for columnName,datatype in pDf.dtypes.iteritems():
+                fields.append( { "name":str(columnName) , "datatype":str(datatype)} )         
+            obj ={
+                "records":json.loads(records),
+                "schema":fields
+            } 
+            print("result pandas join")
+            #print(json.dumps({"result":obj},indent=4))
+            print( pDf.head() )
+            return obj            
     else: #we have to do the join using pandas
         print("run query left")
         leftDF = pd.read_csv(leftFile, sep = ',', dtype = {'ACCOUNT': int,'CLUB': str,
