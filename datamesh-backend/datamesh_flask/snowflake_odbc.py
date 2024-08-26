@@ -47,7 +47,7 @@ def setOdbcConnection( connectionId , credentials):
                         client_session_keep_alive= credentials["client_session_keep_alive"],
                         query_tag= credentials["query_tag"]
             )          
-        print("session generated:" + str(sess))
+        print("snowflake.setOdbcConnection generated:" + str(sess))
         odbcConnections[connectionId] = sess       
         return sess      
 
@@ -145,6 +145,6 @@ def executeSql(conn, sql):
         finally:
             cur.close()
         resultSetDao = ResultSetDao(sql, metadata, resultSet)
-        print( "executeSql ended OK" )
+        print( "snowflake.executeSql ended OK" )
         return resultSetDao.toJson()
         
