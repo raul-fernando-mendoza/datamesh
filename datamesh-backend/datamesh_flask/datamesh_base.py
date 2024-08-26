@@ -160,56 +160,80 @@ def executeJoin( leftSess, leftQry, leftCols,
             print(json.dumps({"result":obj},indent=4))
             print("executeJoin END")
             return obj 
-        else:
+        else: #join with pandas
             print("pandas left collect")
             leftpDF = pd.DataFrame(data=leftDF.collect())
             print( leftpDF.head() ) 
-            print("pandas right collect")           
             
-            rightpDF = pd.DataFrame(data=rightDF.collect())
-            if rightpDF.empty :
-                rightpDF = pd.DataFrame(columns = rightColsSelected)
+            print("pandas right collect")
+            rightpDF = pd.DataFrame(data=rightDF.collect()) 
             print( rightpDF.head() )
+           
+            if leftpDF.empty:
+                print("left empty add left cols to right:" + str(joinColumns))
+                for c in leftDF.columns:
+                    print(c)
+                    if c not in joinColumns:
+                        if c in rightDF.columns:
+                            rightpDF.rename(columns={c: c + "_r"}, inplace=True)
+                        rightpDF[c] = None 
+                pDf = rightpDF                 
             
-            print("left join pandas")
-            try:   
+            elif rightpDF.empty :
+                print("right empty add right colums to left:" + str(joinColumns))
+                for c in rightDF.columns:
+                    print(c)
+                    if c not in joinColumns:
+                        if c in leftDF.columns:
+                            leftpDF[c + "_r"] = None
+                        else: 
+                            leftpDF[c] = None 
+                pDf = leftpDF                
+                
+            else:
+                print("left join pandas")   
                 pDf = pd.merge( leftpDF, 
                     rightpDF, 
                     on=joinColumns,
                     how = "outer",
                     suffixes=('', '_r'))  
-            except:
-                print("using union:" + str(joinColumns))
-                for c in rightDF.columns:
-                    print(c)
-                    print(type(c))
-                    if c not in joinColumns:
-                       leftpDF[c + "_r"] = None 
-                pDf = leftpDF
-                      
-            print("check filter")
-            if filter and len(filter.strip())>0:
-                print("apply filter:" + filter)
-                pDf = pDf.query(filter)
+
+            print("join result:")
+            print( pDf.head() )
             
-            print("apply sort")   
-            pDf = pDf.sort_values(by = joinColumns)    
+            if not pDf.empty:
+                print("check filter")
+                if filter and len(filter.strip())>0:
+                    print("apply filter:" + filter)
+                    pDf = pDf.query(filter)
                 
-            print( pDf.head() )
-            records = pDf.iloc[:200].to_json(orient = "records")
-            
-            print("retrive datatype from panda dataframe")   
-            fields = []
-            
-            for columnName,datatype in pDf.dtypes.iteritems():
-                fields.append( { "name":str(columnName) , "datatype":str(datatype)} )         
-            obj ={
-                "records":json.loads(records),
-                "schema":fields
-            } 
-            print("result pandas join")
-            #print(json.dumps({"result":obj},indent=4))
-            print( pDf.head() )
+                print("apply sort")   
+                pDf = pDf.sort_values(by = joinColumns)    
+                    
+                print( pDf.head() )
+                records = pDf.iloc[:200].to_json(orient = "records")
+
+                print("retrive datatype from panda dataframe")   
+                fields = []
+                
+                for columnName,datatype in pDf.dtypes.iteritems():
+                    fields.append( { "name":str(columnName) , "datatype":str(datatype)} )   
+                obj ={
+                    "records":json.loads(records),
+                    "schema":fields
+                }                           
+            else:
+                records = []
+                fields = []
+                for c in finalColumns:
+                    print("c:" + c.getName() )
+                    fields.append({ "name":c.getName() , "datatype":"StringType(1)" })
+                print("end empty result")           
+                obj ={
+                    "records":[],
+                    "schema":fields
+                }
+
             return obj            
     else: #we have to do the join using pandas
         print("run query left")

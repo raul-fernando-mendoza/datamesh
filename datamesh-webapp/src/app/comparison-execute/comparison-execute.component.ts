@@ -227,7 +227,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
        this.urlService.post("executeJoin",this.req!).subscribe({ 
         'next':(result:any)=>{
           this.submmiting = false
-          console.log( result )
+          console.log( "result" + result )
         
            var resultList:[] = result["records"]
 
@@ -472,8 +472,8 @@ export class ComparisonExecuteComponent implements AfterViewInit{
   }
 
   getColor(node:TreeNode, port_name:string ){
-    console.log( node, port_name)
-    if( port_name.endsWith("_R")  ){
+    //console.log( "getColor",node, port_name)
+    if( port_name.endsWith("_r")  ){
       let left_name = port_name.substring( 0, port_name.length - 2)
       if( node.obj[ port_name] != node.obj[ left_name ] ){
         return "yellow"
