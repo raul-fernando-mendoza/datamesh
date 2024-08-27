@@ -11,7 +11,7 @@ import { MatSelectModule} from '@angular/material/select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UrlService } from 'app/url.service';
 import { sql } from '@codemirror/lang-sql';
-import { LoadmoreDatabase, LoadmoreFlatNode, LoadmoreNode, LOAD_MORE } from './tables-tree';
+import { LoadmoreDatabase, DbFlatNode, SchemaNode, LOAD_MORE, TableNode, MoreNode, TableItem, SchemaItem } from './tables-tree';
 import { Observable } from 'rxjs';
 import { MatInputModule } from '@angular/material/input';
 
@@ -34,11 +34,11 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class TablesTreeComponent implements OnInit{
 
-  nodeMap = new Map<string, LoadmoreFlatNode>();
-  treeControl: FlatTreeControl<LoadmoreFlatNode>;
-  treeFlattener: MatTreeFlattener<LoadmoreNode, LoadmoreFlatNode>;
+  nodeMap = new Map<string, DbFlatNode>();
+  treeControl: FlatTreeControl<DbFlatNode>;
+  treeFlattener: MatTreeFlattener<SchemaNode|TableNode|MoreNode, DbFlatNode>;
   // Flat tree data source
-  dataSource: MatTreeFlatDataSource<LoadmoreNode, LoadmoreFlatNode>;
+  dataSource: MatTreeFlatDataSource<SchemaNode|TableNode|MoreNode, DbFlatNode>;
 
   FG = this.fb.group({
     connectionId:[""],
@@ -48,6 +48,13 @@ export class TablesTreeComponent implements OnInit{
   connections:Array<Connection> = []
 
   schemaSql = 
+  "select t.table_schema,          "+
+  "       t.table_name             "+                                 
+  " from information_schema.tables t"+                                        
+  " order by table_schema,          "+                                        
+  "       table_name               "
+  
+  tableSql =
   "select t.table_schema,                                                     "+
   "       t.table_name,                                                       "+
   "       c.column_name,                                                      "+
@@ -83,7 +90,7 @@ export class TablesTreeComponent implements OnInit{
         this.getChildren,
       );
   
-      this.treeControl = new FlatTreeControl<LoadmoreFlatNode>(this.getLevel, this.isExpandable);
+      this.treeControl = new FlatTreeControl<DbFlatNode>(this.getLevel, this.isExpandable);
   
       this.dataSource = new MatTreeFlatDataSource(this.treeControl, this.treeFlattener);
   
@@ -95,40 +102,52 @@ export class TablesTreeComponent implements OnInit{
 
   }
 
-  getChildren = (node: LoadmoreNode): Observable<LoadmoreNode[]> => node.childrenChange;
+  getChildren = (node: SchemaNode|TableNode|MoreNode): Observable<Array<SchemaNode|TableNode|MoreNode>> => node.childrenChange;
 
-  transformer = (node: LoadmoreNode, level: number) => {
-    const existingNode = this.nodeMap.get(node.item);
+  transformer = (node: SchemaNode|TableNode|MoreNode, level: number) => {
+    const existingNode = this.nodeMap.get(node.item.id);
 
     if (existingNode) {
       return existingNode;
     }
 
-    const newNode = new LoadmoreFlatNode(
-      node.item,
+    const newNode = new DbFlatNode(
+      node,
       level,
-      node.hasChildren,
-      node.loadMoreParentItem,
+      node.hasChildren
     );
-    this.nodeMap.set(node.item, newNode);
+    this.nodeMap.set(node.item.id, newNode);
     return newNode;
   };  
 
-  getLevel = (node: LoadmoreFlatNode) => node.level;
+  getLevel = (node: DbFlatNode) => node.level;
 
-  isExpandable = (node: LoadmoreFlatNode) => node.expandable;
+  isExpandable = (node: DbFlatNode) => node.expandable;
 
-  hasChild = (_: number, _nodeData: LoadmoreFlatNode) => _nodeData.expandable;
+  hasChild = (_: number, _nodeData: DbFlatNode) => _nodeData.expandable;
 
-  isLoadMore = (_: number, _nodeData: LoadmoreFlatNode) =>  _nodeData.item.startsWith( LOAD_MORE );
+  isLoadMore = (_: number, _nodeData: DbFlatNode) =>{
+    var node = _nodeData.node
+    if( node instanceof MoreNode ){
+      console.log(node instanceof MoreNode)
+      return true;
+    }
+ 
+    return node instanceof MoreNode;
+
+  } 
 
   /** Load more nodes from data source */
-  loadMore(item: string) {
+  loadMore(item: SchemaNode|TableNode|MoreNode) {
     this._database.loadMore(item);
   }
 
-  loadChildren(node: LoadmoreFlatNode) {
-    this._database.loadMore(node.item, true);
+  appendMore(item: SchemaNode|TableNode|MoreNode) {
+    this._database.appendMore(item);
+  }
+
+  loadChildren(node: DbFlatNode) {
+    this._database.loadMore(node.node, true);
   }  
 
   ngOnInit(): void {
@@ -173,8 +192,9 @@ export class TablesTreeComponent implements OnInit{
             var record = resultSet[i]
             var schemaName = record[0]
             //add the schema to the root nodes
-            if( !this._database.rootLevelNodes.find( s => s == schemaName) ){
-              this._database.rootLevelNodes.push(schemaName)
+            if( !this._database.rootLevelNodes.find( s => s.id == schemaName) ){
+              var schemaItem = new SchemaItem( schemaName)
+              this._database.rootLevelNodes.push(schemaItem)
               this._database.dataMap.set( schemaName , [])
             }
    
@@ -182,16 +202,17 @@ export class TablesTreeComponent implements OnInit{
             //now add the table to the datanode schema
             var schemaData = this._database.dataMap.get(schemaName)!
             var tableName = schemaName + "." + record[1]
-            if( !schemaData.find(e => e == tableName) ){
-              schemaData.push( tableName )
+            if( !schemaData.find(item => item.id == tableName) ){
+              var tableItem = new TableItem(schemaName,tableName)
+              schemaData.push( tableItem )
               this._database.dataMap.set( tableName , [])
             }
-
+            /*
             //no add field
             var fieldName = tableName + "." + record[2]
             var tableData = this._database.dataMap.get(tableName)!
             tableData.push( fieldName )
-
+            */
           }
           this._database.initialize();
           
@@ -213,6 +234,7 @@ export class TablesTreeComponent implements OnInit{
   }
 
   getLastName(id:string){
+    if(!id) return "unknown"
     let strArr = id.split(".").reverse()
     return strArr[0]
   }
