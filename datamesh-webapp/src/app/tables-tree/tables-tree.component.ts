@@ -11,7 +11,7 @@ import { MatSelectModule} from '@angular/material/select';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { UrlService } from 'app/url.service';
 import { sql } from '@codemirror/lang-sql';
-import { LoadmoreDatabase, DbFlatNode, SchemaNode, LOAD_MORE, TableNode, MoreNode, TableItem, SchemaItem } from './tables-tree';
+import { LoadmoreDatabase, DbFlatNode, SchemaNode, LOAD_MORE, TableNode, MoreNode, TableItem, SchemaItem, MoreItem } from './tables-tree';
 import { Observable } from 'rxjs';
 import { MatInputModule } from '@angular/material/input';
 
@@ -112,7 +112,7 @@ export class TablesTreeComponent implements OnInit{
     }
 
     const newNode = new DbFlatNode(
-      node,
+      node.item,
       level,
       node.hasChildren
     );
@@ -127,27 +127,17 @@ export class TablesTreeComponent implements OnInit{
   hasChild = (_: number, _nodeData: DbFlatNode) => _nodeData.expandable;
 
   isLoadMore = (_: number, _nodeData: DbFlatNode) =>{
-    var node = _nodeData.node
-    if( node instanceof MoreNode ){
-      console.log(node instanceof MoreNode)
-      return true;
-    }
- 
-    return node instanceof MoreNode;
-
+    var item = _nodeData.item
+    return item instanceof MoreItem;
   } 
 
   /** Load more nodes from data source */
-  loadMore(item: SchemaNode|TableNode|MoreNode) {
-    this._database.loadMore(item);
-  }
-
-  appendMore(item: SchemaNode|TableNode|MoreNode) {
-    this._database.appendMore(item);
+   appendMore(node: DbFlatNode) {
+    this._database.appendMore(node.item);
   }
 
   loadChildren(node: DbFlatNode) {
-    this._database.loadMore(node.node, true);
+    this._database.loadChildren(node.item, true);
   }  
 
   ngOnInit(): void {

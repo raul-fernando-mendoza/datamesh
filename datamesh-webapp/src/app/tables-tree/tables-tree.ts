@@ -44,7 +44,7 @@ export class MoreItem{
     this._tableName = tableName
   };
   get id():string{
-    return "More." + this._schemaName + "." + this._tableName;
+    return this._schemaName + "." + this._tableName;
   }
 }
 
@@ -77,7 +77,7 @@ export class MoreNode implements IDbNode {
   }
 
   constructor(
-    public item: SchemaItem|TableItem,
+    public item: SchemaItem|TableItem|MoreItem,
     public hasChildren = false
   ) {}
 }
@@ -101,7 +101,7 @@ export class TableNode implements IDbNode {
 /** Flat node with expandable and level information */
 export class DbFlatNode {
   constructor(
-    public node: SchemaNode|TableNode|MoreNode,
+    public item: SchemaItem|TableItem|MoreItem,
     public level = 1,
     public expandable = false
   ) {}
@@ -127,12 +127,12 @@ export class LoadmoreDatabase {
   }
 
   /** Expand a node whose children are not loaded */
-  loadMore(n: SchemaNode|TableNode|MoreNode, onlyFirstTime = false) {
-    if (!this.nodeMap.has(n.item.id) || !this.dataMap.has(n.item.id)) {
+  loadChildren(item: SchemaItem|TableItem|MoreItem, onlyFirstTime = false) {
+    if (!this.nodeMap.has(item.id) || !this.dataMap.has(item.id)) {
       return;
     }
-    const parent = this.nodeMap.get(n.item.id)!;
-    const children = this.dataMap.get(n.item.id)!;
+    const parent = this.nodeMap.get(item.id)!;
+    const children = this.dataMap.get(item.id)!;
     if (onlyFirstTime && parent.children!.length > 0) {
       return;
     }
@@ -140,7 +140,7 @@ export class LoadmoreDatabase {
     const nodes:Array<SchemaNode|TableNode|MoreNode> = children.slice(0, newChildrenNumber).map(n => this._generateNode(n));
     if (newChildrenNumber < children.length) {
       // Need a new load more node
-      var schemaMoreNode = new MoreNode(new TableItem(parent.item.id, "more"),false)
+      var schemaMoreNode = new MoreNode(new MoreItem(parent.item.id, "more"),false)
       nodes.push(schemaMoreNode);
     }
 
@@ -148,9 +148,9 @@ export class LoadmoreDatabase {
     this.dataChange.next(this.dataChange.value);
   }
 
-  appendMore(n: SchemaNode|TableNode|MoreNode) {
+  appendMore(item: SchemaItem|TableItem|MoreItem) {
 
-    var schema = n.item.id.split(".")[0]
+    var schema = item.id.split(".")[0]
 
     const parent = this.nodeMap.get(schema)!;
     const children = this.dataMap.get(schema)!;
