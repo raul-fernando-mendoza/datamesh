@@ -1,0 +1,72 @@
+#docker compose cluster mode
+#to run 
+# docker-compose up --build -d
+# yarn jar /opt/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.6.jar pi 10 15
+version: "2"
+
+networks:
+  datamesh-network:
+    name: datamesh-network
+    external: true
+   
+services:
+
+   _ssh_build:
+      image: ssh-image
+      #command: ["/etc/init.d/ssh", "start"]  # any linux command which directly terminates.
+      build:
+         context: .
+         dockerfile: Dockerfile-node 
+    
+   namenode:
+      image: ssh-image
+      depends_on:
+        - _ssh_build
+      image: ssh-image:latest
+      networks:
+        - datamesh-network
+      container_name: namenode
+      hostname: namenode
+      command: ["/home/hadoop/startup.sh"]
+      ports:
+        - 9870:9870
+        - 8088:8088
+      env_file:
+        - ./config
+      environment:
+          ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+      tty: true
+     
+   worker1:
+      image: ssh-image
+      depends_on:
+        - _ssh_build
+      image: ssh-image:latest
+      networks:
+        - datamesh-network
+      container_name: worker1
+      hostname: worker1
+      command: ["/home/hadoop/startup.sh"]
+      env_file:
+        - ./config
+      environment:
+          ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+      tty: true
+      
+   worker2:
+      image: ssh-image
+      depends_on:
+        - _ssh_build
+      image: ssh-image:latest
+      networks:
+        - datamesh-network
+      container_name: worker2
+      hostname: worker2
+      command: ["/home/hadoop/startup.sh"]
+      env_file:
+        - ./config
+      environment:
+          ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
+      tty: true      
+                
+

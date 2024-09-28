@@ -1,0 +1,36 @@
+FROM ubuntu:jammy
+WORKDIR .
+
+RUN apt-get update -y && \
+ apt-get install openjdk-11-jdk -y && \
+ apt-get install ssh -y && \
+ apt-get install iputils-ping -y && \
+ apt-get install -y iproute2 -y && \
+ apt-get install vim -y && \
+ apt-get install sudo -y && \
+ apt-get install wget
+
+RUN useradd -ms /bin/bash hadoop && usermod -aG sudo hadoop
+RUN echo hadoop:U6aMy0wojraho | sudo chpasswd -e
+WORKDIR /home/hadoop
+RUN mkdir downloads && chown hadoop:hadoop downloads
+
+USER hadoop
+COPY ./downloads/hadoop-3.4.0.tar.gz ./downloads/hadoop-3.4.0.tar.gz 
+RUN tar -xvf ./downloads/hadoop-3.4.0.tar.gz -C ./downloads 
+RUN mkdir ./opt
+RUN mv ./downloads/hadoop-3.4.0 ./opt/hadoop
+RUN mkdir ./opt/hadoop/logs
+COPY ./etc/* ./opt/hadoop/etc/hadoop/
+COPY ./home/* ./
+
+
+USER root
+RUN sudo service ssh start 
+
+#RUN ./opt/hadoop/bin/hdfs namenode -format 
+#RUN ./opt/hadoop/sbin/start-dfs.sh 
+#RUN ./opt/hadoop/sbin/start-yarn.sh
+
+
+ 
