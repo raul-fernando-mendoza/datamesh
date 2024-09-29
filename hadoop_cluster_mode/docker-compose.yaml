@@ -19,10 +19,9 @@ services:
          dockerfile: Dockerfile-node 
     
    namenode:
-      image: ssh-image
       depends_on:
         - _ssh_build
-      image: ssh-image:latest
+      image: ssh-image
       networks:
         - datamesh-network
       container_name: namenode
@@ -38,10 +37,9 @@ services:
       tty: true
      
    worker1:
-      image: ssh-image
       depends_on:
         - _ssh_build
-      image: ssh-image:latest
+      image: ssh-image
       networks:
         - datamesh-network
       container_name: worker1
@@ -54,10 +52,9 @@ services:
       tty: true
       
    worker2:
-      image: ssh-image
       depends_on:
         - _ssh_build
-      image: ssh-image:latest
+      image: ssh-image
       networks:
         - datamesh-network
       container_name: worker2
