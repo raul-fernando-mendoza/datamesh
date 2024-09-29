@@ -1,3 +1,5 @@
+#!/bin/bash
+
 while : ; do
     docker cp namenode:/home/hadoop/.ssh/id_rsa.pub ./public_keys/id_rsa_namenode.pub
     [[ $? != 0 ]] || break

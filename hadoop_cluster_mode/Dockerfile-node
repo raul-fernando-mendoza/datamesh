@@ -24,6 +24,12 @@ RUN mkdir ./opt/hadoop/logs
 COPY ./etc/* ./opt/hadoop/etc/hadoop/
 COPY ./home/* ./
 
+COPY ./downloads/spark-3.5.3-bin-hadoop3.tgz ./downloads/spark-3.5.3-bin-hadoop3.tgz 
+RUN tar -xvf ./downloads/spark-3.5.3-bin-hadoop3.tgz -C ./downloads 
+RUN mv ./downloads/spark-3.5.3-bin-hadoop3 ./opt/spark
+
+COPY ./spark-conf/* ./opt/spark/conf
+
 
 USER root
 RUN sudo service ssh start 
