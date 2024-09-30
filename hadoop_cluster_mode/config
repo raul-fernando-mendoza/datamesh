@@ -1,2 +1,6 @@
 JAVA_HOME=/usr
 HADOOP_HOME=/home/hadoop/opt/hadoop
+HADOOP_CONF_DIR=/home/hadoop/opt/hadoop/etc/hadoop 
+SPARK_HOME=/home/hadoop/opt/spark
+LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native
+

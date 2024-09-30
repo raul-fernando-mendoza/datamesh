@@ -1,15 +1,14 @@
 #!/bin/bash
-echo "ran ssh" >> ran.txt
-/etc/init.d/ssh start
-sudo -H -u hadoop bash -c ' \
-ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa && \
-cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys && \
-chmod 0600 ~/.ssh/authorized_keys && \
-ssh-keyscan namenode >> ~/.ssh/known_hosts && \
-ssh-keyscan worker1 >> ~/.ssh/known_hosts && \
-ssh-keyscan worker2 >> ~/.ssh/known_hosts \
-'
+echo "starting..." >> startup.txt
 
+/etc/init.d/ssh start
+
+PATH=$SPARK_HOME/bin:HADOOP_HOME$bin:$PATH
+
+sudo -E -H -u hadoop bash -c 'ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa'
+
+hostname >> startup.txt
+echo "ending startup..." >> startup.txt
 #this should be the last line
 /bin/bash
 

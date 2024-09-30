@@ -32,7 +32,7 @@ COPY ./spark-conf/* ./opt/spark/conf
 
 
 USER root
-RUN sudo service ssh start 
+
 
 #RUN ./opt/hadoop/bin/hdfs namenode -format 
 #RUN ./opt/hadoop/sbin/start-dfs.sh 

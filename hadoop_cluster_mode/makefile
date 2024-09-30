@@ -1,32 +1,47 @@
-startup: 
-	docker-compose up --build -d
-	./keys_get.sh || true
-	docker exec -it namenode /bin/bash -c ./namenode-setup.sh
-
 all:
 	make clean
 	make startup
-	make run
-	make stop
+	make keys
+	make format
+	make start-all
+	make run-python
+	make stop-all
 
-run:
-	docker exec -it namenode /bin/bash -c " \ 
-		cd /home/hadoop/opt/hadoop/ && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
-		"
+startup: 
+	docker-compose up --build -d
+
+keys:
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-format.sh'"
+	./keys_get.sh || true
+
+format:
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-format.sh'"
+
+start-all:
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-start-all.sh'"
+
+
+
+run-mapreduce:
+	docker exec -it namenode /bin/bash -c " sudo -E -H -u hadoop bash -c './mapreduce-sample-pi.sh'"
 
 run-spark:
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c './spark-java-pi.sh'"
+
+run-python:
 	docker exec -it namenode /bin/bash -c "sudo -H -u hadoop bash -c ' \
 	export HADOOP_HOME=/home/hadoop/opt/hadoop && \
 	export HADOOP_CONF_DIR=/home/hadoop/opt/hadoop/etc/hadoop && \
 	export SPARK_HOME=/home/hadoop/opt/spark && \
 	export LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native && \
-		/home/hadoop/opt/spark/bin/spark-submit --deploy-mode cluster \
-               --class org.apache.spark.examples.SparkPi \
-               /home/hadoop/opt/spark/examples/jars/spark-examples_2.12-3.5.3.jar 10 \
-	'"
+		/home/hadoop/opt/spark/bin/spark-submit \
+  		--master yarn \
+  		/home/hadoop/opt/spark/examples/src/main/python/pi.py \
+  		1000 \
+	'"	
 
 stop:
-	docker exec -it namenode /bin/bash -c "sudo -H -u hadoop bash -c '/home/hadoop/opt/hadoop/sbin/stop-all.sh'"	
+	docker exec -it namenode /bin/bash -c "sudo -H -u hadoop bash -c '/hadoop/stop-all.sh'"	
 
 .PHONY: clean
 clean:

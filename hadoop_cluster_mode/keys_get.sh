@@ -1,5 +1,10 @@
 #!/bin/bash
 
+
+docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-knownhost.sh'"
+docker exec -it worker1 /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-knownhost.sh'"
+docker exec -it worker2 /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-knownhost.sh'"
+
 while : ; do
     docker cp namenode:/home/hadoop/.ssh/id_rsa.pub ./public_keys/id_rsa_namenode.pub
     [[ $? != 0 ]] || break
