@@ -5,7 +5,7 @@ all:
 	make format
 	make start-all
 	make run-python
-	make stop-all
+	
 
 startup: 
 	docker-compose up --build -d
@@ -29,16 +29,20 @@ run-spark:
 	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c './spark-java-pi.sh'"
 
 run-python:
-	docker exec -it namenode /bin/bash -c "sudo -H -u hadoop bash -c ' \
-	export HADOOP_HOME=/home/hadoop/opt/hadoop && \
-	export HADOOP_CONF_DIR=/home/hadoop/opt/hadoop/etc/hadoop && \
-	export SPARK_HOME=/home/hadoop/opt/spark && \
-	export LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native && \
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/opt/spark/examples/src/main/python/pi.py \
-  		1000 \
+  		10 \
 	'"	
+
+run-python-sample:
+	docker cp ./python/sample.py namenode:/home/hadoop/sample.py
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+		/home/hadoop/opt/spark/bin/spark-submit \
+  		--master yarn \
+  		/home/hadoop/sample.py \
+	'"		
 
 stop:
 	docker exec -it namenode /bin/bash -c "sudo -H -u hadoop bash -c '/hadoop/stop-all.sh'"	
