@@ -1,4 +1,8 @@
 **.gz
 **.tgz
 **.pub
-public_keys_all/authorized_keys
+public_keys_all/
+secrets/
+downloads/
+downloads-jars/
+venv/

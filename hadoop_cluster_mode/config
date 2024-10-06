@@ -3,4 +3,5 @@ HADOOP_HOME=/home/hadoop/opt/hadoop
 HADOOP_CONF_DIR=/home/hadoop/opt/hadoop/etc/hadoop 
 SPARK_HOME=/home/hadoop/opt/spark
 LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native
+GOOGLE_APPLICATION_CREDENTIALS=/home/hadoop/.config/gcloud/application_default_credentials.json
 

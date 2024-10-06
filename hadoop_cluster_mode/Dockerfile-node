@@ -11,14 +11,11 @@ RUN apt-get update -y && \
  apt-get install wget -y && \
  apt-get install python3-pip -y
 
-RUN pip install pyspark
-# Spark SQL
-RUN pip install pyspark[sql]
-# pandas API on Spark
-RUN pip install pyspark[pandas_on_spark] plotly 
-# to plot your data, you can install plotly together.
-# Spark Connect
-RUN pip install pyspark[connect]
+
+# pip
+COPY ./requirements.txt ./
+RUN pip install -r ./requirements.txt
+
 
 RUN useradd -ms /bin/bash hadoop && usermod -aG sudo hadoop
 RUN echo hadoop:U6aMy0wojraho | sudo chpasswd -e
@@ -31,6 +28,7 @@ RUN tar -xvf ./downloads/hadoop-3.4.0.tar.gz -C ./downloads
 RUN mkdir ./opt
 RUN mv ./downloads/hadoop-3.4.0 ./opt/hadoop
 RUN mkdir ./opt/hadoop/logs
+
 COPY ./etc/* ./opt/hadoop/etc/hadoop/
 COPY ./home/* ./
 
@@ -38,11 +36,18 @@ COPY ./downloads/spark-3.5.3-bin-hadoop3.tgz ./downloads/spark-3.5.3-bin-hadoop3
 RUN tar -xvf ./downloads/spark-3.5.3-bin-hadoop3.tgz -C ./downloads 
 RUN mv ./downloads/spark-3.5.3-bin-hadoop3 ./opt/spark
 
+
+
 COPY ./spark-conf/* ./opt/spark/conf
 
-
+#gcloud folder
+RUN mkdir -p ./.config/gcloud
+RUN mkdir ./secrets
 USER root
-
+COPY ./downloads-jars/gcs-connector-hadoop3-latest.jar /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/
+RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/gcs-connector-hadoop3-latest.jar
+RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/etc/hadoop/*.*
+RUN chown hadoop:hadoop /home/hadoop/opt/spark/conf/*.*
 
 #RUN ./opt/hadoop/bin/hdfs namenode -format 
 #RUN ./opt/hadoop/sbin/start-dfs.sh 

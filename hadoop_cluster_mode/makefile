@@ -37,11 +37,11 @@ run-python:
 	'"	
 
 run-python-sample:
-	docker cp ./python/sample.py namenode:/home/hadoop/sample.py
+	docker cp ./python/read_gs.py namenode:/home/hadoop/
 	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
-  		/home/hadoop/sample.py \
+  		/home/hadoop/read_gs.py \
 	'"		
 
 stop:

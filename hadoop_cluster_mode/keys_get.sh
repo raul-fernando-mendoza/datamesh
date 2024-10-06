@@ -32,3 +32,5 @@ docker cp ./public_keys_all/authorized_keys namenode:/home/hadoop/.ssh/
 docker cp ./public_keys_all/authorized_keys worker1:/home/hadoop/.ssh/
 docker cp ./public_keys_all/authorized_keys worker2:/home/hadoop/.ssh/
 
+docker cp ./secrets/service-account-credentials.json namenode:/home/hadoop/secrets/
+

@@ -21,34 +21,51 @@ from pyspark.sql import Row
 import csv
 from pyspark.sql import SparkSession
 from google.cloud import storage
+from google.oauth2 import service_account
 
-url = 'https://storage.cloud.google.com/datamesh-7b8b8.appspot.com/Book1.csv'
+
+projectId = 'datamesh-7b8b8'
+bucket = 'datamesh-7b8b8.appspot.com'
+url = 'gs://datamesh-7b8b8.appspot.com/customer1/Book1.csv'
+out_file = 'customer1/Book1_out.csv'
 
 if __name__ == "__main__":
     """
         Usage: pi [partitions]
     """
+    print("*** Spark session")
     spark = SparkSession\
         .builder\
         .appName("s_df")\
         .getOrCreate()
     
+    print("*** Client credentials")
+    credentials = service_account.Credentials.from_service_account_file('./secrets/service-account-credentials.json')
 
-    s_df = spark.createDataFrame([
-        Row(a=1, b=2., c='string1', d=date(2000, 1, 1), e=datetime(2000, 1, 1, 12, 0)),
-        Row(a=2, b=3., c='string2', d=date(2000, 2, 1), e=datetime(2000, 1, 2, 12, 0)),
-        Row(a=4, b=5., c='string3', d=date(2000, 3, 1), e=datetime(2000, 1, 3, 12, 0))
-    ])
-    s_df.show()
+    print("*** generate ")
+    storage_client = storage.Client(credentials=credentials)
 
-    pandas_df = pd.DataFrame({
-        'a': [11, 12, 13],
-        'b': [12., 13., 14.],
-        'c': ['string4', 'string5', 'string6'],
-        'd': [date(2001, 1, 1), date(2002, 2, 1), date(2003, 3, 1)],
-        'e': [datetime(2001, 1, 1, 12, 0), datetime(2002, 1, 2, 12, 0), datetime(2003, 1, 3, 12, 0)]
-    })
-    s_df = spark.createDataFrame(pandas_df)
+    print('*** bucket')
+    bucket = storage_client.get_bucket(bucket)
+   
+    print("*** Read csv")
+    pd_df =pd.read_csv(url)
+    pd_df = pd.read_csv(url,storage_options={"token": "./secrets/service-account-credentials.json"})    
+
+    print("*** create dataframe")
+    s_df=spark.createDataFrame(pd_df)
     s_df.show() 
 
+    print("*** apply filter")
+    s_df = s_df.filter(s_df.COLUMN_NAME == "ACTION")
+    s_df.show()
+
+    print("*** write back")
+    p_df = s_df.toPandas()
+
+    bucket.blob(out_file).upload_from_string(p_df.to_csv(), 'text/csv')
+
+    print("*** Stop")
     spark.stop()
+
+    print("*** End")
