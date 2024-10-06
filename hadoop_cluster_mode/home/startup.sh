@@ -3,7 +3,7 @@ echo "starting..." >> startup.txt
 
 /etc/init.d/ssh start
 
-PATH=$SPARK_HOME/bin:HADOOP_HOME$bin:$PATH
+export PATH=$SPARK_HOME/bin:$HADOOP_HOME/bin:$PATH
 
 sudo -E -H -u hadoop bash -c 'ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa'
 

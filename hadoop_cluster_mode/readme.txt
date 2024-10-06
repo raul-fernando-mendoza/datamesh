@@ -25,3 +25,11 @@ EOF
 export HADOOP_CLIENT_OPTS="-Djava.util.logging.config.file=/tmp/gcs-connector-logging.properties"
 
 ./hadoop --loglevel debug fs -ls gs://datamesh-7b8b8.appspot.com
+
+#listar un archivo
+hdfs dfs -ls  <path>
+
+./hdfs dfs -mkdir /user/customer1
+
+#using hadoop 
+./hdfs dfs -copyFromLocal /book1.csv /user/customer1/

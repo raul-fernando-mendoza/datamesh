@@ -44,6 +44,14 @@ run-python-sample:
   		/home/hadoop/read_gs.py \
 	'"		
 
+run-python-read-hdfs:
+	docker cp ./python/read_hdfs.py namenode:/home/hadoop/
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+		/home/hadoop/opt/spark/bin/spark-submit \
+  		--master yarn \
+  		/home/hadoop/read_hdfs.py \
+	'"		
+
 stop:
 	docker exec -it namenode /bin/bash -c "sudo -H -u hadoop bash -c '/hadoop/stop-all.sh'"	
 
