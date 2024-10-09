@@ -52,6 +52,8 @@ RUN chown hadoop:hadoop /home/hadoop/opt/spark/conf/*.*
 COPY ./downloads/book1.csv /home/hadoop/
 RUN chown hadoop:hadoop /home/hadoop/book1.csv
 
+COPY ./downloads-jars/gcs-connector-hadoop3-latest.jar /home/hadoop/opt/spark/jars/
+RUN chown hadoop:hadoop /home/hadoop/opt/spark/jars/gcs-connector-hadoop3-latest.jar
 
 
  
