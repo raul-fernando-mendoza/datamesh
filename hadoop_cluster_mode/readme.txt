@@ -29,7 +29,9 @@ export HADOOP_CLIENT_OPTS="-Djava.util.logging.config.file=/tmp/gcs-connector-lo
 #listar un archivo
 hdfs dfs -ls  <path>
 
+cd opt/hadoop/bin
+
 ./hdfs dfs -mkdir /user/customer1
 
 #using hadoop 
-./hdfs dfs -copyFromLocal /book1.csv /user/customer1/
+./hdfs dfs -copyFromLocal ~/book1.csv /user/customer1/

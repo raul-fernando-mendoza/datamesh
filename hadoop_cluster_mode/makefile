@@ -36,7 +36,7 @@ run-python:
   		10 \
 	'"	
 
-run-python-sample:
+run-python-read-gs:
 	docker cp ./python/read_gs.py namenode:/home/hadoop/
 	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
@@ -50,7 +50,15 @@ run-python-read-hdfs:
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/read_hdfs.py \
-	'"		
+	'"	
+
+run-python-write-gs:
+	docker cp ./python/write_gs.py namenode:/home/hadoop/
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+		/home/hadoop/opt/spark/bin/spark-submit \
+  		--master yarn \
+  		/home/hadoop/write_gs.py \
+	'"			
 
 stop:
 	docker exec -it namenode /bin/bash -c "sudo -H -u hadoop bash -c '/hadoop/stop-all.sh'"	

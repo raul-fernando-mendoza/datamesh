@@ -49,12 +49,9 @@ RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/gcs-connec
 RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/etc/hadoop/*.*
 RUN chown hadoop:hadoop /home/hadoop/opt/spark/conf/*.*
 
-COPY ./downloads/book1.csv /home/hadoop
+COPY ./downloads/book1.csv /home/hadoop/
 RUN chown hadoop:hadoop /home/hadoop/book1.csv
 
-#RUN ./opt/hadoop/bin/hdfs namenode -format 
-#RUN ./opt/hadoop/sbin/start-dfs.sh 
-#RUN ./opt/hadoop/sbin/start-yarn.sh
 
 
  
