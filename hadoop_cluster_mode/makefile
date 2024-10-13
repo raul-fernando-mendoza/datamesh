@@ -1,29 +1,39 @@
+clustername = $(shell basename "$$PWD")
+
 all:
 	make clean
-	make startup
+	make build
 	make keys
 	make format
 	make start-all
 	
+build: 
+	echo clustername=${clustername} > .env
+	docker-compose -p $(clustername) up --build -d
 
-startup: 
-	docker-compose up --build -d
+start: 
+	docker-compose start 
+	make start-all
+
+stop: 
+	make stop-all
+	docker-compose stop 
 
 keys:
 	./keys_get.sh || true
 
 format:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/hadoop/bin/hdfs namenode -format \
 	'"		
 
 start-all:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 	/home/hadoop/opt/hadoop/sbin/start-all.sh \
 	'"
 
 stop-all:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker exec -it $(clustername)_namenode_1 /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 	/home/hadoop/opt/hadoop/sbin/stop-all.sh \
 	'"
 
@@ -85,9 +95,8 @@ prune:
 
 .PHONY: clean
 clean:
-	make stop-all
 	rm -f ./public_keys_all/authorized_keys
 	rm -f ./public_keys/*.pub
-	docker stop worker1 worker2 namenode || true 
-	docker rm -f worker1 worker2 namenode || true 
+	docker stop $(clustername)_worker1 $(clustername)_worker2 $(clustername)_namenode || true 
+	docker rm -f $(clustername)_worker1 $(clustername)_worker2 $(clustername)_namenode || true 
 

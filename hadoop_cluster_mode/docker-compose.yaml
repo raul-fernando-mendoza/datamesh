@@ -6,8 +6,7 @@ version: "2"
 
 networks:
   datamesh-network:
-    name: datamesh-network
-    external: true
+    name: ${clustername}
    
 services:
 

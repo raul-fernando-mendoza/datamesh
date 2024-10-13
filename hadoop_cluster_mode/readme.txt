@@ -56,3 +56,5 @@ jps
 ~/opt/hadoop/logs
 
 hdfs" getconf -confKey "yarn.resourcemanager.hostname"
+
+docker rm -v -f $(docker ps -qa)
