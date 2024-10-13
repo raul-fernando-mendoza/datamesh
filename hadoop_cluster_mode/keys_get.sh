@@ -1,35 +1,35 @@
 #!/bin/bash
 
 
-docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash ' \
-        ssh-keyscan namenode > ~/.ssh/known_hosts \
-        ssh-keyscan worker1 >> ~/.ssh/known_hosts \
+docker exec -it $1_namenode  /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+        ssh-keyscan namenode > ~/.ssh/known_hosts && \
+        ssh-keyscan worker1 >> ~/.ssh/known_hosts && \
         ssh-keyscan worker2 >> ~/.ssh/known_hosts \
     '"
-docker exec -it worker1 /bin/bash -c "sudo -E -H -u hadoop bash ' \
-        ssh-keyscan namenode > ~/.ssh/known_hosts \
-        ssh-keyscan worker1 >> ~/.ssh/known_hosts \
-        ssh-keyscan worker2 >> ~/.ssh/known_hosts \
+docker exec -it $1_namenode  /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+        ssh-keyscan namenode > ~/.ssh/known_hosts && \
+        ssh-keyscan worker1 >> ~/.ssh/known_hosts && \
+        ssh-keyscan worker2 >> ~/.ssh/known_hosts\
     '"
-docker exec -it worker2 /bin/bash -c "sudo -E -H -u hadoop bash ' \
-        ssh-keyscan namenode > ~/.ssh/known_hosts \
-        ssh-keyscan worker1 >> ~/.ssh/known_hosts \
+docker exec -it $1_namenode  /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+        ssh-keyscan namenode > ~/.ssh/known_hosts && \
+        ssh-keyscan worker1 >> ~/.ssh/known_hosts && \
         ssh-keyscan worker2 >> ~/.ssh/known_hosts \
     '"
 while : ; do
-    docker cp namenode:/home/hadoop/.ssh/id_rsa.pub ./public_keys/id_rsa_namenode.pub
+    docker cp $1_namenode:/home/hadoop/.ssh/id_rsa.pub ./public_keys/id_rsa_namenode.pub
     [[ $? != 0 ]] || break
     sleep 10s
 done
 
 while : ; do
-    docker cp worker1:/home/hadoop/.ssh/id_rsa.pub ./public_keys/id_rsa_worker1.pub
+    docker cp $1_worker1:/home/hadoop/.ssh/id_rsa.pub ./public_keys/id_rsa_worker1.pub
     [[ $? != 0 ]] || break
     sleep 10s
 done
 
 while : ; do
-    docker cp worker2:/home/hadoop/.ssh/id_rsa.pub ./public_keys/id_rsa_worker2.pub
+    docker cp $1_worker2:/home/hadoop/.ssh/id_rsa.pub ./public_keys/id_rsa_worker2.pub
     [[ $? != 0 ]] || break
     sleep 10s
 done
@@ -39,6 +39,6 @@ cat ./public_keys/id_rsa_namenode.pub > ./public_keys_all/authorized_keys
 cat ./public_keys/id_rsa_worker1.pub >> ./public_keys_all/authorized_keys
 cat ./public_keys/id_rsa_worker2.pub >> ./public_keys_all/authorized_keys
 
-docker cp ./public_keys_all/authorized_keys namenode:/home/hadoop/.ssh/
-docker cp ./public_keys_all/authorized_keys worker1:/home/hadoop/.ssh/
-docker cp ./public_keys_all/authorized_keys worker2:/home/hadoop/.ssh/
+docker cp ./public_keys_all/authorized_keys $1_namenode:/home/hadoop/.ssh/
+docker cp ./public_keys_all/authorized_keys $1_worker1:/home/hadoop/.ssh/
+docker cp ./public_keys_all/authorized_keys $1_worker2:/home/hadoop/.ssh/

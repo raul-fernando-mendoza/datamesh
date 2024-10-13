@@ -1,15 +1,19 @@
-clustername = $(shell basename "$$PWD")
-
+currentdir = $(shell dirname "$$PWD")
+clustername = $(shell basename ${currentdir}) 
+namenode=$(clustername)_namenode
 all:
 	make clean
 	make build
 	make keys
 	make format
 	make start-all
-	
+
+env: 
+	echo clustername=${clustername} > .env
+
 build: 
 	echo clustername=${clustername} > .env
-	docker-compose -p $(clustername) up --build -d
+	docker-compose -p ${clustername} up --build -d
 
 start: 
 	docker-compose start 
@@ -20,7 +24,7 @@ stop:
 	docker-compose stop 
 
 keys:
-	./keys_get.sh || true
+	./keys_get.sh ${clustername} || true
 
 format:
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
@@ -33,22 +37,22 @@ start-all:
 	'"
 
 stop-all:
-	docker exec -it $(clustername)_namenode_1 /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker exec -it $(clustername)_namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 	/home/hadoop/opt/hadoop/sbin/stop-all.sh \
 	'"
 
 run-mapreduce:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker exec -it $(clustername) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 	cd /home/hadoop/opt/hadoop && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
 	'"	
 
 run-spark:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker exec -it $(clustername) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 	cd /home/hadoop/opt/hadoop && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
 	'"	
 
 run-python:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker exec -it $(clustername) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/opt/spark/examples/src/main/python/pi.py \
@@ -56,32 +60,32 @@ run-python:
 	'"	
 
 run-python-pandas-read-gs:
-	docker cp ./python/pandas_read_gs.py namenode:/home/hadoop/
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker cp ./python/pandas_read_gs.py $(clustername):/home/hadoop/
+	docker exec -it $(clustername) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/pandas_read_gs.py \
 	'"		
 
 run-python-read-hdfs:
-	docker cp ./python/read_hdfs.py namenode:/home/hadoop/
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker cp ./python/read_hdfs.py $(clustername):/home/hadoop/
+	docker exec -it $(clustername) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/read_hdfs.py \
 	'"	
 
 run-python-gs-write:
-	docker cp ./python/gs_write.py namenode:/home/hadoop/
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker cp ./python/gs_write.py $(clustername):/home/hadoop/
+	docker exec -it $(clustername) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/gs_write.py \
 	'"			
 
 run-python-gs-read:
-	docker cp ./python/gs_read.py namenode:/home/hadoop/
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	docker cp ./python/gs_read.py $(clustername):/home/hadoop/
+	docker exec -it $(clustername) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/gs_read.py \
