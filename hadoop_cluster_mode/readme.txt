@@ -26,6 +26,9 @@ export HADOOP_CLIENT_OPTS="-Djava.util.logging.config.file=/tmp/gcs-connector-lo
 
 ./hadoop --loglevel debug fs -ls gs://datamesh-7b8b8.appspot.com
 
+
+export PATH=/home/hadoop/opt/hadoop/bin:/home/hadoop/opt/hadoop/sbin:$PATH
+
 #listar un archivo
 hdfs dfs -ls  <path>
 
@@ -35,3 +38,19 @@ cd opt/hadoop/bin
 
 #using hadoop 
 ./hdfs dfs -copyFromLocal ~/book1.csv /user/customer1/
+
+docker cp ./spark-conf/* namenode:/home/hadoop/opt/spark/conf
+
+docker cp ./etc/core-site.xml namenode:/home/hadoop/opt/hadoop/etc/hadoop
+docker cp ./etc/core-site.xml worker1:/home/hadoop/opt/hadoop/etc/hadoop
+docker cp ./etc/core-site.xml worker2:/home/hadoop/opt/hadoop/etc/hadoop
+
+#to see the status of the hadoop
+jps 
+8352 SecondaryNameNode
+8567 ResourceManager
+8139 NameNode
+
+
+#where the log are 
+~/opt/hadoop/logs

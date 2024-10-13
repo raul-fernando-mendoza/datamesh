@@ -4,7 +4,6 @@ all:
 	make keys
 	make format
 	make start-all
-	make run-python
 	
 
 startup: 
@@ -18,9 +17,9 @@ format:
 	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-format.sh'"
 
 start-all:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-start-all.sh'"
-
-
+	docker exec -it namenode /bin/bash -c " \
+	sudo -H -u hadoop bash -c '/home/hadoop/opt/hadoop/sbin/start-all.sh' \
+	"	
 
 run-mapreduce:
 	docker exec -it namenode /bin/bash -c " sudo -E -H -u hadoop bash -c './mapreduce-sample-pi.sh'"
@@ -60,8 +59,16 @@ run-python-write-gs:
   		/home/hadoop/write_gs.py \
 	'"			
 
-stop:
-	docker exec -it namenode /bin/bash -c "sudo -H -u hadoop bash -c '/hadoop/stop-all.sh'"	
+stop-all:
+	docker exec -it namenode /bin/bash -c " \
+	sudo -H -u hadoop bash -c '/home/hadoop/opt/hadoop/sbin/stop-all.sh' \
+	"	
+
+prune:
+	make clean
+	docker rm $(docker ps -a -q)
+	docker rmi $(docker images -q)
+	docker system prune -a
 
 .PHONY: clean
 clean:
