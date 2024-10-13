@@ -41,9 +41,9 @@ cd opt/hadoop/bin
 
 docker cp ./spark-conf/* namenode:/home/hadoop/opt/spark/conf
 
-docker cp ./etc/core-site.xml namenode:/home/hadoop/opt/hadoop/etc/hadoop
-docker cp ./etc/core-site.xml worker1:/home/hadoop/opt/hadoop/etc/hadoop
-docker cp ./etc/core-site.xml worker2:/home/hadoop/opt/hadoop/etc/hadoop
+docker cp ./etc/yarn-site.xml namenode:/home/hadoop/opt/hadoop/etc/hadoop
+docker cp ./etc/yarn-site.xml worker1:/home/hadoop/opt/hadoop/etc/hadoop
+docker cp ./etc/yarn-site.xml worker2:/home/hadoop/opt/hadoop/etc/hadoop
 
 #to see the status of the hadoop
 jps 
@@ -54,3 +54,5 @@ jps
 
 #where the log are 
 ~/opt/hadoop/logs
+
+hdfs" getconf -confKey "yarn.resourcemanager.hostname"
