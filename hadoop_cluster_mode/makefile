@@ -10,22 +10,32 @@ startup:
 	docker-compose up --build -d
 
 keys:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-format.sh'"
 	./keys_get.sh || true
 
 format:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash './hadoop-format.sh'"
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+		/home/hadoop/opt/hadoop/bin/hdfs namenode -format \
+	'"		
 
 start-all:
-	docker exec -it namenode /bin/bash -c " \
-	sudo -H -u hadoop bash -c '/home/hadoop/opt/hadoop/sbin/start-all.sh' \
-	"	
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	/home/hadoop/opt/hadoop/sbin/start-all.sh \
+	'"
+
+stop-all:
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	/home/hadoop/opt/hadoop/sbin/stop-all.sh \
+	'"
 
 run-mapreduce:
-	docker exec -it namenode /bin/bash -c " sudo -E -H -u hadoop bash -c './mapreduce-sample-pi.sh'"
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	cd /home/hadoop/opt/hadoop && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
+	'"	
 
 run-spark:
-	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c './spark-java-pi.sh'"
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+	cd /home/hadoop/opt/hadoop && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
+	'"	
 
 run-python:
 	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
@@ -58,6 +68,7 @@ run-python-gs-write:
   		--master yarn \
   		/home/hadoop/gs_write.py \
 	'"			
+
 run-python-gs-read:
 	docker cp ./python/gs_read.py namenode:/home/hadoop/
 	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
@@ -65,11 +76,6 @@ run-python-gs-read:
   		--master yarn \
   		/home/hadoop/gs_read.py \
 	'"	
-
-stop-all:
-	docker exec -it namenode /bin/bash -c " \
-	sudo -H -u hadoop bash -c '/home/hadoop/opt/hadoop/sbin/stop-all.sh' \
-	"	
 
 prune:
 	make clean
@@ -79,6 +85,7 @@ prune:
 
 .PHONY: clean
 clean:
+	make stop-all
 	rm -f ./public_keys_all/authorized_keys
 	rm -f ./public_keys/*.pub
 	docker stop worker1 worker2 namenode || true 
