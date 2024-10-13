@@ -35,12 +35,12 @@ run-python:
   		10 \
 	'"	
 
-run-python-read-gs:
-	docker cp ./python/read_gs.py namenode:/home/hadoop/
+run-python-pandas-read-gs:
+	docker cp ./python/pandas_read_gs.py namenode:/home/hadoop/
 	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
-  		/home/hadoop/read_gs.py \
+  		/home/hadoop/pandas_read_gs.py \
 	'"		
 
 run-python-read-hdfs:
@@ -51,13 +51,20 @@ run-python-read-hdfs:
   		/home/hadoop/read_hdfs.py \
 	'"	
 
-run-python-write-gs:
-	docker cp ./python/write_gs.py namenode:/home/hadoop/
+run-python-gs-write:
+	docker cp ./python/gs_write.py namenode:/home/hadoop/
 	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
 		/home/hadoop/opt/spark/bin/spark-submit \
   		--master yarn \
-  		/home/hadoop/write_gs.py \
+  		/home/hadoop/gs_write.py \
 	'"			
+run-python-gs-read:
+	docker cp ./python/gs_read.py namenode:/home/hadoop/
+	docker exec -it namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+		/home/hadoop/opt/spark/bin/spark-submit \
+  		--master yarn \
+  		/home/hadoop/gs_read.py \
+	'"	
 
 stop-all:
 	docker exec -it namenode /bin/bash -c " \
