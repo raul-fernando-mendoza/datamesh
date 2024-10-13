@@ -43,6 +43,7 @@ COPY ./spark-conf/* ./opt/spark/conf
 #gcloud folder
 RUN mkdir -p ./.config/gcloud
 RUN mkdir ./secrets
+COPY ./secrets/service-account-credentials.json /home/hadoop/secrets/
 USER root
 COPY ./downloads-jars/gcs-connector-hadoop3-latest.jar /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/
 RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/gcs-connector-hadoop3-latest.jar

@@ -44,6 +44,6 @@ if __name__ == "__main__":
     })
     s_df = spark.createDataFrame(pandas_df)
 
-    s_df.write.save('gs://datamesh-7b8b8.appspot.com/customer1/Book2.csv',format("csv"), header=True)
+    s_df.write.mode("overwrite").save('gs://datamesh-7b8b8.appspot.com/customer1/Book2.csv',format("csv"), header=True)
 
     spark.stop()
