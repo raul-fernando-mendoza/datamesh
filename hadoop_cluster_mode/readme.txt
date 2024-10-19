@@ -58,3 +58,5 @@ jps
 hdfs" getconf -confKey "yarn.resourcemanager.hostname"
 
 docker rm -v -f $(docker ps -qa)
+
+sudo lsof -i -P -n | grep LISTEN

@@ -23,7 +23,7 @@ services:
       image: ssh-image
       networks:
         - datamesh-network
-      container_name: ${clustername_namenode}
+      container_name: ${clustername}_namenode
       hostname: namenode
       command: ["/home/hadoop/startup.sh"]
       ports:
@@ -42,7 +42,7 @@ services:
       image: ssh-image
       networks:
         - datamesh-network
-      container_name: ${clustername_worker1}
+      container_name: ${clustername}_worker1
       hostname: worker1
       command: ["/home/hadoop/startup.sh"]
       env_file:
@@ -57,7 +57,7 @@ services:
       image: ssh-image
       networks:
         - datamesh-network
-      container_name: ${clustername_worker2}
+      container_name: ${clustername}_worker2
       hostname: worker2
       command: ["/home/hadoop/startup.sh"]
       env_file:

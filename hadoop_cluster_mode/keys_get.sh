@@ -6,12 +6,12 @@ docker exec -it $1_namenode  /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
         ssh-keyscan worker1 >> ~/.ssh/known_hosts && \
         ssh-keyscan worker2 >> ~/.ssh/known_hosts \
     '"
-docker exec -it $1_namenode  /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+docker exec -it $1_worker1  /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
         ssh-keyscan namenode > ~/.ssh/known_hosts && \
         ssh-keyscan worker1 >> ~/.ssh/known_hosts && \
         ssh-keyscan worker2 >> ~/.ssh/known_hosts\
     '"
-docker exec -it $1_namenode  /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+docker exec -it $1_worker2  /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
         ssh-keyscan namenode > ~/.ssh/known_hosts && \
         ssh-keyscan worker1 >> ~/.ssh/known_hosts && \
         ssh-keyscan worker2 >> ~/.ssh/known_hosts \
