@@ -3,6 +3,10 @@ clustername = $(shell basename ${currentdir})
 namenode=$(addprefix ${clustername},_namenode)
 worker1=$(addprefix ${clustername},_worker1)
 worker2=$(addprefix ${clustername},_worker2)
+
+hadoop_home=/mnt/software/hadoop-3.4.0
+spark_home=/mnt/software/spark-3.5.3-bin-hadoop3
+
 all:
 	make clean
 	make build
@@ -26,41 +30,41 @@ keys:
 
 format:
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-		/home/hadoop/opt/hadoop/bin/hdfs namenode -format \
+		${hadoop_home}/bin/hdfs namenode -format \
 	'"		
 
 start-all:
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-	/home/hadoop/opt/hadoop/sbin/start-all.sh \
+		${hadoop_home}/sbin/start-all.sh \
 	'"
 
 stop-all:
-	docker exec -it $(namenode)_namenode /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-	/home/hadoop/opt/hadoop/sbin/stop-all.sh \
+	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+		${hadoop_home}/sbin/stop-all.sh \
 	'"
 
 run-mapreduce:
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-	cd /home/hadoop/opt/hadoop && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
+	cd ${hadoop_home} && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
 	'"	
 
 run-spark:
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-	cd /home/hadoop/opt/hadoop && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
+	cd ${hadoop_home} && ./bin/yarn jar share/hadoop/mapreduce/hadoop-mapreduce-examples-3.4.0.jar pi 10 15 \
 	'"	
 
 run-python:
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-		/home/hadoop/opt/spark/bin/spark-submit \
+		${spark_home}/bin/spark-submit \
   		--master yarn \
-  		/home/hadoop/opt/spark/examples/src/main/python/pi.py \
+  		${spark_home}/examples/src/main/python/pi.py \
   		10 \
 	'"	
 
 run-python-pandas-read-gs:
 	docker cp ./python/pandas_read_gs.py $(namenode):/home/hadoop/
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-		/home/hadoop/opt/spark/bin/spark-submit \
+		${spark_home}/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/pandas_read_gs.py \
 	'"		
@@ -68,7 +72,7 @@ run-python-pandas-read-gs:
 run-python-read-hdfs:
 	docker cp ./python/read_hdfs.py $(namenode):/home/hadoop/
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-		/home/hadoop/opt/spark/bin/spark-submit \
+		${spark_home}/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/read_hdfs.py \
 	'"	
@@ -76,7 +80,7 @@ run-python-read-hdfs:
 run-python-gs-write:
 	docker cp ./python/gs_write.py $(namenode):/home/hadoop/
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-		/home/hadoop/opt/spark/bin/spark-submit \
+		${spark_home}/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/gs_write.py \
 	'"			
@@ -84,7 +88,7 @@ run-python-gs-write:
 run-python-gs-read:
 	docker cp ./python/gs_read.py $(namenode):/home/hadoop/
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
-		/home/hadoop/opt/spark/bin/spark-submit \
+		${spark_home}/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/gs_read.py \
 	'"	

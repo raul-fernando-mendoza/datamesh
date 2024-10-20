@@ -1,9 +1,17 @@
 JAVA_HOME=/usr
-HADOOP_HOME=/home/hadoop/opt/hadoop
+HADOOP_HOME=/mnt/software/hadoop-3.4.0
 HADOOP_CONF_DIR=/home/hadoop/opt/hadoop/etc/hadoop
-HADOOP_MAPRED_HOME=/home/hadoop/opt/hadoop
-YARN_HOME=/home/hadoop/opt/hadoop
-SPARK_HOME=/home/hadoop/opt/spark
-LD_LIBRARY_PATH=/home/hadoop/hadoop/lib/native
+HADOOP_MAPRED_HOME=/mnt/software/hadoop-3.4.0
+HADOOP_COMMON_HOME=/mnt/software/hadoop-3.4.0
+HADOOP_HDFS_HOME=/mnt/software/hadoop-3.4.0
+
+
+YARN_HOME=/mnt/software/hadoop-3.4.0
+HADOOP_YARN_HOME=/mnt/software/hadoop-3.4.0
+
+SPARK_HOME=/mnt/software/spark-3.5.3-bin-hadoop3
+
+LD_LIBRARY_PATH=/mnt/software/hadoop-3.4.0/lib/native
+
 GOOGLE_APPLICATION_CREDENTIALS=/home/hadoop/.config/gcloud/application_default_credentials.json
 

@@ -23,38 +23,40 @@ WORKDIR /home/hadoop
 RUN mkdir downloads && chown hadoop:hadoop downloads
 
 USER hadoop
-COPY ./downloads/hadoop-3.4.0.tar.gz ./downloads/hadoop-3.4.0.tar.gz 
-RUN tar -xvf ./downloads/hadoop-3.4.0.tar.gz -C ./downloads 
-RUN mkdir ./opt
-RUN mv ./downloads/hadoop-3.4.0 ./opt/hadoop
-RUN mkdir ./opt/hadoop/logs
+#COPY ./downloads/hadoop-3.4.0.tar.gz ./downloads/hadoop-3.4.0.tar.gz 
+#RUN tar -xvf ./downloads/hadoop-3.4.0.tar.gz -C ./downloads 
+#RUN mkdir ./opt
+#RUN mv ./downloads/hadoop-3.4.0 ./opt/hadoop
+RUN mkdir -p ./opt/hadoop/logs
 
 COPY ./etc/* ./opt/hadoop/etc/hadoop/
 COPY ./home/* ./
 
-COPY ./downloads/spark-3.5.3-bin-hadoop3.tgz ./downloads/spark-3.5.3-bin-hadoop3.tgz 
-RUN tar -xvf ./downloads/spark-3.5.3-bin-hadoop3.tgz -C ./downloads 
-RUN mv ./downloads/spark-3.5.3-bin-hadoop3 ./opt/spark
+#COPY ./downloads/spark-3.5.3-bin-hadoop3.tgz ./downloads/spark-3.5.3-bin-hadoop3.tgz 
+#RUN tar -xvf ./downloads/spark-3.5.3-bin-hadoop3.tgz -C ./downloads 
+#RUN mv ./downloads/spark-3.5.3-bin-hadoop3 ./opt/spark
 
 
 
-COPY ./spark-conf/* ./opt/spark/conf
+COPY ./spark_conf/* ./opt/spark/conf
 
 #gcloud folder
 RUN mkdir -p ./.config/gcloud
 RUN mkdir ./secrets
 COPY ./secrets/service-account-credentials.json /home/hadoop/secrets/
+
+#you must always end with root so services can be started
 USER root
-COPY ./downloads-jars/gcs-connector-hadoop3-latest.jar /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/
-RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/gcs-connector-hadoop3-latest.jar
-RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/etc/hadoop/*.*
-RUN chown hadoop:hadoop /home/hadoop/opt/spark/conf/*.*
+#COPY ./downloads-jars/gcs-connector-hadoop3-latest.jar /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/
+#RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/gcs-connector-hadoop3-latest.jar
+#RUN chown hadoop:hadoop /home/hadoop/opt/hadoop/etc/hadoop/*.*
+#RUN chown hadoop:hadoop /home/hadoop/opt/spark/conf/*.*
 
-COPY ./downloads/book1.csv /home/hadoop/
-RUN chown hadoop:hadoop /home/hadoop/book1.csv
+#COPY ./downloads/book1.csv /home/hadoop/
+#RUN chown hadoop:hadoop /home/hadoop/book1.csv
 
-COPY ./downloads-jars/gcs-connector-hadoop3-latest.jar /home/hadoop/opt/spark/jars/
-RUN chown hadoop:hadoop /home/hadoop/opt/spark/jars/gcs-connector-hadoop3-latest.jar
+#COPY ./downloads-jars/gcs-connector-hadoop3-latest.jar /home/hadoop/opt/spark/jars/
+#RUN chown hadoop:hadoop /home/hadoop/opt/spark/jars/gcs-connector-hadoop3-latest.jar
 
 
  

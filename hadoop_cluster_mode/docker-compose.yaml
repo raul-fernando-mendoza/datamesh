@@ -16,6 +16,7 @@ services:
       build:
          context: .
          dockerfile: Dockerfile-node 
+
     
    namenode:
       depends_on:
@@ -35,6 +36,8 @@ services:
       environment:
           ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
       tty: true
+      volumes:
+        - ~/datamesh_software:/mnt/software      
      
    worker1:
       depends_on:
@@ -50,6 +53,9 @@ services:
       environment:
           ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
       tty: true
+      volumes:
+        - ~/datamesh_software:/mnt/software      
+
       
    worker2:
       depends_on:
@@ -64,6 +70,9 @@ services:
         - ./config
       environment:
           ENSURE_NAMENODE_DIR: "/tmp/hadoop-root/dfs/name"
-      tty: true      
+      tty: true
+      volumes:
+        - ~/datamesh_software:/mnt/software      
+
                 
 

@@ -59,7 +59,7 @@ export LANG=en_US.UTF-8
 
 # Location of Hadoop.  By default, Hadoop will attempt to determine
 # this location based upon its execution path.
-export HADOOP_HOME=/home/hadoop/opt/hadoop
+#export HADOOP_HOME=/home/hadoop/opt/hadoop
 
 # Location of Hadoop's configuration information.  i.e., where this
 # file is living. If this is not defined, Hadoop will attempt to
@@ -69,7 +69,7 @@ export HADOOP_HOME=/home/hadoop/opt/hadoop
 # /etc/profile.d or equivalent.  Some options (such as
 # --config) may react strangely otherwise.
 #
-export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
+#export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
 
 # The maximum amount of heap to use (Java -Xmx).  If no unit
 # is provided, it will be converted to MB.  Daemons will
@@ -127,7 +127,7 @@ export HADOOP_OS_TYPE=${HADOOP_OS_TYPE:-$(uname -s)}
 # Similarly, end users should utilize ${HOME}/.hadooprc .
 # This variable should ideally only be used as a short-cut,
 # interactive way for temporary additions on the command line.
-# export HADOOP_CLASSPATH="/some/cool/path/on/your/machine"
+#HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/mnt/software/gcs-connector-hadoop3-latest.jar
 
 # Should HADOOP_CLASSPATH be first in the official CLASSPATH?
 # export HADOOP_USER_CLASSPATH_FIRST="yes"

@@ -12,7 +12,7 @@ python3 -m pip freeze > requirements.txt
 python3 -m pip install -r
 
 #to test gs connectivity
-~/opt/hadoop/bin/hadoop fs -ls gs://datamesh-7b8b8.appspot.com
+hadoop fs -ls gs://datamesh-7b8b8.appspot.com
 
 #to debug
 cat <<EOF >"/tmp/gcs-connector-logging.properties"
@@ -60,3 +60,7 @@ hdfs" getconf -confKey "yarn.resourcemanager.hostname"
 docker rm -v -f $(docker ps -qa)
 
 sudo lsof -i -P -n | grep LISTEN
+
+#gcs-connector-hadoop3-latest.jar must be copied to both hadoop and spark
+COPY gcs-connector-hadoop3-latest.jar /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/
+COPY gcs-connector-hadoop3-latest.jar /home/hadoop/opt/spark/jars/

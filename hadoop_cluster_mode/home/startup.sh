@@ -9,6 +9,6 @@ sudo -E -H -u hadoop bash -c 'ssh-keygen -t rsa -P "" -f ~/.ssh/id_rsa'
 
 hostname >> startup.txt
 echo "ending startup..." >> startup.txt
-#this should be the last line
+#this should be the last line to keep the container up all the time
 /bin/bash
 
