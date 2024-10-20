@@ -15,7 +15,7 @@ all:
 	make start-all
 
 build: 
-	clustername=${clustername} docker-compose up --build -d
+	clustername=${clustername} docker-compose --project-name ${clustername} up --build -d
 
 start: 
 	docker-compose start 
