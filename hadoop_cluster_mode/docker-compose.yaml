@@ -28,9 +28,9 @@ services:
       hostname: namenode
       command: ["/home/hadoop/startup.sh"]
       ports:
-        - 9870:9870
-        - 8088:8088
-        - 7077:7077
+        - 9870
+        - 8088
+        - 7077
       env_file:
         - ./config
       environment:
