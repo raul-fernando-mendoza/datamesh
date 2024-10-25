@@ -118,6 +118,7 @@
     <final>false</final>
     <source>Dataproc Cluster Properties</source>
   </property>
+  <!--
 <property>
   <name>google.cloud.auth.type</name>
   <value>SERVICE_ACCOUNT_JSON_KEYFILE</value>
@@ -125,6 +126,7 @@
     Authentication type to use for GCS access.
   </description>
 </property>
+
 <property>
   <name>google.cloud.auth.service.account.json.keyfile</name>
   <value>/home/hadoop/secrets/service-account-credentials.json</value>
@@ -133,5 +135,6 @@
     access when google.cloud.auth.type is SERVICE_ACCOUNT_JSON_KEYFILE.
   </description>
 </property>
+-->
 
 </configuration>

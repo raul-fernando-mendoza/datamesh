@@ -85,6 +85,14 @@ run-python-gs-write:
   		/home/hadoop/gs_write.py \
 	'"			
 
+run-python-gs-write-with-key:
+	docker cp ./python/gs_write_with_key.py $(namenode):/home/hadoop/
+	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+		${spark_home}/bin/spark-submit \
+  		--master yarn \
+  		/home/hadoop/gs_write_with_key.py \
+	'"		
+
 run-python-gs-read:
 	docker cp ./python/gs_read.py $(namenode):/home/hadoop/
 	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
