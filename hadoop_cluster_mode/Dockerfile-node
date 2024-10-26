@@ -33,7 +33,7 @@ COPY ./spark_conf/* ./opt/spark/conf
 #gcloud folder
 RUN mkdir -p ./.config/gcloud
 RUN mkdir ./secrets
-COPY ./secrets/service-account-credentials.json /home/hadoop/secrets/
+RUN mkdir ./python
 
 #you must always end with root so services can be started
 USER root
