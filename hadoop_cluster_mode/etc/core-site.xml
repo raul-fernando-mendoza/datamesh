@@ -52,6 +52,7 @@
     <name>hadoop.security.token.service.use_ip</name>
     <value>false</value>
   </property>
+  <!--
   <property>
     <name>fs.gs.project.id</name>
     <value>datamesh-7b8b8</value>
@@ -59,6 +60,8 @@
       Google Cloud Project ID with access to configured GCS buckets.
     </description>
   </property>
+  -->
+  <!--
   <property>
     <name>fs.gs.system.bucket</name>
     <value>datamesh-7b8b8.appspot.com</value>
@@ -66,6 +69,7 @@
       GCS bucket to use as a default bucket if fs.default.name is not a gs: uri.
     </description>
   </property>
+  -->
   <property>
     <name>fs.gs.implicit.dir.infer.enable</name>
     <value>true</value>
