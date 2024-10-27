@@ -64,3 +64,6 @@ sudo lsof -i -P -n | grep LISTEN
 #gcs-connector-hadoop3-latest.jar must be copied to both hadoop and spark
 COPY gcs-connector-hadoop3-latest.jar /home/hadoop/opt/hadoop/share/hadoop/hdfs/lib/
 COPY gcs-connector-hadoop3-latest.jar /home/hadoop/opt/spark/jars/
+
+
+opt/snowsql$ ./snowsql -a xfqfpxb-oe01569 -u rmendoza 

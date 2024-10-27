@@ -92,7 +92,17 @@ run-python-gs-write-with-key:
 		${spark_home}/bin/spark-submit \
   		--master yarn \
   		/home/hadoop/python/gs_write_with_key.py \
-	'"		
+	'"	
+
+run-python-snowflake-read:
+	docker cp ./python/snowflake_read.py $(namenode):/home/hadoop/python/
+	docker cp ./secrets/cheneque-dev-1-5b1b89a45607.json $(namenode):/home/hadoop/secrets/
+	docker cp ./secrets/snowflake-credentials.json $(namenode):/home/hadoop/secrets/
+	docker exec -it $(namenode) /bin/bash -c "sudo -E -H -u hadoop bash -c ' \
+		${spark_home}/bin/spark-submit \
+  		--master yarn \
+  		/home/hadoop/python/snowflake_read.py \
+	'"			
 
 run-python-gs-read:
 	docker cp ./python/gs_read.py $(namenode):/home/hadoop/
