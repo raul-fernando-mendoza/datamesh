@@ -1,8 +1,9 @@
-import { NgModule } from '@angular/core';
+import { NgModule, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
 import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
 import { Timestamp } from 'firebase/firestore';
+import { ModelEditComponent } from 'app/model-edit/model-edit.component';
 
 
 
@@ -205,4 +206,56 @@ export class Column{
   precision:string | null = null
   scale:string | null = null
   type_code!:number
+}
+
+export interface JoinNode {
+  name: string;
+  children: JoinNode[];
+}
+
+export interface Model{
+  id?:string
+  label?:string
+  description?:string
+  credentials?:string
+  owner?:string,
+  group?:string,
+  groupId?:string,
+  data?:JoinNode[]
+}
+export class ModelObj{
+  id!:string
+  label!:string
+  description:string = ""
+  credentials:string = ""
+  owner!:string
+  groupId!:string
+  data:JoinNode[] = []
+}
+export class ModelCollection{
+  static collectionName = "Model"
+}
+
+export enum TreeOption {
+  Last,
+  Highlighted
+}
+
+export interface LongData { 
+  /**
+   * The index of the data item
+   */
+  index?: number;
+  /**
+   * The data item
+   */
+  item?: string;
+}
+export class FlatTreeNode {
+  expandable = signal(true);
+  loading = signal(false);
+  options = signal<Set<TreeOption>>(new Set<TreeOption>())
+  selected = signal(false);
+  constructor(public level: number, public data: LongData) {
+  }
 }

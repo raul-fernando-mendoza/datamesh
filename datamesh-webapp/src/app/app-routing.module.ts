@@ -6,6 +6,7 @@ import { ComparisonGroupEditComponent } from './comparisongroup-edit/comparisong
 import { ConnectionEditComponent } from './connection-edit/connection-edit.component';
 import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
+import { ModelEditComponent } from './model-edit/model-edit.component';
 import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 
@@ -29,6 +30,9 @@ const routes: Routes = [
   { path: 'Connection/create/:groupId', component: ConnectionEditComponent},
   { path: 'Connection/edit/:id', component: ConnectionEditComponent},
 
+  { path: 'Model/create/:groupId', component: ModelEditComponent},
+  { path: 'Model/edit/:id', component: ModelEditComponent},
+  
   //this should be the last one
   { path: '**', component: WelcomeComponent }
 ];

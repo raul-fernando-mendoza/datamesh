@@ -1,0 +1,23 @@
+<div class="header">
+    <span>Model Edit</span>
+    @if( model ){
+        <span class="spacer"></span>
+        <span >{{id}}</span>
+        <button  mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+    }
+</div>
+
+<div [formGroup]="FG">
+    <p>
+        <mat-form-field class="name" appearance="fill">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="label" (change)="firebaseService.onChange($event,'Model',id,'label')">
+        </mat-form-field>
+    <p>
+ 
+    
+    @if(!model){
+        <button mat-raised-button (click)="onCancel()">Cancelar</button>     
+        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
+    }
+</div>
