@@ -214,7 +214,8 @@ export interface InfoNode{
 }
 
 export interface JoinNode extends InfoNode{
-  name: string;
+  name: string
+  criteria:string
   joins?: JoinNode[];
 }
 

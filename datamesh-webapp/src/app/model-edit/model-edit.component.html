@@ -19,16 +19,21 @@
             <!-- There is inline padding applied to this node using styles.
               This padding value depends on the mat-icon-button width. -->
             <mat-tree-node *matTreeNodeDef="let node">
-              {{node.item.name}}
+              {{node.item.criteria }} - {{node.item.name}}
               @if( !isAdding ){
+                <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
                 <button mat-icon-button (click)="Add(node.item)"><mat-icon>add</mat-icon></button>
                 <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
-
+                
               }              
             </mat-tree-node>
 
             <mat-tree-node *matTreeNodeDef="let node; when: isNew">
               <div [formGroup]="newJoinFG">
+                <mat-form-field class="criteria" appearance="fill">
+                  <mat-label>criteria</mat-label> 
+                  <textarea class="sql" matInput maxlength="10000" rows="10" formControlName="criteria"></textarea>
+                </mat-form-field>                  
                 <mat-form-field class="name" appearance="fill">
                     <mat-label>Name</mat-label>
                     <input matInput formControlName="table">
@@ -36,6 +41,19 @@
                 <button mat-icon-button (click)="AddSubmit(node.item)"><mat-icon>check</mat-icon></button>
               </div>                      
             </mat-tree-node>  
+            <mat-tree-node *matTreeNodeDef="let node; when: isEditing">
+              <div [formGroup]="newJoinFG">
+                <mat-form-field class="criteria" appearance="fill">
+                  <mat-label>criteria</mat-label> 
+                  <textarea class="sql" matInput maxlength="10000" rows="10" formControlName="criteria"></textarea>
+                </mat-form-field>                  
+                <mat-form-field class="name" appearance="fill">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="table">
+                </mat-form-field>
+                <button mat-icon-button (click)="EditSubmit(node.item)"><mat-icon>check</mat-icon></button>
+              </div>                      
+            </mat-tree-node>              
             <!-- This is the tree node template for expandable nodes -->
             <mat-nested-tree-node
                 *matTreeNodeDef="let node; when: hasChild"
@@ -47,7 +65,7 @@
                     {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                   </mat-icon>
                 </button>
-                {{node.item.name}}
+                {{node.item.criteria }} - {{node.item.name}}
               </div>
               <!-- There is inline padding applied to this div using styles.
                   This padding value depends on the mat-icon-button width.  -->

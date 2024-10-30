@@ -52,8 +52,8 @@ export class ModelEditComponent {
   })  
 
   newJoinFG = this.fb.group({
-    join:['',[Validators.required]],
-    table:['',[Validators.required]]
+    table:['',[Validators.required]],
+    criteria:['',[Validators.required]]
   })  
 /*
   data: JoinNode[] = [
@@ -82,6 +82,10 @@ export class ModelEditComponent {
   hasChild = (_: number, node: TreeNode) => !!node.childrenNodes && node.childrenNodes.length > 0;
 
   isLast = (_: number, node: TreeNode) => node.isLast;
+
+  isEditing = (_: number, node: TreeNode) => {
+    return node.item ==  this.newInfoNodeAdding
+  };
 
   isNew = (_: number, node: TreeNode) => {
     if( this.isAdding && node.item.name == "" ){
@@ -188,7 +192,8 @@ export class ModelEditComponent {
       console.log(node)
       this.isAdding = true
       this.newInfoNodeAdding = {
-        name:""
+        name:"",
+        criteria:""
       }
       this.parentInfoNodeAdding = node
       
@@ -205,20 +210,53 @@ export class ModelEditComponent {
       this.dataSource.setData(this.model.data)    
     } 
   }
+  Edit(node:JoinNode | null){
+    if( this.model  && node ){
+      console.log(node)
+      this.isAdding = true
+
+      this.newJoinFG.controls.table.setValue(node.name)
+      this.newJoinFG.controls.criteria.setValue(node.criteria)
+      this.newInfoNodeAdding = node
+    } 
+    this.dataSource.setData(this.model!.data)
+  }
+
   AddSubmit(node:JoinNode){
     if( this.model ){
       console.log(node)
       var name = this.newJoinFG.controls.table.value
+      var criteria = this.newJoinFG.controls.criteria.value ? this.newJoinFG.controls.criteria.value : "" 
       
-      if(this.isAdding && this.newInfoNodeAdding != null && name) {
+      if(this.isAdding && this.newInfoNodeAdding != null && name ) {
         this.newInfoNodeAdding.name = name
+        this.newInfoNodeAdding.criteria = criteria
         this.isAdding = false
         this.newInfoNodeAdding = null
         this.parentInfoNodeAdding = null
+        this.newJoinFG.controls.table.setValue("")
       }
       this.save()    
     }
   }  
+  EditSubmit(node:JoinNode){
+    if( this.model ){
+      console.log(node)
+      var name = this.newJoinFG.controls.table.value
+      var criteria = this.newJoinFG.controls.criteria.value ? this.newJoinFG.controls.criteria.value : "" 
+      
+      if(this.isAdding && this.newInfoNodeAdding != null && name ) {
+        this.newInfoNodeAdding.name = name
+        this.newInfoNodeAdding.criteria = criteria
+        this.isAdding = false
+        this.newInfoNodeAdding = null
+        this.parentInfoNodeAdding = null
+        this.newJoinFG.controls.table.setValue("")
+        this.newJoinFG.controls.criteria.setValue("")
+      }
+      this.save()    
+    }
+  }    
   deleteNode(parentNodeInfo:JoinNode, nodeInfo:JoinNode){
     if( this.model ){
       if( parentNodeInfo && parentNodeInfo.children ){
