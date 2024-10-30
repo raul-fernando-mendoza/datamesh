@@ -230,7 +230,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
         "next":( (set:any) =>{
           
           groupNode.children.length = 0
-          console.log("childs for collections:" + this.dataCollection + ": " + groupNode.item.id + ":" + set.docs.length)
+          //console.log("childs for collections:" + this.dataCollection + ": " + groupNode.item.id + ":" + set.docs.length)
           set.docs.map( (doc:any) =>{
             var data:Data = doc.data() as Data
             let newDatasetNode:TreeNode = {

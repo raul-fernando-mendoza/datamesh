@@ -208,9 +208,14 @@ export class Column{
   type_code!:number
 }
 
-export interface JoinNode {
+export interface InfoNode{
+  name:string
+  children?:InfoNode[]
+}
+
+export interface JoinNode extends InfoNode{
   name: string;
-  children: JoinNode[];
+  joins?: JoinNode[];
 }
 
 export interface Model{
@@ -241,21 +246,3 @@ export enum TreeOption {
   Highlighted
 }
 
-export interface LongData { 
-  /**
-   * The index of the data item
-   */
-  index?: number;
-  /**
-   * The data item
-   */
-  item?: string;
-}
-export class FlatTreeNode {
-  expandable = signal(true);
-  loading = signal(false);
-  options = signal<Set<TreeOption>>(new Set<TreeOption>())
-  selected = signal(false);
-  constructor(public level: number, public data: LongData) {
-  }
-}

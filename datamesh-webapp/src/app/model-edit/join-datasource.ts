@@ -1,61 +1,85 @@
-import { CollectionViewer, DataSource, SelectionChange } from '@angular/cdk/collections';
-import { FlatTreeControl } from '@angular/cdk/tree';
-import { JoinNode } from "app/datatypes/datatypes.module";
+import { CollectionViewer, SelectionChange } from '@angular/cdk/collections';
+import { NestedTreeControl } from '@angular/cdk/tree';
+import { Injectable } from '@angular/core';
+import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { InfoNode } from "app/datatypes/datatypes.module";
 import { BehaviorSubject, Observable,  of, Subscriber  } from "rxjs";
 
-export class JoinDataSource extends DataSource<JoinNode> {
 
 
+export interface TreeNode{
+  item:InfoNode
+  isLast:boolean
+  childrenNodes:TreeNode[]
+  parentTreeNode:TreeNode | null
+}
 
-    data:JoinNode[] = [{ name:"hi", children:[] }]
-    private subscriber: Subscriber<JoinNode[]> | null = null
+@Injectable()
+export class JoinDataSource extends MatTreeNestedDataSource<TreeNode>{
+    private observable = new BehaviorSubject<TreeNode[]>([]);
+    
+    
+    override get data(): TreeNode[] { 
+      return this.observable.value; 
+    }
+    
 
-    observable = new BehaviorSubject<JoinNode[]>([]);
-
-    constructor(private _treeControl: FlatTreeControl<JoinNode>) {
-        super();
+    constructor(private _treeControl:NestedTreeControl<TreeNode>) {
+      super()
+      this.observable.next([]);
+      
+      this._treeControl.expansionModel.changed.subscribe(change => {
+        if (
+          (change as SelectionChange<TreeNode>).added ||
+          (change as SelectionChange<TreeNode>).removed
+        ) {
+          //console.log(change as SelectionChange<TreeNode>);
+        }
+      });        
     }
 
-    connect(collectionViewer: CollectionViewer): Observable<readonly JoinNode[]> {
-        this._treeControl.expansionModel.changed.subscribe(change => {
-            if (
-              (change as SelectionChange<JoinNode>).added ||
-              (change as SelectionChange<JoinNode>).removed
-            ) {
-              this.handleTreeControl(change as SelectionChange<JoinNode>);
-            }
-          });
-                  
+    override connect(collectionViewer: CollectionViewer): Observable<TreeNode[]>{
         return this.observable       
     }
 
-    disconnect(collectionViewer: CollectionViewer): void {
+    override disconnect(): void {
     }
-    onAddjoin(parentNode:JoinNode | null, newNode:JoinNode){
-        if( parentNode ){
-            parentNode.children.push( newNode )
-        }
-        else{
-            this.data.push(newNode)
-        }
-        this.observable.next(this.data);
-    }
-    setData(data:JoinNode[]){
+    setData(data:InfoNode[]){
         this.data.length = 0;
-        data.map( n => this.data.push(n))
-        this.observable.next(this.data);
-    }
-    handleTreeControl(change: SelectionChange<JoinNode>) {
-       
-        if (change.added) {
-          change.added.forEach(node => console.log(node, true));
+
+        var tree:TreeNode[] = [];
+        data.map( node => {
+          var rootNode:TreeNode = {
+            item:node,
+            isLast: false,
+            childrenNodes: [],
+            parentTreeNode: null
+          }
+          tree.push(rootNode)
+          this.addNodeChildren(rootNode, node.children)
+        })
+        if(tree.length){
+          tree[tree.length -1].isLast = true
         }
-        if (change.removed) {
-          change.removed
-            .slice()
-            .reverse()
-            .forEach(node => console.log(node, false));
+        this.observable.next(tree);
+        this._treeControl.dataNodes = tree
+        this._treeControl.expandAll()
+    }
+    addNodeChildren(parentNode:TreeNode, children: InfoNode[] | undefined){
+      if(children){
+        children.map( node => {
+          var childNode:TreeNode = {
+            item:node,
+            isLast: false,
+            childrenNodes: [],
+            parentTreeNode: parentNode
+          }
+          parentNode.childrenNodes.push(childNode)
+          this.addNodeChildren(childNode, node.children)
+        })
+        if(parentNode.childrenNodes.length){
+          parentNode.childrenNodes[parentNode.childrenNodes.length -1].isLast = true
         }
       }
-    
+    }
 }

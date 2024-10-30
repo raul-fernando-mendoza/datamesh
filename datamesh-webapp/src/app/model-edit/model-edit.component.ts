@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component , ViewChild} from '@angular/core';
+import { ChangeDetectionStrategy, Component , ViewChild} from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -14,9 +14,13 @@ import { db } from '../../environments/environment'
 import * as uuid from 'uuid';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { NestedTreeControl } from '@angular/cdk/tree';
-import { MatTreeModule, MatTree, MatTreeNestedDataSource} from '@angular/material/tree';
-import { JoinDataSource } from './join-datasource';
+import { MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
+import { NestedTreeControl} from '@angular/cdk/tree';
+import { JoinDataSource, TreeNode } from './join-datasource';
+
+
+
+
 
 @Component({
   selector: 'app-model-edit',
@@ -30,7 +34,8 @@ import { JoinDataSource } from './join-datasource';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatTreeModule  ],
+    MatTreeModule ],
+  providers: [JoinDataSource],
   templateUrl: './model-edit.component.html',
   styleUrl: './model-edit.component.css'
 })
@@ -46,6 +51,50 @@ export class ModelEditComponent {
     description:['']
   })  
 
+  newJoinFG = this.fb.group({
+    join:['',[Validators.required]],
+    table:['',[Validators.required]]
+  })  
+/*
+  data: JoinNode[] = [
+    {
+      name: 'Fruit',
+      children: [{name: 'Apple'}, {name: 'Banana'}, {name: 'Fruit loops'}],
+    },
+    {
+      name: 'Vegetables',
+      children: [
+        {
+          name: 'Green',
+          children: [{name: 'Broccoli'}, {name: 'Brussels sprouts'}],
+        },
+        {
+          name: 'Orange',
+          children: [{name: 'Pumpkins'}, {name: 'Carrots'}],
+        },
+      ],
+    },
+  ];  
+  */
+  treeControl = new NestedTreeControl<TreeNode>(node => node.childrenNodes);
+  dataSource = new JoinDataSource(this.treeControl);
+  
+  hasChild = (_: number, node: TreeNode) => !!node.childrenNodes && node.childrenNodes.length > 0;
+
+  isLast = (_: number, node: TreeNode) => node.isLast;
+
+  isNew = (_: number, node: TreeNode) => {
+    if( this.isAdding && node.item.name == "" ){
+      return true
+    }
+    else{
+      return false
+    }
+  };
+
+  isAdding = false
+  parentInfoNodeAdding:JoinNode | null = null
+  newInfoNodeAdding:JoinNode | null = null
 
  
   constructor( 
@@ -65,8 +114,6 @@ export class ModelEditComponent {
          this.groupId = res["groupId"]
        }
      }) 
- 
-     
   }  
     
 
@@ -80,7 +127,8 @@ export class ModelEditComponent {
                   this.FG.controls.label.setValue( this.model.label!)
                 }
                 if( this.model ){
-                  //this.nestedDataSource.setData(this.model.data) 
+                  this.dataSource.setData(this.model.data) 
+                  //this.dataSource.setData(this.data)
                 }
           },
           (reason:any) =>{
@@ -135,5 +183,58 @@ export class ModelEditComponent {
   ngOnInit() {
     this.update()
   }
-
+  Add(node:JoinNode | null){
+    if( this.model ){
+      console.log(node)
+      this.isAdding = true
+      this.newInfoNodeAdding = {
+        name:""
+      }
+      this.parentInfoNodeAdding = node
+      
+      if( !this.parentInfoNodeAdding ){
+        this.model.data.push( this.newInfoNodeAdding  )
+      }
+      else{
+        var item = this.parentInfoNodeAdding
+        if( !item.children ){
+          item.children = []
+        }
+        item.children.push(this.newInfoNodeAdding)
+      }
+      this.dataSource.setData(this.model.data)    
+    } 
+  }
+  AddSubmit(node:JoinNode){
+    if( this.model ){
+      console.log(node)
+      var name = this.newJoinFG.controls.table.value
+      
+      if(this.isAdding && this.newInfoNodeAdding != null && name) {
+        this.newInfoNodeAdding.name = name
+        this.isAdding = false
+        this.newInfoNodeAdding = null
+        this.parentInfoNodeAdding = null
+      }
+      this.save()    
+    }
+  }  
+  deleteNode(parentNodeInfo:JoinNode, nodeInfo:JoinNode){
+    if( this.model ){
+      if( parentNodeInfo && parentNodeInfo.children ){
+        let idx = parentNodeInfo.children.findIndex( (node) => node == nodeInfo )
+        if( idx >= 0){
+          parentNodeInfo.children.splice(idx, 1)
+          this.save()
+        }
+      } 
+      else{
+        let idx = this.model.data.findIndex( (node) => node == nodeInfo )
+        if( idx >= 0){
+          this.model.data.splice(idx, 1)
+          this.save()
+        }      
+      }
+    }
+  }
 }
