@@ -24,3 +24,11 @@
 .example-tree div[role=group] > .mat-tree-node {
   padding-left: 40px;
 }
+
+.table {
+  text-transform:uppercase;
+  margin-left:20px;
+}
+.criteria {
+  text-transform:lowercase 
+}

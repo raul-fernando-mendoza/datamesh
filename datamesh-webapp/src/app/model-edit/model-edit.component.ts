@@ -17,6 +17,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
 import { NestedTreeControl} from '@angular/cdk/tree';
 import { JoinDataSource, TreeNode } from './join-datasource';
+import { MatMenuModule } from '@angular/material/menu';
 
 
 
@@ -34,7 +35,8 @@ import { JoinDataSource, TreeNode } from './join-datasource';
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatTreeModule ],
+    MatTreeModule,
+    MatMenuModule ],
   providers: [JoinDataSource],
   templateUrl: './model-edit.component.html',
   styleUrl: './model-edit.component.css'

@@ -19,12 +19,16 @@
             <!-- There is inline padding applied to this node using styles.
               This padding value depends on the mat-icon-button width. -->
             <mat-tree-node *matTreeNodeDef="let node">
-              {{node.item.criteria }} - {{node.item.name}}
+              <span class="criteria">{{node.item.criteria }}</span> <span class="table">{{node.item.name}}</span>
               @if( !isAdding ){
-                <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
-                <button mat-icon-button (click)="Add(node.item)"><mat-icon>add</mat-icon></button>
-                <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
-                
+                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #menu="matMenu">
+                  <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
+                  <button mat-icon-button (click)="Add(node.item)"><mat-icon>add</mat-icon></button>
+                  <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
+                </mat-menu>
               }              
             </mat-tree-node>
 
@@ -65,8 +69,32 @@
                     {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                   </mat-icon>
                 </button>
-                {{node.item.criteria }} - {{node.item.name}}
+                {{node.item.criteria }} {{node.item.name}}
+                @if( !isAdding ){
+                  <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menu="matMenu">
+                    <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button (click)="Add(node.item)"><mat-icon>add</mat-icon></button>
+                    <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
+                  </mat-menu>
+                }                    
               </div>
+              <mat-tree-node *matTreeNodeDef="let node; when: isEditing">
+                <div [formGroup]="newJoinFG">
+                  <mat-form-field class="criteria" appearance="fill">
+                    <mat-label>criteria</mat-label> 
+                    <textarea class="sql" matInput maxlength="10000" rows="10" formControlName="criteria"></textarea>
+                  </mat-form-field>                  
+                  <mat-form-field class="name" appearance="fill">
+                      <mat-label>Name</mat-label>
+                      <input matInput formControlName="table">
+                  </mat-form-field>
+                  <button mat-icon-button (click)="EditSubmit(node.item)"><mat-icon>check</mat-icon></button>
+                </div>                      
+              </mat-tree-node> 
+
               <!-- There is inline padding applied to this div using styles.
                   This padding value depends on the mat-icon-button width.  -->
               <div [class.example-tree-invisible]="!treeControl.isExpanded(node)"
