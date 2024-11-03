@@ -14,6 +14,8 @@ import { sql } from '@codemirror/lang-sql';
 import { LoadmoreDatabase, DbFlatNode, SchemaNode, LOAD_MORE, TableNode, MoreNode, TableItem, SchemaItem, MoreItem } from './tables-tree';
 import { Observable } from 'rxjs';
 import { MatInputModule } from '@angular/material/input';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-tables-tree',
@@ -30,6 +32,8 @@ import { MatInputModule } from '@angular/material/input';
     MatProgressBarModule,
     MatSelectModule,
     MatInputModule,
+    MatProgressSpinnerModule,
+    CdkDropList, CdkDrag
   ]
 })
 export class TablesTreeComponent implements OnInit{
@@ -76,7 +80,7 @@ export class TablesTreeComponent implements OnInit{
   "       table_name,                                                         "+
   "       ordinal_position;                                                   "
   
-     
+   isLoading = false  
   constructor(
     private fb:FormBuilder, 
     private connectionSrv:ConnectionsService,
@@ -164,6 +168,7 @@ export class TablesTreeComponent implements OnInit{
 
   }
   reloadSchemas(){
+    this.isLoading = true
     this._database.rootLevelNodes.length = 0
     this._database.dataMap.clear()
     if( this.FG.controls.connectionId.value ){
@@ -175,6 +180,7 @@ export class TablesTreeComponent implements OnInit{
       }
       this.urlSrv.post("executeSql",req).subscribe({ 
         'next':(result:any)=>{
+          this.isLoading = false
           console.log( result )
           var resultSet = result.resultSet
           var newData = []
@@ -209,6 +215,7 @@ export class TablesTreeComponent implements OnInit{
 
         },
         'error':(reason)=>{
+          this.isLoading = false
           alert( reason.error.error )
         }
       })         

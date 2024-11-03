@@ -19,7 +19,20 @@
             <!-- There is inline padding applied to this node using styles.
               This padding value depends on the mat-icon-button width. -->
             <mat-tree-node *matTreeNodeDef="let node">
-              <span class="criteria">{{node.item.criteria }}</span> <span class="table">{{node.item.name}}</span>
+              <div
+              [id]="node.item.id"
+              cdkDropList
+              #doneList="cdkDropList"
+              class="example-list"
+              (cdkDropListDropped)="onDrop($event)"
+              [cdkDropListEnterPredicate]="acceptPredicate"
+              >
+                  leaf:
+                  <span class="criteria">{{node.item.criteria }}</span> 
+                  <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
+                  <span class="name">{{node.item.name}}</span>
+              </div>
+
               @if( !isAdding ){
                 <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
                   <mat-icon>more_vert</mat-icon>
@@ -69,7 +82,19 @@
                     {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                   </mat-icon>
                 </button>
-                {{node.item.criteria }} {{node.item.name}}
+                <div
+                [id]="node.item.id"
+                cdkDropList
+                #doneList="cdkDropList"
+                class="example-list"
+                (cdkDropListDropped)="onDrop($event)"
+                [cdkDropListEnterPredicate]="acceptPredicate"
+                >
+                    hasChild:
+                    <span class="criteria">{{node.item.criteria }}</span> 
+                    <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' '}}</span>
+                    <span class="name">{{node.item.name}}</span>
+                </div>
                 @if( !isAdding ){
                   <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
                     <mat-icon>more_vert</mat-icon>
@@ -80,7 +105,7 @@
                     <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                   </mat-menu>
                 }                    
-              </div>
+              </div>  
               <mat-tree-node *matTreeNodeDef="let node; when: isEditing">
                 <div [formGroup]="newJoinFG">
                   <mat-form-field class="criteria" appearance="fill">
@@ -109,7 +134,16 @@
             </mat-nested-tree-node>
           </mat-tree>
           @if( !isAdding ){
-            <button mat-icon-button (click)="Add(null)"><mat-icon>create_new_folder</mat-icon></button>
+            <div
+            id="root"
+            cdkDropList
+            #doneList="cdkDropList"
+            class="example-list"
+            (cdkDropListDropped)="onDrop($event)"
+            [cdkDropListEnterPredicate]="acceptPredicate"
+            >            
+              <button mat-icon-button (click)="Add(null)"><mat-icon>create_new_folder</mat-icon></button>
+            </div>  
           }          
     
     @if(!model){

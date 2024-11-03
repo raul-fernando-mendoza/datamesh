@@ -32,3 +32,12 @@
 .criteria {
   text-transform:lowercase 
 }
+
+.example-list {
+  border: solid 1px #ccc;
+  min-height: 2em;
+  background: greenyellow;
+  border-radius: 4px;
+  overflow: hidden;
+  display: block;
+}

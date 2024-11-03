@@ -209,16 +209,24 @@ export class Column{
 }
 
 export interface InfoNode{
+  id:string
   name:string
   children?:InfoNode[]
 }
 
+export interface JoinItem{
+  left_column: string
+  operator: "equal" 
+  right_column: string
+}
 
 
 export interface JoinNode extends InfoNode{
+  id:string
   name: string
-  criteria:string
-  joins?: JoinNode[];
+  tableName:string
+  children?: JoinNode[]
+  criteria:JoinItem[]  
 }
 
 export interface Model{

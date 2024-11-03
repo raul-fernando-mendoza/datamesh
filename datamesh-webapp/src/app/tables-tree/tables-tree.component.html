@@ -23,31 +23,40 @@
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
   </mat-tree-node>
 -->
+@if( !isLoading ){
+  <mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
+    <!-- Leaf node -->
+    
+      <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+        <button mat-icon-button disabled></button>
+        <div cdkDropList class="example-list">
+          <div class="example-box" cdkDrag [cdkDragData]="{connectionId:FG.controls.connectionId.value, schemaName:node.item._schemaName,tableName:node.item._tableName}">
+              {{ getLastName(node.item.id) }}
+          </div>
+        </div>
+      </mat-tree-node>
 
-<mat-tree [dataSource]="dataSource" [treeControl]="treeControl">
-  <!-- Leaf node -->
-  <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
-    <button mat-icon-button disabled></button>
-    {{ getLastName(node.item.id) }}
-  </mat-tree-node>
+    <!-- expandable node -->
+    <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
+      <button mat-icon-button
+              [attr.aria-label]="'Toggle ' + node.item"
+              (click)="loadChildren(node)"
+              matTreeNodeToggle>
+        <mat-icon class="mat-icon-rtl-mirror">
+          {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+        </mat-icon>
+      </button>
+      {{ getLastName(node.item.id) }}
+    </mat-tree-node>
 
-  <!-- expandable node -->
-  <mat-tree-node *matTreeNodeDef="let node; when: hasChild" matTreeNodePadding>
-    <button mat-icon-button
-            [attr.aria-label]="'Toggle ' + node.item"
-            (click)="loadChildren(node)"
-            matTreeNodeToggle>
-      <mat-icon class="mat-icon-rtl-mirror">
-        {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-      </mat-icon>
-    </button>
-    {{ getLastName(node.item.id) }}
-  </mat-tree-node>
-
-  <mat-tree-node *matTreeNodeDef="let node; when: isLoadMore" matTreeNodePadding>
-    <button mat-button (click)="appendMore(node)">
-      Load more... {{ getLastName(node.item.id) }}
-    </button>
-  </mat-tree-node>
-</mat-tree>
+    <mat-tree-node *matTreeNodeDef="let node; when: isLoadMore" matTreeNodePadding>
+      <button mat-button (click)="appendMore(node)">
+        Load more... {{ getLastName(node.item.id) }}
+      </button>
+    </mat-tree-node>
+  </mat-tree>
+}
+@else{
+  <mat-spinner></mat-spinner>
+}
 

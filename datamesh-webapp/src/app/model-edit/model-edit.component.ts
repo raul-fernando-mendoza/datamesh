@@ -18,6 +18,8 @@ import { MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
 import { NestedTreeControl} from '@angular/cdk/tree';
 import { JoinDataSource, TreeNode } from './join-datasource';
 import { MatMenuModule } from '@angular/material/menu';
+import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { HttpStatusCode } from '@angular/common/http';
 
 
 
@@ -36,7 +38,9 @@ import { MatMenuModule } from '@angular/material/menu';
     MatInputModule,
     MatSelectModule,
     MatTreeModule,
-    MatMenuModule ],
+    MatMenuModule,
+    CdkDropList, CdkDrag     
+   ],
   providers: [JoinDataSource],
   templateUrl: './model-edit.component.html',
   styleUrl: './model-edit.component.css'
@@ -54,30 +58,9 @@ export class ModelEditComponent {
   })  
 
   newJoinFG = this.fb.group({
-    table:['',[Validators.required]],
-    criteria:['',[Validators.required]]
+    table:['',[Validators.required]]
   })  
-/*
-  data: JoinNode[] = [
-    {
-      name: 'Fruit',
-      children: [{name: 'Apple'}, {name: 'Banana'}, {name: 'Fruit loops'}],
-    },
-    {
-      name: 'Vegetables',
-      children: [
-        {
-          name: 'Green',
-          children: [{name: 'Broccoli'}, {name: 'Brussels sprouts'}],
-        },
-        {
-          name: 'Orange',
-          children: [{name: 'Pumpkins'}, {name: 'Carrots'}],
-        },
-      ],
-    },
-  ];  
-  */
+
   treeControl = new NestedTreeControl<TreeNode>(node => node.childrenNodes);
   dataSource = new JoinDataSource(this.treeControl);
   
@@ -122,6 +105,16 @@ export class ModelEditComponent {
      }) 
   }  
     
+  flatModelMap = new Map<string,JoinNode>()
+  loadFlatModel( joins:JoinNode[] ){
+    joins.map( n => {
+      this.flatModelMap.set(n.id, n)
+      if( n.children ){
+        this.loadFlatModel( n.children )
+      }
+    })
+  }
+
 
   update(){
     
@@ -133,6 +126,8 @@ export class ModelEditComponent {
                   this.FG.controls.label.setValue( this.model.label!)
                 }
                 if( this.model ){
+                  this.flatModelMap.clear()
+                  this.loadFlatModel(this.model.data)
                   this.dataSource.setData(this.model.data) 
                   //this.dataSource.setData(this.data)
                 }
@@ -194,8 +189,10 @@ export class ModelEditComponent {
       console.log(node)
       this.isAdding = true
       this.newInfoNodeAdding = {
+        id: uuid.v4(),
         name:"",
-        criteria:""
+        tableName:"",
+        criteria:[]
       }
       this.parentInfoNodeAdding = node
       
@@ -218,7 +215,6 @@ export class ModelEditComponent {
       this.isAdding = true
 
       this.newJoinFG.controls.table.setValue(node.name)
-      this.newJoinFG.controls.criteria.setValue(node.criteria)
       this.newInfoNodeAdding = node
     } 
     this.dataSource.setData(this.model!.data)
@@ -228,11 +224,11 @@ export class ModelEditComponent {
     if( this.model ){
       console.log(node)
       var name = this.newJoinFG.controls.table.value
-      var criteria = this.newJoinFG.controls.criteria.value ? this.newJoinFG.controls.criteria.value : "" 
+      
       
       if(this.isAdding && this.newInfoNodeAdding != null && name ) {
         this.newInfoNodeAdding.name = name
-        this.newInfoNodeAdding.criteria = criteria
+        
         this.isAdding = false
         this.newInfoNodeAdding = null
         this.parentInfoNodeAdding = null
@@ -245,16 +241,13 @@ export class ModelEditComponent {
     if( this.model ){
       console.log(node)
       var name = this.newJoinFG.controls.table.value
-      var criteria = this.newJoinFG.controls.criteria.value ? this.newJoinFG.controls.criteria.value : "" 
       
       if(this.isAdding && this.newInfoNodeAdding != null && name ) {
         this.newInfoNodeAdding.name = name
-        this.newInfoNodeAdding.criteria = criteria
         this.isAdding = false
         this.newInfoNodeAdding = null
         this.parentInfoNodeAdding = null
         this.newJoinFG.controls.table.setValue("")
-        this.newJoinFG.controls.criteria.setValue("")
       }
       this.save()    
     }
@@ -277,4 +270,49 @@ export class ModelEditComponent {
       }
     }
   }
+  acceptPredicate(drag: CdkDrag, drop: CdkDropList) {
+    return true //drag.data.startsWith("G") ;
+  }  
+  
+  AddTable(
+    connectionId:string,
+    schemaName:string,
+    tableName:string,
+    parentNode:JoinNode | null){
+    if( this.model ){
+      console.log(parentNode)
+      let id = uuid.v4()
+      var newJoin:JoinNode = {
+        id: id,
+        name:tableName,
+        tableName:tableName,
+        criteria:[]
+      }
+      
+      if( !parentNode ){
+        this.model.data.push( newJoin  )
+      }
+      else{
+        
+        if( !parentNode.children ){
+          parentNode.children = []
+        }
+        parentNode.children.push(newJoin)
+      }
+      this.save()   
+    } 
+  }
+  
+  onDrop(e:any){
+    var data  = e.item.data
+    console.log(data)
+    var connectionId = data.connectionId
+    var schemaName = data.schemaName
+    var tableName =  data.tableName
+    var joinNodeId = e.container.id  
+    var node = this.flatModelMap.get( joinNodeId ) 
+    this.AddTable( connectionId, schemaName, tableName, node! )
+  } 
+  
+
 }
