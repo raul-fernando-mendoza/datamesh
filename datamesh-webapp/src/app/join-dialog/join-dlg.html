@@ -1,0 +1,78 @@
+<h1 mat-dialog-title>{{ data.label }}</h1>
+
+<mat-dialog-content>
+
+  <table>
+    <tr>
+      <td>
+        {{data.leftTableName}}
+      </td>
+      <td>
+
+      </td>
+      <td>
+      <mat-form-field>
+        <mat-label>nombre</mat-label>
+        <input  matInput [(ngModel)]="data.rightTableName">
+      </mat-form-field> 
+      </td>
+    </tr>
+
+    @for( j of joinConditions; track j; let i= $index){
+    <tr>
+        <td>
+          {{j.leftValue}}
+        </td>
+        <td>
+          {{j.comparator}}
+        </td>
+        <td>
+          {{j.rightValue}}
+        </td>
+    </tr>
+    }
+
+    
+    <tr>
+      <td>
+        <mat-radio-group name="leftColumns"  [value]="leftColumnSelected" (change)="onLeftColumnSelected($event)">
+        @for( c of leftKeys; track c; let i = $index ){
+        <div>
+            <mat-radio-button name="leftColumns" value="{{c.columnName}}" > {{c.columnName}} </mat-radio-button> 
+        </div>    
+        }
+        </mat-radio-group>
+      </td>  
+      <td>
+        <mat-radio-group name='operator'  (change)="onComparatorSelected($event)" >
+        @for( c of comparisonOptions; track c; let i=$index ){
+          <div>
+            <mat-radio-button [value]="c" [checked]="selectedComparatorOption == c"> {{c}} </mat-radio-button> 
+          </div>    
+        }
+        </mat-radio-group>
+      </td>
+      <td> 
+        <mat-radio-group name='rightColumns' [value]="rightColumnSelected" (change)="onRightColumnSelected($event)">
+        @for( c of rightKeys; track c; let i = $index ){
+          <div>
+            <mat-radio-button  name="rightColumns" value="{{c.columnName}}"> {{c.columnName}} </mat-radio-button> 
+          </div>    
+        }
+        </mat-radio-group>
+      </td>
+    </tr>
+    <tr><td><button mat-button (click)="onAddJoin()">add</button></td></tr>
+  </table>
+
+     
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button> 
+   
+  <button [disabled]="data.rightTableName.length < 1 || data.rightTableName.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+</mat-dialog-actions>
+
+
+
+ 

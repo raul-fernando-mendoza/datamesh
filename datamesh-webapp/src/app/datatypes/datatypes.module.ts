@@ -224,6 +224,7 @@ export interface JoinItem{
 export interface JoinNode extends InfoNode{
   id:string
   name: string
+  connectionId:string
   tableName:string
   children?: JoinNode[]
   criteria:JoinItem[]  
@@ -255,5 +256,31 @@ export class ModelCollection{
 export enum TreeOption {
   Last,
   Highlighted
+}
+
+export interface SnowFlakeColumn{
+  tableSchema:string,
+  tableName:string,
+  columnName:string,
+  ordinalPosition:number,
+  dataType:string,
+  maxLength:number,
+  NumericScale?:number,
+  isIdentity:boolean,
+  isNullabe:boolean
+}
+
+export enum ComparatorOption {
+  equal = "=",
+  gt = ">",
+  gte = ">=",
+  lt = "<",
+  lte = "<="
+}
+
+export interface JoinCondition{
+  leftValue:string
+  comparator:ComparatorOption
+  rightValue:string
 }
 

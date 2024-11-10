@@ -14,6 +14,10 @@
             <input matInput formControlName="label" (change)="firebaseService.onChange($event,'Model',id,'label')">
         </mat-form-field>
     <p>
+
+        @if( isLoading ){
+          <mat-progress-bar mode="determinate" value="40"></mat-progress-bar>
+        }
         <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
             <!-- This is the tree node template for leaf nodes -->
             <!-- There is inline padding applied to this node using styles.
@@ -39,7 +43,6 @@
                 </button>
                 <mat-menu #menu="matMenu">
                   <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
-                  <button mat-icon-button (click)="Add(node.item)"><mat-icon>add</mat-icon></button>
                   <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                 </mat-menu>
               }              
@@ -101,7 +104,6 @@
                   </button>
                   <mat-menu #menu="matMenu">
                     <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button (click)="Add(node.item)"><mat-icon>add</mat-icon></button>
                     <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                   </mat-menu>
                 }                    
@@ -128,7 +130,7 @@
               </div>
               @if( treeControl.isExpanded(node) && !isAdding ){
                 <div role="group">
-                <button mat-icon-button   (click)="Add(node.item)"><mat-icon>create_new_folder</mat-icon></button>
+<!--                <button mat-icon-button   (click)="Add(node.item)"><mat-icon>create_new_folder</mat-icon></button> -->
                 </div>
               }  
             </mat-nested-tree-node>
@@ -141,8 +143,11 @@
             class="example-list"
             (cdkDropListDropped)="onDrop($event)"
             [cdkDropListEnterPredicate]="acceptPredicate"
-            >            
+            > 
+            <!-->           
               <button mat-icon-button (click)="Add(null)"><mat-icon>create_new_folder</mat-icon></button>
+            -->
+            <mat-icon>create_new_folder</mat-icon>
             </div>  
           }          
     
