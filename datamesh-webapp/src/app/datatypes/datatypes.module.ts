@@ -214,20 +214,13 @@ export interface InfoNode{
   children?:InfoNode[]
 }
 
-export interface JoinItem{
-  left_column: string
-  operator: "equal" 
-  right_column: string
-}
-
-
 export interface JoinNode extends InfoNode{
   id:string
   name: string
   connectionId:string
   tableName:string
   children?: JoinNode[]
-  criteria:JoinItem[]  
+  joinCriteria:JoinCondition[]  
 }
 
 export interface Model{
@@ -269,6 +262,13 @@ export interface SnowFlakeColumn{
   isIdentity:boolean,
   isNullabe:boolean
 }
+
+export interface SnowFlakeTable {
+  connectionId:string, 
+  schemaName:string,
+  tableName:string
+}
+
 
 export enum ComparatorOption {
   equal = "=",

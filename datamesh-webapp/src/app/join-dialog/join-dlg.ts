@@ -1,6 +1,6 @@
 import {  ChangeDetectionStrategy, Component,  Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,7 +9,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { SnowFlakeColumn, ComparatorOption, JoinCondition } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatRadioGroup, MatRadioModule} from '@angular/material/radio';
+import {MatRadioChange, MatRadioModule} from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+import { MatGridListModule } from '@angular/material/grid-list';
 
 
 export interface DataName {
@@ -17,7 +19,8 @@ export interface DataName {
   leftTableName:string,
   leftColumns:Array<SnowFlakeColumn>,
   rightTableName:string,
-  rightColumns:Array<SnowFlakeColumn>
+  rightColumns:Array<SnowFlakeColumn>,
+  joinConditions:JoinCondition[]
 }
 
 interface SnowflakeColumnPair{
@@ -45,12 +48,16 @@ interface Key{
       MatButtonModule,
       MatIconModule,
       FormsModule, 
+      MatFormFieldModule,
       ReactiveFormsModule,
       MatFormFieldModule,
       MatInputModule,    
       MatDialogModule,
       MatCheckboxModule,
+      MatSelectModule,
+      MatGridListModule,
       MatRadioModule
+      
     ]
   })
   export class JoinDialog implements OnInit{ 
@@ -68,12 +75,12 @@ interface Key{
 
  
 
-    joinConditions:JoinCondition[] = []
+   
 
-    leftColumnSelected :string | null = null
-    rightColumnSelected :string | null = null
-    selectedComparatorOption:ComparatorOption | null = null 
-    
+    leftForm = new FormControl<string>('');
+    comparatorForm = new FormControl<ComparatorOption>(ComparatorOption.equal);
+    rightForm = new FormControl<string>('');
+    strForm = new FormControl<string>('');
 
     constructor(
       public dialogRef: MatDialogRef<JoinDialog>,
@@ -83,8 +90,6 @@ interface Key{
       let maxcolumns = this.data.leftColumns.length > this.data.rightColumns.length ? this.data.leftColumns.length : this.data.rightColumns.length
       let lCols = this.data.leftColumns
       let rCols = this.data.rightColumns
-
-      
 
       this.data.leftColumns.map( n =>{
         var key:Key = {
@@ -118,34 +123,35 @@ interface Key{
     }
 
     clearSelection(){
-      this.leftColumnSelected = ""
-      this.rightColumnSelected = ""
-      this.selectedComparatorOption = null
+      this.leftForm.setValue("")
+      this.rightForm.setValue("")
+      this.comparatorForm.setValue(ComparatorOption.equal)
     }
 
-    onLeftColumnSelected(event:any){
-      this.leftColumnSelected = event.value
-    }
-    onRightColumnSelected(event:any){
-      this.rightColumnSelected = event.value
-    }
-    onComparatorSelected(event:any){
-      this.selectedComparatorOption = event.value
-    }
-    columnSelected(){
-      if( this.leftColumnSelected && this.selectedComparatorOption  && this.rightColumnSelected ){
+    addJoin(){
+
+      let left = this.leftForm.value
+      let comparator = this.comparatorForm.value
+      
+      let manual = this.strForm.value
+      let right = manual ?  manual : this.rightForm.value
+
+      if( left && comparator && right) {
         let newJoinCondition:JoinCondition = {
-          leftValue: this.leftColumnSelected,
-          comparator: this.selectedComparatorOption,
-          rightValue: this.rightColumnSelected
+          leftValue: left,
+          comparator: comparator,
+          rightValue: right
         }
-        this.joinConditions.push( newJoinCondition )
+        this.data.joinConditions.push( newJoinCondition )
         this.clearSelection()
       }
 
     }
     onAddJoin(){
-      this.columnSelected()
+      this.addJoin()
+    }
+    onDelete(i:number){
+      this.data.joinConditions.splice(i,1)
     }
   }
   

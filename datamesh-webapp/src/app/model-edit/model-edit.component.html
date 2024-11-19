@@ -32,7 +32,7 @@
               [cdkDropListEnterPredicate]="acceptPredicate"
               >
                   leaf:
-                  <span class="criteria">{{node.item.criteria }}</span> 
+                  <span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> 
                   <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
                   <span class="name">{{node.item.name}}</span>
               </div>
@@ -43,6 +43,8 @@
                 </button>
                 <mat-menu #menu="matMenu">
                   <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
+                  <button mat-icon-button (click)="EditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
+
                   <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                 </mat-menu>
               }              

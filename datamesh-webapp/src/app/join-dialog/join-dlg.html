@@ -18,7 +18,7 @@
       </td>
     </tr>
 
-    @for( j of joinConditions; track j; let i= $index){
+    @for( j of data.joinConditions; track j; let i= $index){
     <tr>
         <td>
           {{j.leftValue}}
@@ -29,47 +29,48 @@
         <td>
           {{j.rightValue}}
         </td>
+        <td>
+          <button mat-icon-button (click)="onDelete(i)"><mat-icon>delete</mat-icon></button>
+        </td>
     </tr>
     }
+  </table>  
 
-    
+
+  <table>
     <tr>
       <td>
-        <mat-radio-group name="leftColumns"  [value]="leftColumnSelected" (change)="onLeftColumnSelected($event)">
+      <mat-radio-group class="example-radio-group" [formControl]="leftForm">
         @for( c of leftKeys; track c; let i = $index ){
-        <div>
-            <mat-radio-button name="leftColumns" value="{{c.columnName}}" > {{c.columnName}} </mat-radio-button> 
-        </div>    
+          <mat-radio-button class="example-radio-button" [value]="c.columnName"> {{c.columnName}} </mat-radio-button> 
         }
-        </mat-radio-group>
-      </td>  
+      </mat-radio-group>
+      </td>
       <td>
-        <mat-radio-group name='operator'  (change)="onComparatorSelected($event)" >
+      <mat-radio-group class="example-radio-group"  [formControl]="comparatorForm" >
         @for( c of comparisonOptions; track c; let i=$index ){
-          <div>
-            <mat-radio-button [value]="c" [checked]="selectedComparatorOption == c"> {{c}} </mat-radio-button> 
-          </div>    
+          <mat-radio-button class="example-radio-button" [value]="c">{{ " " + c + " "}}</mat-radio-button>   
         }
-        </mat-radio-group>
+      </mat-radio-group>
       </td>
-      <td> 
-        <mat-radio-group name='rightColumns' [value]="rightColumnSelected" (change)="onRightColumnSelected($event)">
+      <td>
+      <mat-radio-group class="example-radio-group" [formControl]="rightForm">
         @for( c of rightKeys; track c; let i = $index ){
-          <div>
-            <mat-radio-button  name="rightColumns" value="{{c.columnName}}"> {{c.columnName}} </mat-radio-button> 
-          </div>    
+          <mat-radio-button class="example-radio-button" [value]="c.columnName" > {{c.columnName}} </mat-radio-button> 
         }
-        </mat-radio-group>
+        <mat-form-field appearance="fill">
+          <mat-label>manual entry</mat-label>
+          <input matInput placeholder="manual entry" [formControl]="strForm">
+        </mat-form-field>        
+      </mat-radio-group>
       </td>
-    </tr>
-    <tr><td><button mat-button (click)="onAddJoin()">add</button></td></tr>
+    </tr>  
   </table>
 
-     
 </mat-dialog-content>
 <mat-dialog-actions>
+  <button mat-button (click)="onAddJoin()">add</button>
   <button mat-button mat-dialog-close>Cancel</button> 
-   
   <button [disabled]="data.rightTableName.length < 1 || data.rightTableName.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
 </mat-dialog-actions>
 

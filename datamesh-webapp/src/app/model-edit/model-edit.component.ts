@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JoinNode, ModelCollection, ModelObj, SnowFlakeColumn } from 'app/datatypes/datatypes.module';
+import { JoinCondition, JoinNode, ModelCollection, ModelObj, SnowFlakeColumn, SnowFlakeTable } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -24,6 +24,7 @@ import { DaoService } from 'app/dao.service';
 import { JoinDialog } from 'app/join-dialog/join-dlg';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { TableItem } from 'app/tables-tree/tables-tree';
 
 
 
@@ -93,6 +94,7 @@ export class ModelEditComponent {
   isLoading = false
 
  
+  
   constructor( 
     private fb:FormBuilder 
    ,private stringUtilService:StringUtilService
@@ -115,6 +117,7 @@ export class ModelEditComponent {
   }  
     
   flatModelMap = new Map<string,JoinNode>()
+
   loadFlatModel( joins:JoinNode[] ){
     joins.map( n => {
       this.flatModelMap.set(n.id, n)
@@ -193,34 +196,7 @@ export class ModelEditComponent {
   ngOnInit() {
     this.update()
   }
-  /*
-  Add(node:JoinNode | null){
-    if( this.model ){
-      console.log(node)
-      this.isAdding = true
-      this.newInfoNodeAdding = {
-        id: uuid.v4(),
-        name:"",
-       
-        tableName:"",
-        criteria:[]
-      }
-      this.parentInfoNodeAdding = node
-      
-      if( !this.parentInfoNodeAdding ){
-        this.model.data.push( this.newInfoNodeAdding  )
-      }
-      else{
-        var item = this.parentInfoNodeAdding
-        if( !item.children ){
-          item.children = []
-        }
-        item.children.push(this.newInfoNodeAdding)
-      }
-      this.dataSource.setData(this.model.data)    
-    } 
-  }
-  */
+  
   Edit(node:JoinNode | null){
     if( this.model  && node ){
       console.log(node)
@@ -265,6 +241,8 @@ export class ModelEditComponent {
       this.save()    
     }
   }    
+
+
   deleteNode(parentNodeInfo:JoinNode, nodeInfo:JoinNode){
     if( this.model ){
       if( parentNodeInfo && parentNodeInfo.children ){
@@ -300,7 +278,7 @@ export class ModelEditComponent {
         name: tableName,
         connectionId: connectionId,
         tableName: tableName,
-        criteria: [],
+        joinCriteria: [],
         
       }
       
@@ -319,13 +297,13 @@ export class ModelEditComponent {
   }
   
   onDrop(e:any){
-    var data  = e.item.data
+    var data  = e.item.data as SnowFlakeTable 
     console.log(data)
     var connectionId = data.connectionId
     var schemaName = data.schemaName
     var tableName =  data.tableName
     var joinNodeId = e.container.id  
-    var parentNode = this.flatModelMap.get( joinNodeId ) 
+    var parentNode:JoinNode = this.flatModelMap.get( joinNodeId ) as JoinNode
 
     if( parentNode ){
 
@@ -345,7 +323,7 @@ export class ModelEditComponent {
         })
       }).then( ()=>{
         this.isLoading = false
-        this.openJoinDialog(parentNode!.tableName, leftColumns, tableName, rightColumns)
+        this.openJoinDialog(parentNode, leftColumns, connectionId, schemaName, tableName, rightColumns)
       },
       error=>{
         this.isLoading = false
@@ -360,8 +338,10 @@ export class ModelEditComponent {
   } 
   
   openJoinDialog(
-    leftTableName:string,
+    parentNode:JoinNode,
     leftColumns:Array<SnowFlakeColumn>,
+    connectionId:string, 
+    schemaName:string, 
     rightTableName:string,
     rightColumns:Array<SnowFlakeColumn>
   ){
@@ -370,10 +350,11 @@ export class ModelEditComponent {
       width: '60%',
       data: { 
         label:"Join Dialog", 
-        leftTableName:leftTableName,
+        leftTableName:parentNode.tableName,
         leftColumns:leftColumns,
         rightTableName:rightTableName,
-        rightColumns:rightColumns
+        rightColumns:rightColumns,
+        joinConditions:[]
       }
     });
   
@@ -381,8 +362,86 @@ export class ModelEditComponent {
       console.log('The dialog was closed');
       if( data != undefined ){
         console.debug( data )
-        
+        let newJoinNode:JoinNode = {
+          id: uuid.v4(),
+          name: rightTableName,
+          connectionId: connectionId,
+          tableName: rightTableName,
+          joinCriteria: data.joinConditions
+        }
+        if( !parentNode.children ){
+          parentNode.children = []
+        }
+        parentNode.children.push(newJoinNode)
+        this.save()
       }
     })
   }
+
+  getJoinCriteriaText(joinCriteria: JoinCondition[]){
+    let str=""
+    joinCriteria.forEach( e =>{
+      str += e.leftValue + e.comparator + e.rightValue + "\n"
+    })
+    return str
+  }
+
+  EditJoinNode(parentNode:JoinNode, node:JoinNode){
+    console.log(node)
+    if( parentNode ){
+
+      var leftColumns:Array<SnowFlakeColumn> = []
+      var rightColumns:Array<SnowFlakeColumn> = []
+
+      this.isLoading = true
+    
+      this.dao.getTableColumns(parentNode.connectionId, parentNode.tableName ).then( left =>{
+        console.debug( left )
+        leftColumns = left
+        
+      }).then(()=>{
+        return this.dao.getTableColumns(node.connectionId, node.tableName ).then( right =>{
+          console.debug( right )
+          rightColumns = right
+        })
+      }).then( ()=>{
+        this.isLoading = false
+        this.editJoinDialog(parentNode, leftColumns, node, rightColumns)
+      },
+      error=>{
+        this.isLoading = false
+        alert("error retriving columns")
+      })
+    }
+
+  }
+
+  editJoinDialog(
+    parentNode:JoinNode,
+    leftColumns:Array<SnowFlakeColumn>,
+    node:JoinNode,
+    rightColumns:Array<SnowFlakeColumn>
+  ){
+    const dialogRef = this.dialog.open(JoinDialog, {
+      height: '60%',
+      width: '60%',
+      data: { 
+        label:"Join Dialog", 
+        leftTableName:parentNode.tableName,
+        leftColumns:leftColumns,
+        rightTableName:node.tableName,
+        rightColumns:rightColumns,
+        joinConditions:node.joinCriteria
+      }
+    });
+  
+    dialogRef.afterClosed().subscribe(data => {
+      console.log('The dialog was closed');
+      if( data != undefined ){
+        console.debug( data )
+        this.save()
+      }
+    })
+  }
+
 }
