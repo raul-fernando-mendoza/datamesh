@@ -230,6 +230,9 @@ export class ModelEditComponent {
     if( this.model ){
       console.log(node)
       var name = this.newJoinFG.controls.table.value
+      if( name ){
+        node.name = name
+      }
       
       if(this.isAdding && this.newInfoNodeAdding != null && name ) {
         this.newInfoNodeAdding.name = name
@@ -364,9 +367,9 @@ export class ModelEditComponent {
         console.debug( data )
         let newJoinNode:JoinNode = {
           id: uuid.v4(),
-          name: rightTableName,
+          name: data.rightTableName,
           connectionId: connectionId,
-          tableName: rightTableName,
+          tableName: rightTableName ,
           joinCriteria: data.joinConditions
         }
         if( !parentNode.children ){
@@ -429,7 +432,7 @@ export class ModelEditComponent {
         label:"Join Dialog", 
         leftTableName:parentNode.tableName,
         leftColumns:leftColumns,
-        rightTableName:node.tableName,
+        rightTableName:node.name,
         rightColumns:rightColumns,
         joinConditions:node.joinCriteria
       }
@@ -439,6 +442,7 @@ export class ModelEditComponent {
       console.log('The dialog was closed');
       if( data != undefined ){
         console.debug( data )
+        node.name = data.rightTableName
         this.save()
       }
     })

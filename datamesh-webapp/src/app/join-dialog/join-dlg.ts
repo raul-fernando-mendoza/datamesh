@@ -74,9 +74,6 @@ interface Key{
       ComparatorOption.lte]
 
  
-
-   
-
     leftForm = new FormControl<string>('');
     comparatorForm = new FormControl<ComparatorOption>(ComparatorOption.equal);
     rightForm = new FormControl<string>('');
