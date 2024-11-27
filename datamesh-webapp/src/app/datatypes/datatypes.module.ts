@@ -198,16 +198,6 @@ export class ConnectionCollection{
   static collectionName = "Connection"
 }
 
-export class Column{
-  display_size:number | null = null
-  internal_size:number | null = null
-  is_nullable!:boolean 
-  name!:string 
-  precision:string | null = null
-  scale:string | null = null
-  type_code!:number
-}
-
 export interface InfoNode{
   id:string
   name:string
@@ -220,7 +210,7 @@ export interface JoinNode extends InfoNode{
   connectionId:string
   tableName:string
   children?: JoinNode[]
-  joinCriteria:JoinCondition[]  
+  joinCriteria:JoinCondition[]
 }
 
 export interface Model{
@@ -252,8 +242,6 @@ export enum TreeOption {
 }
 
 export interface SnowFlakeColumn{
-  tableSchema:string,
-  tableName:string,
   columnName:string,
   ordinalPosition:number,
   dataType:string,

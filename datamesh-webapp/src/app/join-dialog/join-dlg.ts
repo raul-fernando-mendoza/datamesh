@@ -9,9 +9,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { SnowFlakeColumn, ComparatorOption, JoinCondition } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
-import {MatRadioChange, MatRadioModule} from '@angular/material/radio';
+import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { MatTabsModule } from '@angular/material/tabs';
 
 
 export interface DataName {
@@ -23,17 +24,7 @@ export interface DataName {
   joinConditions:JoinCondition[]
 }
 
-interface SnowflakeColumnPair{
-  left: SnowFlakeColumn | null,
-  isLeftSelected:boolean,
-  right: SnowFlakeColumn | null
-  isRightSelected:boolean
-}
 
-interface Key{
-  columnName: string,
-  isSelected:boolean,
-}
 
 
 
@@ -56,17 +47,11 @@ interface Key{
       MatCheckboxModule,
       MatSelectModule,
       MatGridListModule,
-      MatRadioModule
-      
+      MatRadioModule,
+      MatTabsModule
     ]
   })
   export class JoinDialog implements OnInit{ 
-
-    allPorts:SnowflakeColumnPair[] = []
-
-    leftKeys:Key[] = []
-    rightKeys:Key[] = []
-
     comparisonOptions:Array<ComparatorOption> = [  ComparatorOption.equal,
       ComparatorOption.gt,
       ComparatorOption.gte,
@@ -79,44 +64,15 @@ interface Key{
     rightForm = new FormControl<string>('');
     strForm = new FormControl<string>('');
 
+  
+
     constructor(
       public dialogRef: MatDialogRef<JoinDialog>,
       @Inject(MAT_DIALOG_DATA) public data:DataName) {}
 
     ngOnInit(): void {
-      let maxcolumns = this.data.leftColumns.length > this.data.rightColumns.length ? this.data.leftColumns.length : this.data.rightColumns.length
-      let lCols = this.data.leftColumns
-      let rCols = this.data.rightColumns
 
-      this.data.leftColumns.map( n =>{
-        var key:Key = {
-          columnName: n.columnName,
-          isSelected: false
-        }
-        this.leftKeys.push(key)
-      })
-      this.data.rightColumns.map( n =>{
-        var key:Key = {
-          columnName: n.columnName,
-          isSelected: false
-        }
-        this.rightKeys.push(key)
-      })
-      for( let i=0; i<maxcolumns; i++){
-        var p:SnowflakeColumnPair = {
-          left:null,
-          isLeftSelected:false,
-          right:null,
-          isRightSelected:false
-        }
-        if( i < lCols.length){
-          p.left = lCols[i]
-        }
-        if( i< rCols.length ){
-          p.right = rCols[i]
-        }
-        this.allPorts.push( p )
-      }
+
     }
 
     clearSelection(){

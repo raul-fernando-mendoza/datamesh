@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ConnectionsService } from './connections.service';
-import { Column, SnowFlakeColumn } from './datatypes/datatypes.module';
+import { SnowFlakeColumn } from './datatypes/datatypes.module';
 import { UrlService } from './url.service';
 
 @Injectable({
@@ -51,8 +51,6 @@ export class DaoService {
           for( var i=0; i<resultSet.length ; i++){
             var record = resultSet[i]
             var column:SnowFlakeColumn = {
-              tableSchema: record[0],
-              tableName: record[1],
               columnName: record[2],
               ordinalPosition: record[3],
               dataType: record[4],
