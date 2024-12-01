@@ -1,11 +1,13 @@
-<h1 mat-dialog-title>{{ data.label }}</h1>
+<h1 mat-dialog-title>Join Properties</h1>
 
 <mat-dialog-content>
-
+  @if( isLoading ){
+    <mat-spinner></mat-spinner>
+  }
   <table>
     <tr>
       <td>
-        {{data.leftTableName}}
+        {{data.leftNode.name}}
       </td>
       <td>
 
@@ -13,14 +15,14 @@
       <td>
       <mat-form-field>
         <mat-label>nombre</mat-label>
-        <input  matInput [(ngModel)]="data.rightTableName">
+        <input  matInput [(ngModel)]="data.rightNode.name">
       </mat-form-field> 
       </td>
     </tr>
   </table>
   <table>
 
-    @for( j of data.joinConditions; track j; let i= $index){
+    @for( j of data.rightNode.joinCriteria; track j; let i= $index){
     <tr>
         <td>
           {{j.leftValue}}
@@ -44,7 +46,7 @@
         <tr>
           <td>
           <mat-radio-group class="example-radio-group" [formControl]="leftForm">
-            @for( c of data.leftColumns; track c; let i = $index ){
+            @for( c of leftColumns; track c; let i = $index ){
               <mat-radio-button class="example-radio-button" [value]="c.columnName"> {{c.columnName}} </mat-radio-button> 
             }
           </mat-radio-group>
@@ -58,7 +60,7 @@
           </td>
           <td>
           <mat-radio-group class="example-radio-group" [formControl]="rightForm">
-            @for( c of data.rightColumns; track c; let i = $index ){
+            @for( c of rightColumns; track c; let i = $index ){
               <mat-radio-button class="example-radio-button" [value]="c.columnName" > {{c.columnName}} </mat-radio-button> 
             }
             <mat-form-field appearance="fill">
@@ -71,41 +73,29 @@
       </table>
     </mat-tab>
     <mat-tab label="Columns">
-      <table>
-        <tr>
-          <td>
-            <ul>
-            @for( c of data.leftColumns; track c; let i = $index ){
-              <li>
-                <mat-checkbox> {{c.columnName}} </mat-checkbox>
-              </li> 
-            }
-            </ul>
-          </td>
-          <td>
-            <ul>
-              @for( c of data.rightColumns; track c; let i = $index ){
-                <li>
-                  <mat-checkbox> {{c.columnName}} </mat-checkbox> 
-                </li>
-                }
-              <li>
-                <mat-form-field appearance="fill">
-                  <mat-label>manual entry</mat-label>
-                  <input matInput placeholder="manual entry" [formControl]="strForm">
-                </mat-form-field> 
-              </li>
-            </ul>       
-          </td>
-        </tr>  
-      </table>      
+      @for( c of data.rightNode.selectedColumns; track c){
+        {{c + ","}}      
+      }
+      <ul>
+        @for( c of rightColumns; track c; let i = $index ){
+          <li>
+            <mat-checkbox [formControl]="selectedFieldFA.at(i)" (change)="onLeftSelectedField(i, $event.checked)" > {{c.columnName}} </mat-checkbox> 
+          </li>
+        }
+        <li>
+          <mat-form-field appearance="fill">
+            <mat-label>manual entry</mat-label>
+            <input matInput placeholder="manual entry" [formControl]="strForm">
+          </mat-form-field> 
+        </li>
+      </ul>       
     </mat-tab>
   </mat-tab-group>  
 </mat-dialog-content>
 <mat-dialog-actions>
   <button mat-button (click)="onAddJoin()">add</button>
   <button mat-button mat-dialog-close>Cancel</button> 
-  <button [disabled]="data.rightTableName.length < 1 || data.rightTableName.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+  <button [disabled]="data.leftNode.name.length < 1 || data.leftNode.name.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
 </mat-dialog-actions>
 
 

@@ -211,6 +211,21 @@ export interface JoinNode extends InfoNode{
   tableName:string
   children?: JoinNode[]
   joinCriteria:JoinCondition[]
+  selectedColumns:String[]
+}
+
+export interface JoinData {
+  leftNode:JoinNode
+  rightNode:JoinNode
+  /*
+  label:string
+  leftTableName:string
+  leftColumns:Array<SnowFlakeColumn>
+  rightTableName:string
+  rightColumns:Array<SnowFlakeColumn>
+  joinConditions:JoinCondition[]
+  selectedColumns:Array<String>
+  */
 }
 
 export interface Model{

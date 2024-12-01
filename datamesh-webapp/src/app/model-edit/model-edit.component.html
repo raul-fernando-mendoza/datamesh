@@ -43,9 +43,9 @@
                 </button>
                 <mat-menu #menu="matMenu">
                   <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
-                  <button mat-icon-button (click)="EditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
+                  <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
 
-                  <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
+                  <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                 </mat-menu>
               }              
             </mat-tree-node>
@@ -98,7 +98,7 @@
                   </button>
                   <mat-menu #menu="matMenu">
                     <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button (click)="deleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
+                    <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                   </mat-menu>
                 }                    
               </div>  
