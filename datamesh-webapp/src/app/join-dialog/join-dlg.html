@@ -7,14 +7,13 @@
 <mat-dialog-content>
   <table>
     <tr>
+      @if( data.leftNode ){
       <td>
         {{data.leftNode.name}}
       </td>
+      }
       <td>
-
-      </td>
-      <td>
-      <mat-form-field>
+      <mat-form-field class="table-name">
         <mat-label>nombre</mat-label>
         <input  matInput [(ngModel)]="data.rightNode.name">
       </mat-form-field> 
@@ -23,18 +22,13 @@
   </table>
 
   <mat-tab-group>  
-    <mat-tab label="Joins">
+    @if( data.leftNode ){
+    <mat-tab  label="Joins">
       <table>
         @for( j of data.rightNode.joinCriteria; track j; let i= $index){
         <tr>
             <td>
-              {{j.leftValue}}
-            </td>
-            <td>
-              {{j.comparator}}
-            </td>
-            <td>
-              {{j.rightValue}}
+              {{j.leftValue}} {{j.comparator}} {{j.rightValue}}
             </td>
             <td>
               <button mat-icon-button (click)="onDelete(i)"><mat-icon>delete</mat-icon></button>
@@ -43,6 +37,11 @@
         }
       </table>  
     
+      <div class="header">
+        <span class="spacer"></span>
+        <button mat-button (click)="onAddJoin()">add</button>
+      </div>
+
       <table>
         <tr>
           <td>
@@ -70,12 +69,10 @@
             </mat-form-field>        
           </mat-radio-group>
           </td>
-          <td>
-            <button mat-button (click)="onAddJoin()">add</button>
-          </td>
         </tr>  
       </table>
     </mat-tab>
+    }
     <mat-tab label="Columns">
       @for( c of data.rightNode.selectedColumns; track c){
         {{c + ","}}      
@@ -98,9 +95,7 @@
       <table>
         @for( f of data.rightNode.filters; track f; let i = $index){
         <tr>
-          <td>{{f.leftValue}}</td>
-          <td>{{f.comparator}}</td>
-          <td>{{f.rightValue}}</td>
+          <td>{{f.leftValue}} {{f.comparator}} {{f.rightValue}}</td>
           <td>
             <button mat-icon-button (click)="onDeleteFilter(i)"><mat-icon>delete</mat-icon></button>
           </td>          
@@ -141,7 +136,9 @@
                 <mat-label>value to filter</mat-label>
                 <input matInput placeholder="manual entry" formControlName="exp">
               </mat-form-field> 
-              <button mat-icon-button (click)="onAddFilter()"><mat-icon>done</mat-icon></button>
+          </td>
+          <td>
+            <button mat-icon-button (click)="onAddFilter()"><mat-icon>done</mat-icon></button>
           </td>
         </tr>
       </table>
@@ -151,7 +148,7 @@
 
 <mat-dialog-actions>
   <button mat-button mat-dialog-close>Cancel</button> 
-  <button [disabled]="data.leftNode.name.length < 1 || data.leftNode.name.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
+  <button [disabled]="data.rightNode.name.length < 1 || data.rightNode.name.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
 </mat-dialog-actions>
 }
 

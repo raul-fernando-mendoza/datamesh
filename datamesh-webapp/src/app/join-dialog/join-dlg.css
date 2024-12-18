@@ -1,5 +1,11 @@
+table{
+    width:100%;
+}
 td{
-    vertical-align: top;
+    width: 100%;
+}
+.table-name{
+    width:100%
 }
 .example-radio-group {
     display: flex;

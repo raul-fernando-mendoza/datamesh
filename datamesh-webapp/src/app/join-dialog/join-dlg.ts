@@ -87,7 +87,17 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
     ngOnInit(): void {
       this.isLoading = true
-      this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( right =>{
+
+      let allPromises:Array<Promise<void>> = []
+
+      if( this.data.leftNode ){
+        let leftPromise   = this.dao.getTableColumns(this.data.leftNode.connectionId, this.data.leftNode.tableName ).then( left =>{
+          this.isLoading = false
+          left.forEach( c => this.leftColumns.push(c))
+        })
+        allPromises.push( leftPromise )
+      }
+      let rightPromise = this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( right =>{
             console.debug( right )
             right.forEach( c => this.rightColumns.push(c))
             this.rightColumns.forEach( c =>{
@@ -105,22 +115,19 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
             this.rightColumns.forEach( c =>{
               this.rightColumnNames.push( c.columnName )
             })            
-      }).then( ()=>{
-        if( this.data.leftNode ){
-          this.dao.getTableColumns(this.data.leftNode.connectionId, this.data.leftNode.tableName ).then( left =>{
-            this.isLoading = false
-            left.forEach( c => this.leftColumns.push(c))
-          }
-          ,error=>{
-            this.isLoading = false
-            alert("error retriving columns")
-          })
-        }
-        else{
-          this.isLoading = false
-        }
+      })
+      allPromises.push( rightPromise )
+
+      Promise.all( allPromises ).then( () =>{
+        this.isLoading = false
+      }
+      ,error=>{
+        this.isLoading = false
+        alert("error retriving columns")
       })
     }
+
+    
 
     clearSelection(){
       this.leftForm.setValue("")

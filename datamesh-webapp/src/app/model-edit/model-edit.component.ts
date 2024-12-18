@@ -359,25 +359,24 @@ export class ModelEditComponent {
 
   onEditJoinNode(parentNode:JoinNode, node:JoinNode){
     console.log(node)
-    if( parentNode ){
-      let data: JoinData = {
-        leftNode: parentNode,
-        rightNode: node
-      }
-      const dialogRef = this.dialog.open(JoinDialog, {
-        height: '60%',
-        width: '60%',
-        data: data
-      });
-    
-      dialogRef.afterClosed().subscribe(data => {
-        console.log('The dialog was closed');
-        if( data != undefined ){
-          console.debug( data )
-          this.save()
-        }
-      })
+
+    let data: JoinData = {
+      leftNode: parentNode,
+      rightNode: node
     }
+    const dialogRef = this.dialog.open(JoinDialog, {
+      height: '60%',
+      width: '60%',
+      data: data
+    });
+  
+    dialogRef.afterClosed().subscribe(data => {
+      console.log('The dialog was closed');
+      if( data != undefined ){
+        console.debug( data )
+        this.save()
+      }
+    })
   }
 
 }
