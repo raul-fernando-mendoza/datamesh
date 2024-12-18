@@ -282,7 +282,8 @@ export class ModelEditComponent {
         connectionId: connectionId,
         tableName: tableName,
         joinCriteria: [],
-        selectedColumns: []
+        selectedColumns: [],
+        filters: []
       }
       
       if( !parentNode ){
@@ -314,7 +315,8 @@ export class ModelEditComponent {
       connectionId: data.connectionId,
       tableName: data.tableName,
       joinCriteria: [],
-      selectedColumns: []
+      selectedColumns: [],
+      filters: []
     }    
 
     if( parentNode ){

@@ -1,6 +1,6 @@
-import {  ChangeDetectionStrategy, Component,  Inject, OnInit, ViewChild } from '@angular/core';
+import {  Component,  ElementRef,  Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { FormArray, FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,8 +14,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatTabsModule } from '@angular/material/tabs';
 import { DaoService } from 'app/dao.service';
-import { setThrowInvalidWriteToSignalError } from '@angular/core/primitives/signals';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 
 @Component({
@@ -38,10 +38,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
       MatGridListModule,
       MatRadioModule,
       MatTabsModule,
-      MatProgressSpinnerModule
+      MatProgressSpinnerModule,
+      MatAutocompleteModule
     ]
   })
   export class JoinDialog implements OnInit{ 
+    @ViewChild('input') input!: ElementRef<HTMLInputElement>;
+    
     comparisonOptions:Array<ComparatorOption> = [  ComparatorOption.equal,
       ComparatorOption.gt,
       ComparatorOption.gte,
@@ -54,12 +57,27 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     rightForm = new FormControl<string>('');
     strForm = new FormControl<string>('');
 
-    selectedFieldFA = this.fb.array([])   
+    leftFilterFC = new FormControl<string>("")
+    comparatorFilterFC = new FormControl<ComparatorOption>(ComparatorOption.equal); 
+    rightFilterFC = new FormControl<string>("")
+
+    selectedFieldFA = this.fb.array([])  
+    filteredFA = this.fb.array([]) 
 
     isLoading = false
 
     leftColumns:Array<SnowFlakeColumn> = []
-    rightColumns:Array<SnowFlakeColumn> = []    
+    rightColumns:Array<SnowFlakeColumn> = []   
+    
+    rightColumnNames:Array<string> = []
+
+    filterFG = this.fb.group({
+      columnName: [''],
+      comparator: [ComparatorOption.equal],
+      exp:['']
+    })
+    myControl = new FormControl('');
+    filteredOptions: string[] = [];
 
     constructor(
       public dialogRef: MatDialogRef<JoinDialog>,
@@ -79,7 +97,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
               }
               let f = new FormControl(selected)
               this.selectedFieldFA.push(f)
-            })             
+            })
+            this.rightColumns.forEach( c =>{
+              let f = new FormControl(false)
+              this.filteredFA.push(f)
+            })  
+            this.rightColumns.forEach( c =>{
+              this.rightColumnNames.push( c.columnName )
+            })            
       }).then( ()=>{
         if( this.data.leftNode ){
           this.dao.getTableColumns(this.data.leftNode.connectionId, this.data.leftNode.tableName ).then( left =>{
@@ -138,6 +163,31 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
         }
       }
       
+    } 
+    
+    filter(): void {
+      const filterValue = this.input.nativeElement.value.toLowerCase();
+      this.filteredOptions = this.rightColumnNames.filter(o => o.toLowerCase().includes(filterValue));
+    }
+
+    onAddFilter(){
+      let columnName = this.filterFG.controls.columnName.value 
+      let comparator = this.filterFG.controls.comparator.value
+      let exp = this.filterFG.controls.exp.value
+      if( columnName && comparator && exp ){
+        let newCondition:JoinCondition = {
+          leftValue: columnName,
+          comparator: comparator,
+          rightValue: exp
+        } 
+        this.data.rightNode.filters.push(newCondition)
+        this.filterFG.controls.columnName.setValue(null)
+        this.filterFG.controls.comparator.setValue(null)
+        this.filterFG.controls.exp.setValue(null)
+      } 
+    }
+    onDeleteFilter(i:number){
+      this.data.rightNode.filters.splice(i,1)
     }    
   }
   

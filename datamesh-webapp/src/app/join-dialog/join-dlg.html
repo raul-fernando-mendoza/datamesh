@@ -1,9 +1,10 @@
 <h1 mat-dialog-title>Join Properties</h1>
 
+@if( isLoading ){
+  <mat-spinner></mat-spinner>
+}
+@else{
 <mat-dialog-content>
-  @if( isLoading ){
-    <mat-spinner></mat-spinner>
-  }
   <table>
     <tr>
       <td>
@@ -20,28 +21,28 @@
       </td>
     </tr>
   </table>
-  <table>
-
-    @for( j of data.rightNode.joinCriteria; track j; let i= $index){
-    <tr>
-        <td>
-          {{j.leftValue}}
-        </td>
-        <td>
-          {{j.comparator}}
-        </td>
-        <td>
-          {{j.rightValue}}
-        </td>
-        <td>
-          <button mat-icon-button (click)="onDelete(i)"><mat-icon>delete</mat-icon></button>
-        </td>
-    </tr>
-    }
-  </table>  
 
   <mat-tab-group>  
     <mat-tab label="Joins">
+      <table>
+        @for( j of data.rightNode.joinCriteria; track j; let i= $index){
+        <tr>
+            <td>
+              {{j.leftValue}}
+            </td>
+            <td>
+              {{j.comparator}}
+            </td>
+            <td>
+              {{j.rightValue}}
+            </td>
+            <td>
+              <button mat-icon-button (click)="onDelete(i)"><mat-icon>delete</mat-icon></button>
+            </td>
+        </tr>
+        }
+      </table>  
+    
       <table>
         <tr>
           <td>
@@ -69,6 +70,9 @@
             </mat-form-field>        
           </mat-radio-group>
           </td>
+          <td>
+            <button mat-button (click)="onAddJoin()">add</button>
+          </td>
         </tr>  
       </table>
     </mat-tab>
@@ -90,14 +94,66 @@
         </li>
       </ul>       
     </mat-tab>
+    <mat-tab label="filters">
+      <table>
+        @for( f of data.rightNode.filters; track f; let i = $index){
+        <tr>
+          <td>{{f.leftValue}}</td>
+          <td>{{f.comparator}}</td>
+          <td>{{f.rightValue}}</td>
+          <td>
+            <button mat-icon-button (click)="onDeleteFilter(i)"><mat-icon>delete</mat-icon></button>
+          </td>          
+        </tr>
+        }
+      </table>
+      <table [formGroup]="filterFG">
+        <tr>
+          <td> 
+            <mat-form-field appearance="fill" >
+              <input #input
+              type="text"
+              placeholder="Pick column"
+              matInput
+              formControlName="columnName"
+              [matAutocomplete]="auto"
+              (input)="filter()"
+              (focus)="filter()">
+              <mat-autocomplete requireSelection #auto="matAutocomplete">
+                @for (option of filteredOptions; track option) {
+                  <mat-option [value]="option">{{option}}</mat-option>
+                }
+              </mat-autocomplete>              
+            </mat-form-field>
+          
+          </td>
+          <td >
+            <mat-form-field>
+              <mat-select    formControlName="comparator">
+                @for( c of comparisonOptions; track c; let i=$index ){
+                  <mat-option [value]="c">{{ c }}</mat-option>   
+                }
+              </mat-select>
+            </mat-form-field>
+          </td>
+          <td>
+              <mat-form-field appearance="fill">
+                <mat-label>value to filter</mat-label>
+                <input matInput placeholder="manual entry" formControlName="exp">
+              </mat-form-field> 
+              <button mat-icon-button (click)="onAddFilter()"><mat-icon>done</mat-icon></button>
+          </td>
+        </tr>
+      </table>
+    </mat-tab>
   </mat-tab-group>  
 </mat-dialog-content>
+
 <mat-dialog-actions>
-  <button mat-button (click)="onAddJoin()">add</button>
   <button mat-button mat-dialog-close>Cancel</button> 
   <button [disabled]="data.leftNode.name.length < 1 || data.leftNode.name.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
 </mat-dialog-actions>
-
+}
 
 
  

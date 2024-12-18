@@ -212,6 +212,7 @@ export interface JoinNode extends InfoNode{
   children?: JoinNode[]
   joinCriteria:JoinCondition[]
   selectedColumns:String[]
+  filters:JoinCondition[]
 }
 
 export interface JoinData {
