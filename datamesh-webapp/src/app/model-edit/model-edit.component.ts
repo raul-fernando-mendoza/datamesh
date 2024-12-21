@@ -378,5 +378,10 @@ export class ModelEditComponent {
       }
     })
   }
+  onPlay(node:JoinNode | null){
+    if( this.model  && node ){
+      console.log(node)
+    } 
+  }    
 
 }
