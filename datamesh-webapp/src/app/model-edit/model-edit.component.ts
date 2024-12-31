@@ -283,7 +283,10 @@ export class ModelEditComponent {
         tableName: tableName,
         joinCriteria: [],
         selectedColumns: [],
-        filters: []
+        filters: [],
+        columns: [],
+        selectedChildColumns: [],
+        expressions: []
       }
       
       if( !parentNode ){
@@ -316,7 +319,10 @@ export class ModelEditComponent {
       tableName: data.tableName,
       joinCriteria: [],
       selectedColumns: [],
-      filters: []
+      filters: [],
+      columns: [],
+      selectedChildColumns: [],
+      expressions: []
     }    
 
     if( parentNode ){

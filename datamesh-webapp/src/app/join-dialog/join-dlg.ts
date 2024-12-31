@@ -1,13 +1,13 @@
 import {  Component,  ElementRef,  Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData } from 'app/datatypes/datatypes.module';
+import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -16,6 +16,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { DaoService } from 'app/dao.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import {MatExpansionModule} from '@angular/material/expansion';
 
 
 @Component({
@@ -39,7 +40,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
       MatRadioModule,
       MatTabsModule,
       MatProgressSpinnerModule,
-      MatAutocompleteModule
+      MatAutocompleteModule,
+      MatExpansionModule
     ]
   })
   export class JoinDialog implements OnInit{ 
@@ -50,27 +52,20 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
       ComparatorOption.gte,
       ComparatorOption.lt ,
       ComparatorOption.lte]
-
  
-    leftForm = new FormControl<string>('');
-    comparatorForm = new FormControl<ComparatorOption>(ComparatorOption.equal);
-    rightForm = new FormControl<string>('');
-    strForm = new FormControl<string>('');
 
-    leftFilterFC = new FormControl<string>("")
-    comparatorFilterFC = new FormControl<ComparatorOption>(ComparatorOption.equal); 
-    rightFilterFC = new FormControl<string>("")
+    selectedColumnsFA = this.fb.array([
+      {
+        columnName: [''],
+        selected: [true],
+        alias:['']
+      }
+    ])  
 
-    selectedFieldFA = this.fb.array([])  
     filteredFA = this.fb.array([]) 
 
     isLoading = false
 
-    leftColumns:Array<SnowFlakeColumn> = []
-    rightColumns:Array<SnowFlakeColumn> = []   
-    
-    leftColumnNames:Array<string> = []
-    rightColumnNames:Array<string> = []
 
     joinsFA = this.fb.array([
       this.fb.group({
@@ -80,6 +75,13 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
       })
     ])  
 
+    columnsFA = this.fb.array([
+      this.fb.group({
+        columnName: [''],
+        selected: [true],
+        alias:['']
+      })
+    ])     
 
     filtersFA = this.fb.array([
       this.fb.group({
@@ -89,8 +91,28 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
       })
     ])   
 
-    filteredOptions: string[] = [];
-    filteredLeftOptions: string[] = [];
+    filteredOptions: SnowFlakeColumn[] = [];
+    filteredLeftOptions: SnowFlakeColumn[] = [];
+
+    childColumnsSelectedFA = [
+      [
+        this.fb.group({
+          columnName: [''],
+          selected: [true],
+          alias:['']
+        }),        
+      ]
+      ,
+      [
+        this.fb.group({
+          columnName: [''],
+          selected: [true],
+          alias:['']
+        }),        
+      ]
+    ]
+
+
 
     constructor(
       public dialogRef: MatDialogRef<JoinDialog>,
@@ -99,19 +121,37 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
       @Inject(MAT_DIALOG_DATA) public data:JoinData) {}
 
     ngOnInit(): void {
+     
       this.isLoading = true
 
       let allPromises:Array<Promise<void>> = []
 
-      if( this.data.leftNode ){
+      if( this.data.leftNode!= null && this.data.leftNode.columns.length == 0){
         let leftPromise   = this.dao.getTableColumns(this.data.leftNode.connectionId, this.data.leftNode.tableName ).then( left =>{
           this.isLoading = false
-          left.forEach( c => this.leftColumns.push(c))
+          this.data.leftNode.columns.length = 0
 
-          this.leftColumns.forEach( c =>{
-            this.leftColumnNames.push( c.columnName )
-          })           
+          left.forEach( c => this.data.leftNode!.columns.push(c))            
 
+ 
+
+        })
+        allPromises.push( leftPromise )
+      }
+      if( this.data.rightNode.columns  && this.data.rightNode.columns.length == 0){
+        let rightPromise = this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( right =>{
+              console.debug( right )
+              this.data.rightNode.columns.length = 0
+              right.forEach( c => this.data.rightNode.columns.push(c)) 
+
+        })
+        allPromises.push( rightPromise )
+      }  
+      Promise.all( allPromises ).then( () =>{
+        this.isLoading = false
+
+        //if there is a leftNode add the joins
+        if( this.data.leftNode ){
           this.joinsFA.clear()
           this.data.rightNode.joinCriteria.forEach( j =>{
             let newJoinFG = this.fb.group({
@@ -120,61 +160,85 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
               exp:[j.rightValue]
             })
             this.joinsFA.push( newJoinFG)
-          })            
+          })     
+        }
+        
+        //generate a form control for each column name
+        this.columnsFA.clear()
+        this.data.rightNode.columns.forEach( c =>{
+          let selected = false
+          let alias = ""
+          let selectedColumn = this.data.rightNode.selectedColumns.find( s => s.exp == c.columnName)
+          if( selectedColumn ){
+            selected = true
+            alias = selectedColumn.alias
+          }
+          let g = this.fb.group({
+            columnName: [c.columnName],
+            selected: [selected],
+            alias:[alias]
+          })
+          this.columnsFA.push(g)
+        })             
+
+        this.data.rightNode.children?.forEach( child =>{
+          let prefix = child.name
+          child.selectedColumns.forEach( selectedColumn =>{
+            console.log("")  
+          })
         })
-        allPromises.push( leftPromise )
-      }
-      let rightPromise = this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( right =>{
-            console.debug( right )
 
-            right.forEach( c => this.rightColumns.push(c))
-
-            this.rightColumns.forEach( c =>{
-              this.rightColumnNames.push( c.columnName )
-            })   
-
-            this.data.rightNode.children?.forEach( child =>{
-              let prefix = child.name
-              child.selectedColumns.forEach( selectedColumn =>{
-                this.rightColumnNames.push( prefix + "_" + selectedColumn )           
-              })
+        //load the childs selected columns
+        this.childColumnsSelectedFA.length = 0
+        //iterate over each children       
+        for( let i =0; this.data.rightNode.children && i < this.data.rightNode.children.length; i++){
+          // first initialize the FA
+          this.childColumnsSelectedFA[i] = []
+          //get the current child
+          let child = this.data.rightNode.children[i]
+          //iterate over the selecvted columns of the child
+          child.selectedColumns.forEach( c =>{
+            //now search if the child columns is in the selected expresion of the parent
+            let selected = false
+            let alias = ""
+            let selectedColumn = this.data.rightNode.selectedChildColumns.find( s => s.exp == child.name + "." + (c.alias?c.alias:c.exp) )
+            if( selectedColumn ){
+              selected = true
+              alias = selectedColumn.alias
+            }
+            let g = this.fb.group({
+              columnName: [child.name + "." + (c.alias?c.alias:c.exp)],
+              selected: [selected],
+              alias:[alias]
             })
+            this.childColumnsSelectedFA[i].push(g)
+          })             
+  
+  
 
-            //generate a form control for each column name
-            this.rightColumnNames.forEach( c =>{
-              let selected = false
-              if( this.data.rightNode.selectedColumns.find( s => s == c) ){
-                selected = true
-              }
-              let f = new FormControl(selected)
-              this.selectedFieldFA.push(f)
-            })
+        }
 
-            this.filtersFA.clear()
-            this.data.rightNode.filters.forEach( f =>{
-              let newFilterFG = this.fb.group({
-                columnName: [f.leftValue],
-                comparator: [f.comparator],
-                exp:[f.rightValue]
-              })
-              this.filtersFA.push( newFilterFG)
-            })  
-      })
-      allPromises.push( rightPromise )
+        //load the filtes
 
-      Promise.all( allPromises ).then( () =>{
-        this.isLoading = false
+        this.filtersFA.clear()
+        this.data.rightNode.filters.forEach( f =>{
+          let newFilterFG = this.fb.group({
+            columnName: [f.leftValue],
+            comparator: [f.comparator],
+            exp:[f.rightValue]
+          })
+          this.filtersFA.push( newFilterFG)
+        })  
+
+
+        
       }
       ,error=>{
         this.isLoading = false
         alert("error retriving columns")
       })
     }
-    clearSelection(){
-      this.leftForm.setValue("")
-      this.rightForm.setValue("")
-      this.comparatorForm.setValue(ComparatorOption.equal)
-    }
+
     onAddJoin(){
       let newJoinFG = this.fb.group({
         columnName: [""],
@@ -189,33 +253,22 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     onDelete(i:number){
       this.filtersFA.controls.splice(i,1)
     }
-    onLeftSelectedField(index:number, value:boolean){
-      console.log("selected"+ this.selectedFieldFA.at(index).value)
-      this.data.rightNode.selectedColumns.length = 0
-      for( let i =0; i< this.selectedFieldFA.controls.length; i++){
-        if( this.selectedFieldFA.at(i).value ){
-          let column = this.rightColumnNames[i]
-          this.data.rightNode.selectedColumns.push(column)
-        }
-      }
-      
-    } 
     
     filter(i:number): void {
       let formFG = this.filtersFA.controls[i]
       const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
-      this.filteredOptions = this.rightColumnNames.filter(o => o.toLowerCase().includes(filterValue.toLowerCase()));
+      this.filteredOptions = this.data.rightNode.columns.filter(o => o.columnName.toLowerCase().includes(filterValue.toLowerCase()));
     }
 
     filterLeft(i:number): void {
       let formFG = this.joinsFA.controls[i]
       const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
-      this.filteredLeftOptions = this.leftColumnNames.filter(o => o.toLowerCase().includes(filterValue.toLowerCase()));
+      this.filteredLeftOptions = this.data.leftNode.columns.filter(o => o.columnName.toLowerCase().includes(filterValue.toLowerCase()));
     }   
     filterJoinExp(i:number): void {
       let formFG = this.joinsFA.controls[i]
       const filterValue = formFG.controls.exp.value ? formFG.controls.exp.value : ""
-      this.filteredOptions = this.rightColumnNames.filter(o => o.toLowerCase().includes(filterValue.toLowerCase()));
+      this.filteredOptions = this.data.rightNode.columns.filter(o => o.columnName.toLowerCase().includes(filterValue.toLowerCase()));
     }     
 
     onAddFilter(){
@@ -244,6 +297,38 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
         } 
         this.data.rightNode.joinCriteria.push(joinCondition)
       })
+
+      this.data.rightNode.selectedColumns.length = 0
+      this.columnsFA.controls.forEach( columnFG =>{
+        let columnName = columnFG.controls.columnName.value! 
+        let selected = columnFG.controls.selected.value 
+        let exp = columnFG.controls.alias.value || ""
+        if( selected ){
+          let selectedColumn:SelectedColumn = {
+            exp: columnName,
+            alias: exp
+          }
+          this.data.rightNode.selectedColumns.push(selectedColumn)
+        }
+      }) 
+      
+      //save the selected child columns
+      this.data.rightNode.selectedChildColumns.length = 0
+      this.childColumnsSelectedFA.forEach( childColumnsSelectedFA =>{
+        childColumnsSelectedFA.forEach( FG =>{
+          let exp:string = FG.controls.columnName.value || ""
+          let selected = FG.controls.selected.value  
+          let alias = FG.controls.alias.value || ""
+          if( selected ){
+            let selectedColumn:SelectedColumn = {
+              exp: exp,
+              alias: alias
+            }
+            this.data.rightNode.selectedChildColumns.push(selectedColumn)
+          }
+        })
+      })
+
 
       this.data.rightNode.filters.length = 0
       this.filtersFA.controls.forEach( filterFG =>{

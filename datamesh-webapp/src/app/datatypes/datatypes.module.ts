@@ -204,15 +204,23 @@ export interface InfoNode{
   children?:InfoNode[]
 }
 
+export interface SelectedColumn {
+  exp: string
+  alias: string
+}
+
 export interface JoinNode extends InfoNode{
   id:string
   name: string
   connectionId:string
   tableName:string
+  columns: SnowFlakeColumn[]
   children?: JoinNode[]
   joinCriteria:JoinCondition[]
-  selectedColumns:String[]
-  filters:JoinCondition[]
+  filters:JoinCondition[]  
+  selectedColumns:SelectedColumn[]
+  selectedChildColumns:SelectedColumn[]
+  expressions:string[]
 }
 
 export interface JoinData {
