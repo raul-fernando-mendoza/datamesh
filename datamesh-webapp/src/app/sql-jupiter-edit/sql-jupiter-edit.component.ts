@@ -349,4 +349,37 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
   getKeys( obj:any ){
     return Object.keys(obj)
   }
+
+  format( key:any, val:any){
+    let metadata = this.sqlResult!.result_metadata!
+    let result = val
+    if( 8 == metadata[key]["type_code"] && val){
+      if( val.endsWith(' 00:00:00') ){
+        result = val.substring( 0, val.length - 9 )
+      }
+      else{
+        result = val
+      }
+    }
+    if( 3 == metadata[key]["type_code"] && val){
+        result = val
+    } 
+    if( 0 == metadata[key]["type_code"] && val){
+      if( val - Math.floor(val) ){
+        result = Number(val).toFixed(2)
+      }
+      else{
+        result = Math.floor(Number(val)) + ".__"
+      }      
+    }              
+
+    return result
+  }
+  isNumber(key:any){
+    let metadata = this.sqlResult!.result_metadata!
+    if( 0 == metadata[key]["type_code"] ){
+      return true
+    }
+    return false
+  }
 }

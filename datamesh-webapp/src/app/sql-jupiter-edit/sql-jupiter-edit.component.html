@@ -83,7 +83,7 @@
                         <tbody>                
                             <tr *ngFor="let row of sqlResult.result_set; index as i">
                                 <td class="sticky-col first-col">{{ i + 1 }}</td>
-                                <td *ngFor="let key of getKeys(row)">{{ row[key] }}</td> 
+                                <td *ngFor="let key of getKeys(row)" [ngClass]="{'number': isNumber(key) }">{{ format(key, row[key]) }}</td> 
                             </tr>
                         </tbody>                
                     </table>  
