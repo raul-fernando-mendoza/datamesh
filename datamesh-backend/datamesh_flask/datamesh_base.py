@@ -451,37 +451,39 @@ def getDFChild( session, infoNode):
         
     #now add the missing columns for the join
     for joinCriteria in infoNode["joinCriteria"]:
-        found = False
+        foundInFilter = False
         for column in infoNode["selectedColumns"]: 
             if (column["alias"] if column["alias"] else column["exp"]) == joinCriteria["rightValue"]:
-                found = True
+                foundInFilter = True
                 break
-        if found == False:
+        if foundInFilter == False:
             cols.append( df.col(joinCriteria["rightValue"]).alias(joinCriteria["rightValue"])  )
 
     #select the child columns cols
     if( "children" in infoNode):
         for i in range(len(childDFs)):
-            child = childDFs[i]
-            for column in  child.columns: 
-                selected = False #if not selection has taken place then take all
-                found = False #found in filter
+            childDF = childDFs[i]
+            childNode = infoNode["children"][i]
+            for column in  childDF.columns: 
+                selected = None #if not selection has taken place then take all
+                foundInFilter = False #found in filter
                 if str(i) in infoNode["selectedChildColumns"]:
                     selectedChildrenColumns = infoNode["selectedChildColumns"][str(i)]
-                    for selectedColumn in selectedChildrenColumns:
-                        left = selectedColumn["alias"] if selectedColumn["alias"] else selectedColumn["exp"]
-                        if left == column:
-                            selected = selectedColumn["isSelected"]
-                            break
+                else:
+                    selectedChildrenColumns = childNode["selectedColumns"]    
+                for selectedColumn in selectedChildrenColumns:
+                    left = selectedColumn["alias"] if selectedColumn["alias"] else selectedColumn["exp"]
+                    if left == column:
+                        selected = selectedColumn["isSelected"]
+                        break
                 #need to know if the df column is in the join criteria of the child
-                if selected == False:
-                    child = infoNode["children"][i]
-                    found = False
-                    for joinCriteria in child["joinCriteria"]:
+                if selected == None:                    
+                    foundInFilter = False
+                    for joinCriteria in childNode["joinCriteria"]:
                         if column == joinCriteria["rightValue"]:
-                            found = True
+                            foundInFilter = True
                             break    
-                if selected == True or (selected == False and found==False):
+                if selected == True or (selected == None and foundInFilter==False):
                     newCol = childDFs[i].col(column).alias(column)  
                     cols.append( newCol )
                       
