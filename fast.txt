@@ -1,0 +1,28 @@
+export interface SelectedColumn {
+  exp: string
+  alias: string
+}
+export interface JoinCondition{
+  leftValue:string
+  comparator:ComparatorOption
+  rightValue:string
+}
+
+export interface JoinNode extends InfoNode{
+  id:string
+  name: string
+  connectionId:string
+  tableName:string
+  columns: SnowFlakeColumn[]
+  children?: JoinNode[]
+  joinCriteria:JoinCondition[]
+  filters:JoinCondition[]  
+  selectedColumns:SelectedColumn[]
+  selectedChildrenColumns:SelectedColumn[]
+  expressions:string[]
+
+      request_id:uuid.v4(),
+      request_status:"requested",
+      request_start_time:Timestamp.now(),
+      request_error_message:""
+}

@@ -1,4 +1,4 @@
-import {  Component,  ElementRef,  Inject, OnInit, ViewChild } from '@angular/core';
+import {  Component,  ElementRef,  Inject, OnInit, SimpleChange, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { FormArray, FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -151,8 +151,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
         this.isLoading = false
 
         //if there is a leftNode add the joins
-        if( this.data.leftNode ){
-          this.joinsFA.clear()
+        this.joinsFA.clear()
+        if( this.data.leftNode ){          
           this.data.rightNode.joinCriteria.forEach( j =>{
             let newJoinFG = this.fb.group({
               columnName: [j.leftValue],
@@ -196,18 +196,22 @@ import {MatExpansionModule} from '@angular/material/expansion';
           this.childColumnsSelectedFA[i] = []
           //get the current child
           let child = this.data.rightNode.children[i]
-          //iterate over the selecvted columns of the child
+          
+          //iterate over the selected columns of the child
           child.selectedColumns.forEach( c =>{
             //now search if the child columns is in the selected expresion of the parent
             let selected = false
             let alias = ""
-            let selectedColumn = this.data.rightNode.selectedChildColumns.find( s => s.exp == child.name + "." + (c.alias?c.alias:c.exp) )
-            if( selectedColumn ){
-              selected = true
-              alias = selectedColumn.alias
+            if( i in this.data.rightNode.selectedChildColumns ){
+                let arr: SelectedColumn[] = this.data.rightNode.selectedChildColumns[i]
+                let selectedColumn = arr.find( s => s.exp == (c.alias?c.alias:c.exp) )
+                if( selectedColumn ){
+                  selected = true
+                  alias = selectedColumn.alias
+                }
             }
             let g = this.fb.group({
-              columnName: [child.name + "." + (c.alias?c.alias:c.exp)],
+              columnName: [(c.alias?c.alias:c.exp)],
               selected: [selected],
               alias:[alias]
             })
@@ -218,9 +222,9 @@ import {MatExpansionModule} from '@angular/material/expansion';
 
         }
 
-        //load the filtes
-
+        //load the filters
         this.filtersFA.clear()
+        
         this.data.rightNode.filters.forEach( f =>{
           let newFilterFG = this.fb.group({
             columnName: [f.leftValue],
@@ -313,8 +317,10 @@ import {MatExpansionModule} from '@angular/material/expansion';
       }) 
       
       //save the selected child columns
-      this.data.rightNode.selectedChildColumns.length = 0
-      this.childColumnsSelectedFA.forEach( childColumnsSelectedFA =>{
+      this.data.rightNode.selectedChildColumns = {}
+      for(let i=0; i<this.childColumnsSelectedFA.length; i++){
+        let childColumnsSelectedFA = this.childColumnsSelectedFA[i]
+        this.data.rightNode.selectedChildColumns[i] = [] 
         childColumnsSelectedFA.forEach( FG =>{
           let exp:string = FG.controls.columnName.value || ""
           let selected = FG.controls.selected.value  
@@ -324,10 +330,10 @@ import {MatExpansionModule} from '@angular/material/expansion';
               exp: exp,
               alias: alias
             }
-            this.data.rightNode.selectedChildColumns.push(selectedColumn)
+            this.data.rightNode.selectedChildColumns[i].push(selectedColumn)
           }
         })
-      })
+      }
 
 
       this.data.rightNode.filters.length = 0

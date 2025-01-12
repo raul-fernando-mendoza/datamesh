@@ -68,4 +68,26 @@ export class DaoService {
       })         
     })
   }
+
+  getModelResult( modelId:string) : Promise<Array<{ [key: string]: any }> >{
+    return new Promise(( resolve, reject ) => {
+
+      let result:Array<{ [key: string]: any }> = []
+
+      var req = {
+        modelId:modelId,
+        connectionId:"c1d0d398-f2cf-47dd-a122-9b97a3b0df3d"
+      }
+      this.urlSrv.post("executeModelId",req).subscribe({ 
+        'next':(result:any)=>{
+          console.log( result )
+          resolve( result )
+        },
+        'error':(reason)=>{        
+          reject( reason.error.error )
+        }
+      })         
+    })
+  }
+
 }

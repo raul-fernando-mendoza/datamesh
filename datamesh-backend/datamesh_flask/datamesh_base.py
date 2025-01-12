@@ -19,7 +19,7 @@ def setSession( connectionId, credentials ):
 def getSession( connectionId ):
     print("retriving session for:" + connectionId)
     if connectionId in sessions:
-        print("session found:")
+        print("datamesh session found:")
         return sessions[connectionId]
     else:
         return None
@@ -414,6 +414,55 @@ def executeChildJoin( req ):
     print("executeChildJoin END")
     return obj 
 
+def getDFChild( session, infoNode ):
+    
+    #first get the childs df
+    df = session.table(infoNode["tableName"]) 
+    #now add the filters
+    
+    for filter in infoNode["filters"]: 
+        df = df.where( str(filter["leftValue"]) + filter["comparator"] + str(filter["rightValue"]) )      
+    
+    childDFs = []
+    
+    qry = df    
+    
+    if( "children" in infoNode):
+        for i in range(len(infoNode["children"])):
+            childNode = infoNode["children"][i]
+            childDF = getDFChild(session, childNode)
+            childDFs.append( childDF )
+            if len(childNode["joinCriteria"]) == 1:
+                condition1 = (qry.col(childNode["joinCriteria"][0]["leftValue"]) == childDF.col(childNode["joinCriteria"][0]["rightValue"]) )
+            qry = qry.join( right=childDFs[i], on=condition1 )
+            
+     
+    #now select the main column cols 
+    cols = []        
+    for column in infoNode["selectedColumns"]: 
+        newCol = None
+        if column["alias"]:
+            newCol = df.col(column["exp"]).alias(column["alias"])
+        else:
+            newCol = df.col(column["exp"]).alias(column["exp"])    
+        cols.append( newCol )
+    
+    #select the child columns cols
+    if( "children" in infoNode):
+        for i in range(len(infoNode["children"])):
+            selectedChildrenColumns = infoNode["selectedChildColumns"][str(i)]
+            
+            for column in  selectedChildrenColumns: 
+                newCol = None
+                if column["alias"]:
+                    newCol = childDFs[i].col(column["exp"]).alias(column["alias"])
+                else:
+                    newCol = childDFs[i].col(column["exp"]).alias(column["exp"])    
+                cols.append( newCol )   
+    qry = qry.select( cols )
+                     
+    #qry.show()   
+    return qry          
 
 
 if __name__ == '__main__':

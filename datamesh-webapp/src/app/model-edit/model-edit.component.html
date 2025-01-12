@@ -148,3 +148,25 @@
         <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
     }
 </div>
+<div>
+      @if( result ){
+        <div class="view">
+            <div class="wrapper">
+                <table *ngIf="result.records && result.schema">
+                    <thead>
+                        <tr>
+                            <td class="sticky-col first-col"> idx </td>
+                            <th *ngFor="let h of result.schema">{{ h["name"] }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>                
+                        <tr *ngFor="let row of result.records; index as i">
+                            <td class="sticky-col first-col">{{ i + 1 }}</td>
+                            <td *ngFor="let column of result.schema; index as c" [ngClass]="{'number': isNumber(column.datatype) }">{{ format(column.datatype, row[column.name]) }}</td> 
+                        </tr>
+                    </tbody>                
+                </table>  
+            </div>
+        </div>
+      }
+</div>    

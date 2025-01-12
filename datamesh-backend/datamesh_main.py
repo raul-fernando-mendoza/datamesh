@@ -239,5 +239,26 @@ def executeSqlByPath():
         return ({"error":str(e)}, 400, headers)
     return (data, 200, headers)   
 
+@app.route('/executeModelId', methods=['POST','OPTIONS'])
+@as_json
+def executeModelId():
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
+    log.debug("*** executeModelId Start data:"+ str(request.data))
+    try:
+        req = request.get_json(force=True)
+        log.debug( str(req) )
+        data = bsnrules.executeModelById(req)
+        log.debug("*** End executeModelId:" + str(data))
+        
+    except Exception as e:
+        log.error("**** processRequest Exception:" + str(e))
+        return ({"error":str(e)}, 400, headers)
+    return (data, 200, headers)     
+
+
 if __name__ == '__main__':
     app.run()

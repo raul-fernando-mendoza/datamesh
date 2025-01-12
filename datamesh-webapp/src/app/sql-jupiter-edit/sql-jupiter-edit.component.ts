@@ -382,4 +382,18 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     }
     return false
   }
+
+  fn_getTimeStamp(): Object {
+    // Create a date object with the current time
+    let now: Date = new Date();
+    // Create an array with the current month, day and time
+    let date: Array<String> = [ String(now.getMonth() + 1), String(now.getDay()), String(now.getFullYear()) ];
+    // Create an array with the current hour, minute and second
+    let time: Array<String> = [ String(now.getHours()), String(now.getMinutes()), String(now.getSeconds())];
+    // Return the formatted string
+    return { 
+        date: date.join("/"),
+        time: time.join(":")
+    };
+}  
 }

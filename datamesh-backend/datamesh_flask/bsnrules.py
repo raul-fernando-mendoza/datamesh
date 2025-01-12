@@ -2,10 +2,29 @@ import json
 import datamesh_flask.firestore_db as firestore_db
 import datamesh_flask.datamesh_base as datamesh_base
 import datamesh_flask.snowflake_odbc as snowflake_odbc
+from google.api_core.datetime_helpers import DatetimeWithNanoseconds
+import pandas as pd
 
 from firebase_admin import firestore
 
 db = firestore.client()
+
+def jsonFilter(obj, excludekeys=[]):
+    result = {}
+    for key in obj:
+        if key in excludekeys:
+            result[key] = "skipped"
+        else:
+            result[key] = obj[key]
+    return result            
+
+def custom_json(obj):
+    if isinstance(obj, DatetimeWithNanoseconds):
+        print("convering to date")
+        t = obj
+        r =  f'{t.year}-{t.month:02}-{t.month:02}' 
+        return r
+    raise TypeError(f'Cannot serialize object of {type(obj)}')
 
 def getCredentials(connectionId):
     connection = firestore_db.getEncryptedDocument("Connection",connectionId)
@@ -183,7 +202,38 @@ def executeSqlByPath(req):
         doc_ref.update( updateObj )        
         raise
         
-
+def executeModelById(req):
+        modelId = req["modelId"]
+        connectionId = req["connectionId"]
+        
+        print("modelId:" + modelId)
+        print("connectionId:" + connectionId)
+        sess = getSnowparkSession( connectionId )
+        doc_ref = db.collection("Model").document(modelId)
+        doc = doc_ref.get()
+        model = doc.to_dict() 
+        #print( json.dumps(jsonFilter(model,("columns")), indent=1, default=custom_json) )
+        
+        df = datamesh_base.getDFChild( sess, model["data"][0])
+        df.show()
+        collected = df.limit(2000).collect()
+        p_df = pd.DataFrame(data=collected)
+        records = p_df.to_json(orient = "records")
+    
+        fields = []
+        for field in df.schema.fields:
+            fields.append( { "name":str(field.name) , "datatype":str(field.datatype)} )         
+        obj ={
+            "records":json.loads(records),
+            "schema":fields
+        } 
+        
+        print(json.dumps({"result":obj},indent=4))
+        print("executeModelById END")
+        return obj 
+                
+        return qry
+    
 if __name__ == '__main__':
     print("datamesh_base compiled")    
             

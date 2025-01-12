@@ -209,6 +209,8 @@ export interface SelectedColumn {
   alias: string
 }
 
+
+
 export interface JoinNode extends InfoNode{
   id:string
   name: string
@@ -219,22 +221,13 @@ export interface JoinNode extends InfoNode{
   joinCriteria:JoinCondition[]
   filters:JoinCondition[]  
   selectedColumns:SelectedColumn[]
-  selectedChildColumns:SelectedColumn[]
+  selectedChildColumns:{ [key: string]: SelectedColumn[] } 
   expressions:string[]
 }
 
 export interface JoinData {
   leftNode:JoinNode
   rightNode:JoinNode
-  /*
-  label:string
-  leftTableName:string
-  leftColumns:Array<SnowFlakeColumn>
-  rightTableName:string
-  rightColumns:Array<SnowFlakeColumn>
-  joinConditions:JoinCondition[]
-  selectedColumns:Array<String>
-  */
 }
 
 export interface Model{
@@ -246,6 +239,7 @@ export interface Model{
   group?:string,
   groupId?:string,
   data?:JoinNode[]
+  joinNodeExecution?:JoinNodeExecution
 }
 export class ModelObj{
   id!:string
@@ -295,4 +289,11 @@ export interface JoinCondition{
   comparator:ComparatorOption
   rightValue:string
 }
+
+
+export class JoinNodeExecution{
+  ModelId?: string 
+  parameters?:any
+}
+
 

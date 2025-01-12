@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component , ViewChild} from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JoinCondition, JoinData, JoinNode, ModelCollection, ModelObj, SnowFlakeColumn, SnowFlakeTable } from 'app/datatypes/datatypes.module';
+import { JoinCondition, JoinData, JoinNode, ModelCollection, ModelObj, JoinNodeExecution, SnowFlakeTable } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -14,21 +14,16 @@ import { db } from '../../environments/environment'
 import * as uuid from 'uuid';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTreeModule, MatTreeNestedDataSource} from '@angular/material/tree';
+import { MatTreeModule} from '@angular/material/tree';
 import { NestedTreeControl} from '@angular/cdk/tree';
 import { JoinDataSource, TreeNode } from './join-datasource';
 import { MatMenuModule } from '@angular/material/menu';
 import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
-import { HttpStatusCode } from '@angular/common/http';
 import { DaoService } from 'app/dao.service';
 import { JoinDialog } from 'app/join-dialog/join-dlg';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { TableItem } from 'app/tables-tree/tables-tree';
-
-
-
-
+import {MatExpansionModule} from '@angular/material/expansion';
 
 @Component({
   selector: 'app-model-edit',
@@ -45,7 +40,8 @@ import { TableItem } from 'app/tables-tree/tables-tree';
     MatTreeModule,
     MatMenuModule,
     CdkDropList, CdkDrag ,
-    MatProgressBarModule    
+    MatProgressBarModule,
+    MatExpansionModule
    ],
   providers: [JoinDataSource],
   templateUrl: './model-edit.component.html',
@@ -93,7 +89,7 @@ export class ModelEditComponent {
 
   isLoading = false
 
- 
+  result:any | null
   
   constructor( 
     private fb:FormBuilder 
@@ -285,7 +281,7 @@ export class ModelEditComponent {
         selectedColumns: [],
         filters: [],
         columns: [],
-        selectedChildColumns: [],
+        selectedChildColumns: {},
         expressions: []
       }
       
@@ -321,7 +317,7 @@ export class ModelEditComponent {
       selectedColumns: [],
       filters: [],
       columns: [],
-      selectedChildColumns: [],
+      selectedChildColumns: {},
       expressions: []
     }    
 
@@ -385,9 +381,64 @@ export class ModelEditComponent {
     })
   }
   onPlay(node:JoinNode | null){
-    if( this.model  && node ){
-      console.log(node)
+    if( this.model  && node ){      
+      console.log(this.model.id)
+      this.dao.getModelResult(this.model.id).then( result =>{
+        console.log( result )
+        this.result = result
+      },
+      error=>{
+        alert("onPlay Error:" + error)
+        this.result = null
+      })
     } 
   }    
+  format( datatype:any, val:any){
+    let result = val
+    if( datatype.startsWith("TimestampType") && val){
+      let ts = this.fn_getTimeStamp(new Date(val))
+      
+      if( ts.endsWith(' 00:00:00') ){
+        result = ts.substring( 0, val.length - 9 )
+      }
+      else{
+        result = ts
+      }
+    }
+    if( 3 == datatype && val){
+        result = val
+    } 
+    if( val && (
+      datatype.startsWith("LongType") ||
+      datatype.startsWith("DecimalType")
+      )
+    ){
+      if( val - Math.floor(val) ){
+        result = Number(val).toFixed(2)
+      }
+      else{
+        result = Math.floor(Number(val)) + ".__"
+      }      
+    }              
 
+    return result
+  }
+  isNumber(datatype:any){
+    if(     
+      datatype.startsWith("LongType") ||
+      datatype.startsWith("DecimalType" ) ){
+      return true
+    }
+    return false
+  }
+  fn_getTimeStamp(d:Date): string {
+    // Create a date object with the current time
+ 
+    // Create an array with the current month, day and time
+    let date: Array<String> = [ String(d.getMonth() + 1), String(d.getDay()), String(d.getFullYear()) ];
+    // Create an array with the current hour, minute and second
+    let time: Array<String> = [ String(d.getHours()), String(d.getMinutes()), String(d.getSeconds())];
+    // Return the formatted string
+    return date.join("/") + " "  + time.join(":")
+  }
 }
