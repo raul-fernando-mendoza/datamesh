@@ -414,7 +414,7 @@ def executeChildJoin( req ):
     print("executeChildJoin END")
     return obj 
 
-def getDFChild( session, infoNode ):
+def getDFChild( session, infoNode):
     
     #first get the childs df
     df = session.table(infoNode["tableName"]) 
@@ -437,8 +437,10 @@ def getDFChild( session, infoNode ):
             qry = qry.join( right=childDFs[i], on=condition1 )
             
      
-    #now select the main column cols 
+     
     cols = []        
+    
+    #now select the main column cols                
     for column in infoNode["selectedColumns"]: 
         newCol = None
         if column["alias"]:
@@ -446,19 +448,43 @@ def getDFChild( session, infoNode ):
         else:
             newCol = df.col(column["exp"]).alias(column["exp"])    
         cols.append( newCol )
-    
+        
+    #now add the missing columns for the join
+    for joinCriteria in infoNode["joinCriteria"]:
+        found = False
+        for column in infoNode["selectedColumns"]: 
+            if (column["alias"] if column["alias"] else column["exp"]) == joinCriteria["rightValue"]:
+                found = True
+                break
+        if found == False:
+            cols.append( df.col(joinCriteria["rightValue"]).alias(joinCriteria["rightValue"])  )
+
     #select the child columns cols
     if( "children" in infoNode):
-        for i in range(len(infoNode["children"])):
-            selectedChildrenColumns = infoNode["selectedChildColumns"][str(i)]
-            
-            for column in  selectedChildrenColumns: 
-                newCol = None
-                if column["alias"]:
-                    newCol = childDFs[i].col(column["exp"]).alias(column["alias"])
-                else:
-                    newCol = childDFs[i].col(column["exp"]).alias(column["exp"])    
-                cols.append( newCol )   
+        for i in range(len(childDFs)):
+            child = childDFs[i]
+            for column in  child.columns: 
+                selected = False #if not selection has taken place then take all
+                found = False #found in filter
+                if str(i) in infoNode["selectedChildColumns"]:
+                    selectedChildrenColumns = infoNode["selectedChildColumns"][str(i)]
+                    for selectedColumn in selectedChildrenColumns:
+                        left = selectedColumn["alias"] if selectedColumn["alias"] else selectedColumn["exp"]
+                        if left == column:
+                            selected = selectedColumn["isSelected"]
+                            break
+                #need to know if the df column is in the join criteria of the child
+                if selected == False:
+                    child = infoNode["children"][i]
+                    found = False
+                    for joinCriteria in child["joinCriteria"]:
+                        if column == joinCriteria["rightValue"]:
+                            found = True
+                            break    
+                if selected == True or (selected == False and found==False):
+                    newCol = childDFs[i].col(column).alias(column)  
+                    cols.append( newCol )
+                      
     qry = qry.select( cols )
                      
     #qry.show()   

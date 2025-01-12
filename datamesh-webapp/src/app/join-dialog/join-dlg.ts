@@ -169,7 +169,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
           let selected = false
           let alias = ""
           let selectedColumn = this.data.rightNode.selectedColumns.find( s => s.exp == c.columnName)
-          if( selectedColumn ){
+          if( selectedColumn && selectedColumn.isSelected ){
             selected = true
             alias = selectedColumn.alias
           }
@@ -200,13 +200,13 @@ import {MatExpansionModule} from '@angular/material/expansion';
           //iterate over the selected columns of the child
           child.selectedColumns.forEach( c =>{
             //now search if the child columns is in the selected expresion of the parent
-            let selected = false
+            let selected = true
             let alias = ""
             if( i in this.data.rightNode.selectedChildColumns ){
                 let arr: SelectedColumn[] = this.data.rightNode.selectedChildColumns[i]
                 let selectedColumn = arr.find( s => s.exp == (c.alias?c.alias:c.exp) )
                 if( selectedColumn ){
-                  selected = true
+                  selected = selectedColumn.isSelected
                   alias = selectedColumn.alias
                 }
             }
@@ -305,12 +305,13 @@ import {MatExpansionModule} from '@angular/material/expansion';
       this.data.rightNode.selectedColumns.length = 0
       this.columnsFA.controls.forEach( columnFG =>{
         let columnName = columnFG.controls.columnName.value! 
-        let selected = columnFG.controls.selected.value 
+        let selected = columnFG.controls.selected.value ? columnFG.controls.selected.value : false
         let exp = columnFG.controls.alias.value || ""
         if( selected ){
           let selectedColumn:SelectedColumn = {
             exp: columnName,
-            alias: exp
+            alias: exp,
+            isSelected:selected
           }
           this.data.rightNode.selectedColumns.push(selectedColumn)
         }
@@ -323,15 +324,14 @@ import {MatExpansionModule} from '@angular/material/expansion';
         this.data.rightNode.selectedChildColumns[i] = [] 
         childColumnsSelectedFA.forEach( FG =>{
           let exp:string = FG.controls.columnName.value || ""
-          let selected = FG.controls.selected.value  
+          let selected = FG.controls.selected.value ? FG.controls.selected.value : false  
           let alias = FG.controls.alias.value || ""
-          if( selected ){
-            let selectedColumn:SelectedColumn = {
-              exp: exp,
-              alias: alias
-            }
-            this.data.rightNode.selectedChildColumns[i].push(selectedColumn)
+          let selectedColumn:SelectedColumn = {
+            exp: exp,
+            alias: alias,
+            isSelected: selected
           }
+          this.data.rightNode.selectedChildColumns[i].push(selectedColumn)
         })
       }
 

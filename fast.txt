@@ -18,11 +18,6 @@ export interface JoinNode extends InfoNode{
   joinCriteria:JoinCondition[]
   filters:JoinCondition[]  
   selectedColumns:SelectedColumn[]
-  selectedChildrenColumns:SelectedColumn[]
+  excludedChildColumns:{ [key: string]: SelectedColumn[] } 
   expressions:string[]
-
-      request_id:uuid.v4(),
-      request_status:"requested",
-      request_start_time:Timestamp.now(),
-      request_error_message:""
 }

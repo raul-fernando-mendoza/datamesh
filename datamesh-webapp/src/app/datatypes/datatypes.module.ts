@@ -207,6 +207,7 @@ export interface InfoNode{
 export interface SelectedColumn {
   exp: string
   alias: string
+  isSelected:boolean
 }
 
 
