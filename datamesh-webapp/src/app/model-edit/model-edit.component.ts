@@ -396,10 +396,15 @@ export class ModelEditComponent {
   format( datatype:any, val:any){
     let result = val
     if( datatype.startsWith("TimestampType") && val){
-      let ts = this.fn_getTimeStamp(new Date(val))
+      let date = new Date(val)
+      let pstOffset = 480; // this is the offset for the Pacific Standard Time timezone     
+      let str = new Date(date.getTime() + (pstOffset) * 60 * 1000).toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
+      let d= Date.parse(str)
+      let ts = this.formatDate(new Date(d))
+     
       
       if( ts.endsWith(' 00:00:00') ){
-        result = ts.substring( 0, val.length - 9 )
+        result = ts.substring( 0, ts.length - 9 )
       }
       else{
         result = ts
@@ -431,13 +436,13 @@ export class ModelEditComponent {
     }
     return false
   }
-  fn_getTimeStamp(d:Date): string {
+  formatDate(d:Date): string {
     // Create a date object with the current time
  
     // Create an array with the current month, day and time
-    let date: Array<String> = [ String(d.getMonth() + 1), String(d.getDay()), String(d.getFullYear()) ];
+    let date: Array<String> = [ String(d.getMonth() + 1).padStart(2 ,"0"), String(d.getDate()).padStart(2 ,"0"), String(d.getFullYear()) ];
     // Create an array with the current hour, minute and second
-    let time: Array<String> = [ String(d.getHours()), String(d.getMinutes()), String(d.getSeconds())];
+    let time: Array<String> = [ String(d.getHours()).padStart(2 ,"0"), String(d.getMinutes()).padStart(2 ,"0"), String(d.getSeconds()).padStart(2 ,"0")];
     // Return the formatted string
     return date.join("/") + " "  + time.join(":")
   }
