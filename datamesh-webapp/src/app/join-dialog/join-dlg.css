@@ -25,3 +25,42 @@ ul{
     padding: 0; /* Remove padding */
     margin: 0; /* Remove margins */
 }
+
+.join-table{
+    table-layout: fixed ;
+}
+.join-table .join-comparator{
+    max-width: 5%;
+    overflow: hidden;
+}
+.join-table .join-action{
+    max-width: 5%;
+    overflow: hidden;
+}
+.join-table .join-field{
+    width:38%;
+    overflow: hidden;
+}
+.join-table mat-form-field{
+    width: 100%;
+}
+
+.filter-table{
+    table-layout: fixed ;
+}
+.filter-table .filter-comparator{
+    max-width: 5%;
+    overflow: hidden;
+}
+.filter-table .filter-action{
+    max-width: 5%;
+    overflow: hidden;
+}
+.filter-table .filter-field{
+    width:38%;
+    overflow: hidden;
+}
+.filter-table mat-form-field{
+    width: 100%;
+}
+

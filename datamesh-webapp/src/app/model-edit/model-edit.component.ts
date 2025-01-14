@@ -369,8 +369,8 @@ export class ModelEditComponent {
       rightNode: node
     }
     const dialogRef = this.dialog.open(JoinDialog, {
-      height: '60%',
-      width: '60%',
+      height: '95%',
+      width: '95%',
       data: data
     });
   

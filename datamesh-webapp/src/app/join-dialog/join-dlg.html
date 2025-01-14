@@ -24,10 +24,11 @@
   <mat-tab-group>  
     @if( data.leftNode ){
     <mat-tab  label="Joins">
-      <table>
+      
+      <table class="join-table">
         @for( j of joinsFA.controls; track j ; let i = $index){
           <tr [formGroup]="j">
-            <td> 
+            <td class="join-field"> 
               <mat-form-field appearance="fill" >
                 <input #input{{i}}
                 type="text"
@@ -44,7 +45,7 @@
                 </mat-autocomplete>              
               </mat-form-field>
             </td>
-            <td >
+            <td class="join-comparator">
               <mat-form-field>
                 <mat-select    formControlName="comparator">
                   @for( c of comparisonOptions; track c; let i=$index ){
@@ -53,7 +54,7 @@
                 </mat-select>
               </mat-form-field>
             </td>
-            <td>
+            <td class="join-field">
               <mat-form-field appearance="fill" >
                 <input #input{{i}}
                 type="text"
@@ -70,7 +71,7 @@
                 </mat-autocomplete>              
               </mat-form-field>
             </td>
-            <td>
+            <td class="join-action">
               <button mat-icon-button (click)="onDeleteJoin(i)"><mat-icon>delete</mat-icon></button>
             </td>
           </tr>
@@ -130,10 +131,10 @@
       </mat-accordion>     
     </mat-tab>
     <mat-tab label="filters">
-      <table >
+      <table class="filter-table">
         @for( f of filtersFA.controls; track f ; let i = $index){
           <tr [formGroup]="f">
-            <td> 
+            <td class="filter-field"> 
               <mat-form-field appearance="fill" >
                 <input #input{{i}}
                 type="text"
@@ -150,7 +151,7 @@
                 </mat-autocomplete>              
               </mat-form-field>
             </td>
-            <td >
+            <td class="filter-comparator">
               <mat-form-field>
                 <mat-select    formControlName="comparator">
                   @for( c of comparisonOptions; track c; let i=$index ){
@@ -159,13 +160,13 @@
                 </mat-select>
               </mat-form-field>
             </td>
-            <td>
+            <td class="filter-field">
                 <mat-form-field appearance="fill">
                   <mat-label>value to filter</mat-label>
                   <input matInput placeholder="manual entry" formControlName="exp">
                 </mat-form-field> 
             </td>
-            <td>
+            <td class="filter-action">
               <button mat-icon-button (click)="onDeleteFilter(i)"><mat-icon>delete</mat-icon></button>
             </td>
           </tr>
