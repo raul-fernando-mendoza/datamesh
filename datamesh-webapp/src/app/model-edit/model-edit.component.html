@@ -149,6 +149,10 @@
     }
 </div>
 <div>
+  @if( isLoading ){
+    <mat-spinner></mat-spinner>
+  }
+  @else{
       @if( result ){
         <div class="view">
             <div class="wrapper">
@@ -169,4 +173,5 @@
             </div>
         </div>
       }
+  }
 </div>    

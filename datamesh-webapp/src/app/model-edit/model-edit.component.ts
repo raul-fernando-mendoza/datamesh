@@ -24,6 +24,7 @@ import { JoinDialog } from 'app/join-dialog/join-dlg';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import {MatExpansionModule} from '@angular/material/expansion';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'app-model-edit',
@@ -41,7 +42,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
     MatMenuModule,
     CdkDropList, CdkDrag ,
     MatProgressBarModule,
-    MatExpansionModule
+    MatExpansionModule,
+    MatProgressSpinnerModule
    ],
   providers: [JoinDataSource],
   templateUrl: './model-edit.component.html',
@@ -383,11 +385,14 @@ export class ModelEditComponent {
   onPlay(node:JoinNode | null){
     if( this.model  && node ){      
       console.log(this.model.id)
+      this.isLoading= true
       this.dao.getModelResult(this.model.id).then( result =>{
+        this.isLoading =false
         console.log( result )
         this.result = result
       },
       error=>{
+        this.isLoading=false
         alert("onPlay Error:" + error)
         this.result = null
       })
