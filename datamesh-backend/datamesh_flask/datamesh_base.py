@@ -1,13 +1,23 @@
 import os
 from snowflake.snowpark import Session
 from snowflake.snowpark.functions import col, sql_expr, lit, Column
+import datamesh_flask.firestore_db as firestore_db
 import pandas as pd
 import json
+
 
 
 sessions = {
 }
 
+def getDatabaseDetails( connectionId ):
+    sess = getSnowparkSession( connectionId )
+    result = database( sess )
+    return result
+
+def getCredentials(connectionId):
+    connection = firestore_db.getEncryptedDocument("Connection",connectionId)
+    return json.loads( connection["credentials"] )
 
 def setSession( connectionId, credentials ):
     print("setting session for:" + connectionId)
@@ -23,7 +33,16 @@ def getSession( connectionId ):
         return sessions[connectionId]
     else:
         return None
-
+    
+def getSnowparkSession( connectionId ):
+     
+    sess = getSession( connectionId )
+    if sess == None:
+        credentials = getCredentials( connectionId )
+        print("connection" + str(credentials["database"])) 
+        print("role" + str(credentials["role"])) 
+        sess = setSession( connectionId, credentials)
+    return sess
 
 def database(sess):
     r = sess.sql("select current_warehouse() warehouse, current_database() database, current_schema() schema").collect()
@@ -414,9 +433,10 @@ def executeChildJoin( req ):
     print("executeChildJoin END")
     return obj 
 
-def getDFChild( session, infoNode):
+def getDFChild( infoNode):
     
     #first get the childs df
+    session = getSnowparkSession( infoNode["connectionId"] )
     df = session.table(infoNode["tableName"]) 
     #now add the filters
     
@@ -430,7 +450,7 @@ def getDFChild( session, infoNode):
     if( "children" in infoNode):
         for i in range(len(infoNode["children"])):
             childNode = infoNode["children"][i]
-            childDF = getDFChild(session, childNode)
+            childDF = getDFChild(childNode)
             childDFs.append( childDF )
             if len(childNode["joinCriteria"]) == 1:
                 condition1 = (qry.col(childNode["joinCriteria"][0]["leftValue"]) == childDF.col(childNode["joinCriteria"][0]["rightValue"]) )

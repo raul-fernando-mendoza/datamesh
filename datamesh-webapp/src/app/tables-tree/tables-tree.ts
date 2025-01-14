@@ -113,7 +113,7 @@ export class DbFlatNode {
  */
 @Injectable()
 export class LoadmoreDatabase {
-  batchNumber = 10;
+  batchNumber = 50;
   dataChange = new BehaviorSubject<Array<SchemaNode|TableNode>>([]);
   nodeMap = new Map<string, SchemaNode|TableNode>();
 

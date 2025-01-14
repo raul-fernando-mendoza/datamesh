@@ -26,32 +26,17 @@ def custom_json(obj):
         return r
     raise TypeError(f'Cannot serialize object of {type(obj)}')
 
-def getCredentials(connectionId):
-    connection = firestore_db.getEncryptedDocument("Connection",connectionId)
-    return json.loads( connection["credentials"] )
+
     
-def getSnowparkSession( connectionId ):
-     
-    sess = datamesh_base.getSession( connectionId )
-    if sess == None:
-        credentials = getCredentials( connectionId )
-        print("connection" + str(credentials["database"])) 
-        print("role" + str(credentials["role"])) 
-        sess = datamesh_base.setSession( connectionId, credentials)
-    return sess
+
 
 def getOdbcConnection( connectionId ):
      
     conn = snowflake_odbc.getOdbcConnection( connectionId )
     if conn == None:
-        credentials = getCredentials( connectionId ) 
+        credentials = datamesh_base.getCredentials( connectionId ) 
         conn = snowflake_odbc.setOdbcConnection( connectionId, credentials)
     return conn
-
-def getDatabaseDetails( connectionId ):
-    sess = getSnowparkSession( connectionId )
-    result = datamesh_base.database( sess )
-    return result
 
 def setEncryptedDocument(req):
     
@@ -203,18 +188,14 @@ def executeSqlByPath(req):
         raise
         
 def executeModelById(req):
-        modelId = req["modelId"]
-        connectionId = req["connectionId"]
-        
+        modelId = req["modelId"]        
         print("modelId:" + modelId)
-        print("connectionId:" + connectionId)
-        sess = getSnowparkSession( connectionId )
         doc_ref = db.collection("Model").document(modelId)
         doc = doc_ref.get()
         model = doc.to_dict() 
         #print( json.dumps(jsonFilter(model,("columns")), indent=1, default=custom_json) )
         
-        df = datamesh_base.getDFChild( sess, model["data"][0])
+        df = datamesh_base.getDFChild( model["data"][0])
         df.show()
         collected = df.limit(2000).collect()
         p_df = pd.DataFrame(data=collected)
