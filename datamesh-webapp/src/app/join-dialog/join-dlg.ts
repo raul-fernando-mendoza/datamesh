@@ -202,6 +202,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
             //now search if the child columns is in the selected expresion of the parent
             let selected = true
             let alias = ""
+
+            //find out if the column in the child has been marked as selected
             if( i in this.data.rightNode.selectedChildColumns ){
                 let arr: SelectedColumn[] = this.data.rightNode.selectedChildColumns[i]
                 let selectedColumn = arr.find( s => s.exp == (c.alias?c.alias:c.exp) )
@@ -331,7 +333,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
             alias: alias,
             isSelected: selected
           }
-          this.data.rightNode.selectedChildColumns[i].push(selectedColumn)
+            this.data.rightNode.selectedChildColumns[i].push(selectedColumn)
         })
       }
 

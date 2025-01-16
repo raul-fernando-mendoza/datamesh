@@ -469,6 +469,7 @@ def getDFChild( infoNode):
             newCol = df.col(column["exp"]).alias(column["exp"])    
         cols.append( newCol )
         
+    '''
     #now add the missing columns for the join
     for joinCriteria in infoNode["joinCriteria"]:
         foundInFilter = False
@@ -478,34 +479,36 @@ def getDFChild( infoNode):
                 break
         if foundInFilter == False:
             cols.append( df.col(joinCriteria["rightValue"]).alias(joinCriteria["rightValue"])  )
-
+    '''
     #select the child columns cols
     if( "children" in infoNode):
-        for i in range(len(childDFs)):
+        for i in range(len(childDFs)): #for all childs
             childDF = childDFs[i]
             childNode = infoNode["children"][i]
-            for column in  childDF.columns: 
-                selected = None #if not selection has taken place then take all
-                foundInFilter = False #found in filter
-                if str(i) in infoNode["selectedChildColumns"]:
-                    selectedChildrenColumns = infoNode["selectedChildColumns"][str(i)]
-                else:
-                    selectedChildrenColumns = childNode["selectedColumns"]    
+            if str(i) in infoNode["selectedChildColumns"]: #if there is an explicit selection on the child
+                selectedChildrenColumns = infoNode["selectedChildColumns"][str(i)]
                 for selectedColumn in selectedChildrenColumns:
-                    left = selectedColumn["alias"] if selectedColumn["alias"] else selectedColumn["exp"]
-                    if left == column:
-                        selected = selectedColumn["isSelected"]
-                        break
-                #need to know if the df column is in the join criteria of the child
-                if selected == None:                    
-                    foundInFilter = False
-                    for joinCriteria in childNode["joinCriteria"]:
-                        if column == joinCriteria["rightValue"]:
-                            foundInFilter = True
-                            break    
-                if selected == True or (selected == None and foundInFilter==False):
-                    newCol = childDFs[i].col(column).alias(column)  
-                    cols.append( newCol )
+                    alias = selectedColumn["alias"] if selectedColumn["alias"] else selectedColumn["exp"]
+                    if selectedColumn["isSelected"]:
+                        newCol = childDFs[i].col(selectedColumn["exp"]).alias(alias)  
+                        cols.append( newCol )                            
+            else: #there is not explicit selection on the childs column; then add all the columns selected in the child
+                selectedChildrenColumns = childNode["selectedColumns"]    
+                for selectedColumn in selectedChildrenColumns:
+                    childCol = selectedColumn["alias"] if selectedColumn["alias"] else selectedColumn["exp"]
+                    newCol = childDFs[i].col(childCol).alias(childCol)                            
+                    break                           
+    #make sure that any column in the join has been selected
+    for joinCriteria in infoNode["joinCriteria"]:
+        column = joinCriteria["rightValue"]
+        found = False
+        for c in cols:
+            if column == c.get_name():
+                found = True
+        if found == False:            
+            newCol = col(column).alias(column)  
+            cols.append( newCol )
+                    
                       
     qry = qry.select( cols )
                      

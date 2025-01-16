@@ -25,7 +25,7 @@
   padding-left: 40px;
 }
 
-.table {
+.table_temp {
   text-transform:uppercase;
   margin-left:20px;
 }
@@ -56,14 +56,14 @@
   white-space: nowrap;
   max-height: 10em;    
 }
-table {
-  border-collapse: separate;
-  border-spacing: 50px 0;
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 2px;
+  font-size: small;
 }
 
-td {
-  padding: 10px 0;
-}
 table tr th:first-child {
   z-index: 11;
   
