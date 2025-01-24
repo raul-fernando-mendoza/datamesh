@@ -178,24 +178,26 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     } )
   }    
   
-  onSqlChange($event:any){
+  onSqlChange($event:any):boolean{
     console.log($event)
-    var sql:string|null = this.FG.controls.sql.value
-    if( this.sqlJupiter && this.sqlJupiter.sql != sql){
-      let obj = {
-        sql:sql
-      }
-      this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, obj).then( ()=>{
-        console.log("save sql")
-      },
-      reason =>{
-        alert("ERROR saving sql:" + reason)
-      })
+    if( this.FG.controls.sql.dirty ){
+      var sql:string|null = this.FG.controls.sql.value
+      if( this.sqlJupiter && this.sqlJupiter.sql != sql){
+        let obj = {
+          sql:sql
+        }
+        this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, obj).then( ()=>{
+          console.log("save sql")
+        },
+        reason =>{
+          alert("ERROR saving sql:" + reason)
+        })
 
-    } 
+      } 
+    }
     return true  
   }
-  onExecute(){
+  onExecute():boolean{
 
     if( this.sqlJupiter && this.sqlJupiter.request_id){
       this.firebaseService.deleteDoc( [this.parentCollection, this.collection, this.id, SqlResultCollection.collectionName].join("/"), this.sqlJupiter.request_id).then( ()=>{
@@ -210,19 +212,27 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       this.sqlResult.result_status = null
     }
     
-    var sql:string|null = this.FG.controls.sql.value
     let sqlJupiter:SqlJupiter = {
       request_id:uuid.v4(),
       request_status:"requested",
       request_start_time:Timestamp.now(),
       request_error_message:""
+    }       
+
+    if( this.FG.controls.sql.dirty ){
+      //also save the sql
+      var sql:string = this.FG.controls.sql.value || ""
+      sqlJupiter.sql = sql
+      this.FG.controls.sql.markAsPristine()     
     }
+
     this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, sqlJupiter).then( ()=>{
       console.log("request execution")
     },
     reason =>{
       alert("ERROR request execution:" + reason)
     })
+    return true
   }
 
   onExportCsv(){
