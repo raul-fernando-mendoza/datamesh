@@ -188,6 +188,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         }
         this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, obj).then( ()=>{
           console.log("save sql")
+          this.FG.controls.sql.markAsPristine()
         },
         reason =>{
           alert("ERROR saving sql:" + reason)
@@ -226,8 +227,10 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       this.FG.controls.sql.markAsPristine()     
     }
 
+    this.submitting = true
     this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, sqlJupiter).then( ()=>{
       console.log("request execution")
+      this.submitting = false
     },
     reason =>{
       alert("ERROR request execution:" + reason)

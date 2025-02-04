@@ -49,7 +49,7 @@ print( json.dumps(model, indent=1, default=custom_json) )
 '''
         
 req = {
-    "modelId":'12fbec6e-a32e-4834-8085-cde4e0990a8f',
+    "modelId":'db36612a-b2c1-4955-8048-cc4e3b2707ba',
 }
 df = bsnrules.executeModelById( req )
 print( json.dumps(df, indent=1, default=custom_json) )

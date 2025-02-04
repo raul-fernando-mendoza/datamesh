@@ -333,7 +333,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
             alias: alias,
             isSelected: selected
           }
-            this.data.rightNode.selectedChildColumns[i].push(selectedColumn)
+          this.data.rightNode.selectedChildColumns[i].push(selectedColumn)
         })
       }
 

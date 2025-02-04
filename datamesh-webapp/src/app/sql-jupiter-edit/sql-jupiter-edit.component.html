@@ -1,4 +1,4 @@
-<div class="ids">
+<div class="id">
     parentCollection:{{ parentCollection }}
     collection:{{ collection }}
     id:{{ id }}
@@ -12,7 +12,12 @@
                 <button mat-raised-button color="warn" [disabled]="submitting" (click)="onAbort()">Abort</button>
             }
             @else{
-                <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+                @if( !FG.controls.sql.dirty ){
+                    <button mat-raised-button color="primary" [disabled]="submitting" (click)="onExecute()">ExecuteSql</button>
+                }
+                @else{
+                    <button mat-icon-button color="primary" [disabled]="submitting" (click)="onSqlChange($event)"><mat-icon>done</mat-icon></button>
+                }    
             }
             <mat-form-field class="dataset" appearance="fill">
                 <mat-label>connection </mat-label> 
@@ -32,7 +37,7 @@
         
         <p>
         sqlJupiter.request_status:{{sqlJupiter.request_status}}
-        this.sqlResult:{{this.sqlResult}}
+        <span class="id">this.sqlResult:{{this.sqlResult}}</span>
         <!--this.sqlResult.result_set:{{ this.sqlResult?.result_set}}-->
         </p>
         

@@ -461,52 +461,63 @@ def getDFChild( infoNode):
     cols = []        
     
     #now select the main column cols                
-    for column in infoNode["selectedColumns"]: 
+    for rightValue in infoNode["selectedColumns"]: 
         newCol = None
-        if column["alias"]:
-            newCol = df.col(column["exp"]).alias(column["alias"])
+        if rightValue["alias"]:
+            newCol = df.col(rightValue["exp"]).alias(rightValue["alias"])
         else:
-            newCol = df.col(column["exp"]).alias(column["exp"])    
+            newCol = df.col(rightValue["exp"]).alias(rightValue["exp"])    
         cols.append( newCol )
-        
-    '''
-    #now add the missing columns for the join
-    for joinCriteria in infoNode["joinCriteria"]:
-        foundInFilter = False
-        for column in infoNode["selectedColumns"]: 
-            if (column["alias"] if column["alias"] else column["exp"]) == joinCriteria["rightValue"]:
-                foundInFilter = True
-                break
-        if foundInFilter == False:
-            cols.append( df.col(joinCriteria["rightValue"]).alias(joinCriteria["rightValue"])  )
-    '''
+
     #select the child columns cols
     if( "children" in infoNode):
         for i in range(len(childDFs)): #for all childs
             childDF = childDFs[i]
             childNode = infoNode["children"][i]
-            if str(i) in infoNode["selectedChildColumns"]: #if there is an explicit selection on the child
-                selectedChildrenColumns = infoNode["selectedChildColumns"][str(i)]
-                for selectedColumn in selectedChildrenColumns:
-                    alias = selectedColumn["alias"] if selectedColumn["alias"] else selectedColumn["exp"]
-                    if selectedColumn["isSelected"]:
-                        newCol = childDFs[i].col(selectedColumn["exp"]).alias(alias)  
+            for childColumnName in childDF.columns: 
+                #now we need know if there is an overwritte in this parent.
+                overwriteIsSelected = None
+                overwrittenAlias = None
+                if str(i) in infoNode["selectedChildColumns"]: #if there is an explicit selection on the child
+                    selectedChildColumns = infoNode["selectedChildColumns"][str(i)]
+                    for selectedChildColumn in selectedChildColumns:
+                        if selectedChildColumn["exp"] == childColumnName: #is overwritten
+                            overwriteIsSelected = selectedChildColumn["isSelected"]
+                            if selectedChildColumn["alias"]:
+                                overwrittenAlias = selectedChildColumn["alias"] if selectedChildColumn["alias"] else selectedChildColumn["exp"]
+                            break
+                        
+                #we need to know if the column was added because of the join  
+                isInChildJoinCriteria = False
+                for joinCriteria in childNode["joinCriteria"]:
+                    rightValue = joinCriteria["rightValue"]
+                    if childColumnName == rightValue:
+                        isInChildJoinCriteria = True
+                        break
+                      
+                if overwriteIsSelected == None: #there is not explicit selection
+                    if isInChildJoinCriteria == False: # the column was added as part of the filter
+                        newCol = childDFs[i].col(childColumnName).alias(childColumnName)
                         cols.append( newCol )                            
-            else: #there is not explicit selection on the childs column; then add all the columns selected in the child
-                selectedChildrenColumns = childNode["selectedColumns"]    
-                for selectedColumn in selectedChildrenColumns:
-                    childCol = selectedColumn["alias"] if selectedColumn["alias"] else selectedColumn["exp"]
-                    newCol = childDFs[i].col(childCol).alias(childCol)                            
-                    break                           
+                elif overwriteIsSelected == True:
+                    if overwrittenAlias:
+                        newCol = childDFs[i].col(childColumnName).alias(overwrittenAlias)
+                    else: 
+                        newCol = childDFs[i].col(childColumnName).alias(childColumnName)
+                    cols.append( newCol ) 
+                   
+                        
+                                               
     #make sure that any column in the join has been selected
     for joinCriteria in infoNode["joinCriteria"]:
-        column = joinCriteria["rightValue"]
-        found = False
+        rightValue = joinCriteria["rightValue"]
+        isInChildJoinCriteria = False
         for c in cols:
-            if column == c.get_name():
-                found = True
-        if found == False:            
-            newCol = col(column).alias(column)  
+            if rightValue == c.get_name()[1:-1]:
+                isInChildJoinCriteria = True
+                break
+        if isInChildJoinCriteria == False:            
+            newCol = col(rightValue).alias(rightValue)  
             cols.append( newCol )
                     
                       

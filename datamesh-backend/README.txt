@@ -28,7 +28,7 @@ flask --app datamesh_main run
 flask --app datamesh_main run --debug --host=192.168.1.14 
 
 #run the service
-python3 datamesh_persistent.py
+python datamesh_persistent.py
 
 
 
