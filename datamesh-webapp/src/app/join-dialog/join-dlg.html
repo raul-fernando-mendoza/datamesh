@@ -53,7 +53,7 @@
             </td>
             <td class="join-comparator">
               <mat-form-field>
-                <mat-select    formControlName="comparator">
+                <mat-select  formControlName="comparator">
                   @for( c of comparisonOptions; track c; let i=$index ){
                     <mat-option [value]="c">{{ c }}</mat-option>   
                   }
@@ -144,7 +144,7 @@
             </td>
             <td class="filter-comparator">
               <mat-form-field>
-                <mat-select    formControlName="comparator">
+                <mat-select formControlName="comparator">
                   @for( c of comparisonOptions; track c; let i=$index ){
                     <mat-option [value]="c">{{ c }}</mat-option>   
                   }
