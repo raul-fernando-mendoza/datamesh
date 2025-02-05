@@ -81,28 +81,12 @@
     </mat-tab>
     }
     <mat-tab label="Columns">
+
+      <h4>{{data.rightNode.name}} - {{data.rightNode.tableName}} </h4>
+      @if( data.rightNode.sampleData != null ){
+        <app-data-grid [result]="data.rightNode.sampleData" [columnsFA]="columnsFA"></app-data-grid>
+      }
       <mat-accordion>
-        <mat-expansion-panel hideToggle>
-          <mat-expansion-panel-header>
-            <mat-panel-title> {{data.rightNode.name}} </mat-panel-title>
-            <mat-panel-description> {{data.rightNode.tableName}} </mat-panel-description>
-          </mat-expansion-panel-header>
-          <table>
-            @for( j of columnsFA.controls; track j ; let i = $index){
-              <tr [formGroup]="j">
-                <td>  
-                  <mat-checkbox formControlName="selected"  > {{j.controls.columnName.value}} </mat-checkbox> 
-                </td>
-                <td>  
-                  <mat-form-field appearance="fill">
-                    <mat-label>Alias</mat-label>
-                    <input matInput formControlName="alias">
-                  </mat-form-field>
-                </td>          
-              </tr> 
-            } 
-            </table> 
-        </mat-expansion-panel>
         @for( childFA of childColumnsSelectedFA; track childFA; let idx = $index){
         <mat-expansion-panel>
           <mat-expansion-panel-header>

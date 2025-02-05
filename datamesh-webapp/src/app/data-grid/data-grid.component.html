@@ -1,0 +1,36 @@
+@if( columnsFA.length > 0 ){
+    <div class="view">
+        <div class="wrapper">
+            <table *ngIf="result.resultSet && result.metadata">
+                <thead>
+                    <tr>
+                        <td class="sticky-col first-col"> idx </td>
+                        <!--<th *ngFor="let h of result.metadata">{{ h["name"] }}</th>-->
+                        @for( j of columnsFA.controls; track j ; let i = $index){
+                        <th [formGroup]="j">
+                            @if( j.controls.selected.value == false){
+                                <mat-checkbox formControlName="selected"  > {{j.controls.columnName.value}} </mat-checkbox> 
+                            }
+                            @else{
+                                <mat-checkbox formControlName="selected"  ></mat-checkbox> 
+                                <mat-form-field appearance="fill">
+                                <mat-label>{{j.controls.columnName.value}}</mat-label>
+                                <input matInput formControlName="alias">
+                                </mat-form-field>
+                            }
+                        </th> 
+                        }                                
+                    </tr>
+                    
+                </thead>
+                <tbody>                
+                    <tr *ngFor="let row of result.resultSet; index as i">
+                        <td class="sticky-col first-col">{{ i + 1 }}</td>
+                        <td *ngFor="let column of result.metadata; index as idx" [ngClass]="{'number': isNumber(column.type_code) }">{{ format(column.type_code, row[idx]) }}</td> 
+                    </tr>
+                </tbody>                
+            </table>  
+        </div>
+    </div>
+}
+

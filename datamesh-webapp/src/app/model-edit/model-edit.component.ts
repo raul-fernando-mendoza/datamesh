@@ -284,7 +284,8 @@ export class ModelEditComponent {
         filters: [],
         columns: [],
         selectedChildColumns: {},
-        expressions: []
+        expressions: [],
+        sampleData:null
       }
       
       if( !parentNode ){
@@ -320,7 +321,8 @@ export class ModelEditComponent {
       filters: [],
       columns: [],
       selectedChildColumns: {},
-      expressions: []
+      expressions: [],
+      sampleData:null
     }    
 
     if( parentNode ){

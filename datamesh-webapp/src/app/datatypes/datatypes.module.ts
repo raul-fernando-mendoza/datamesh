@@ -224,6 +224,7 @@ export interface JoinNode extends InfoNode{
   selectedColumns:SelectedColumn[]
   selectedChildColumns:{ [key: string]: SelectedColumn[] } 
   expressions:string[]
+  sampleData:Result | null
 }
 
 export interface JoinData {
@@ -295,6 +296,16 @@ export interface JoinCondition{
 export class JoinNodeExecution{
   ModelId?: string 
   parameters?:any
+}
+
+export interface Result{
+  resultSet:Array<any>
+  metadata:[
+    { 
+      name:string
+      type_code:number 
+    }
+  ]
 }
 
 

@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn } from 'app/datatypes/datatypes.module';
+import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, Result } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -17,6 +17,8 @@ import { DaoService } from 'app/dao.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import {MatExpansionModule} from '@angular/material/expansion';
+import { UrlService } from 'app/url.service';
+import { DataGridComponent } from 'app/data-grid/data-grid.component';
 
 
 @Component({
@@ -41,7 +43,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
       MatTabsModule,
       MatProgressSpinnerModule,
       MatAutocompleteModule,
-      MatExpansionModule
+      MatExpansionModule,
+      DataGridComponent
     ]
   })
   export class JoinDialog implements OnInit{ 
@@ -112,12 +115,13 @@ import {MatExpansionModule} from '@angular/material/expansion';
       ]
     ]
 
-
+    result:Result | null= null
 
     constructor(
       public dialogRef: MatDialogRef<JoinDialog>,
       private fb:FormBuilder,
       private dao:DaoService,
+      private urlSrv:UrlService,
       @Inject(MAT_DIALOG_DATA) public data:JoinData) {}
 
     ngOnInit(): void {
@@ -138,7 +142,8 @@ import {MatExpansionModule} from '@angular/material/expansion';
         })
         allPromises.push( leftPromise )
       }
-      if( this.data.rightNode.columns  && this.data.rightNode.columns.length == 0){
+      if( (this.data.rightNode.columns  && this.data.rightNode.columns.length == 0) ||
+        this.data.rightNode.sampleData == null){
         let rightPromise = this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( right =>{
               console.debug( right )
               this.data.rightNode.columns.length = 0
@@ -146,7 +151,19 @@ import {MatExpansionModule} from '@angular/material/expansion';
 
         })
         allPromises.push( rightPromise )
-      }  
+
+        let tableName = this.data.rightNode.tableName
+        if( this.data.rightNode.sampleData == null){
+          let sampleData = this.getSampleData(tableName).then( result =>{
+            this.data.rightNode.sampleData = result
+          })
+          allPromises.push( sampleData ) 
+        }
+      }
+
+       
+      
+
       Promise.all( allPromises ).then( () =>{
         this.isLoading = false
 
@@ -351,6 +368,31 @@ import {MatExpansionModule} from '@angular/material/expansion';
         this.data.rightNode.filters.push(joinCondition)
       })
 
+    }
+
+    getSampleData(tableName:string):Promise<Result>{
+      return new Promise(( resolve, reject ) => {
+        
+        let sql = "select * from " + tableName + " limit 10"
+        let connectionId = this.data.rightNode.connectionId
+
+        var req = {
+          connectionId:connectionId,
+          sql:sql
+        }
+        this.isLoading = true
+        this.urlSrv.post("executeSql",req).subscribe({ 
+          'next':(result:any)=>{
+            this.isLoading = false
+            console.log( result )
+            resolve( result )
+          },
+          'error':(reason)=>{   
+            this.isLoading = false     
+            reject( reason.error.error )
+          }
+        })         
+      })  
     }
   }
   
