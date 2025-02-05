@@ -232,7 +232,7 @@ def executeSqlByPath():
         req = request.get_json(force=True)
         log.debug( str(req) )
         data = bsnrules.executeSqlByPath(req)
-        log.debug("*** End runQuery:" + str(data))
+        log.debug("*** End runQuery:" ) #+ str(data)
         
     except Exception as e:
         log.error("**** processRequest Exception:" + str(e))
