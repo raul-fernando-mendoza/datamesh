@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, Result } from 'app/datatypes/datatypes.module';
+import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -50,11 +50,14 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
   export class JoinDialog implements OnInit{ 
     @ViewChild('input') input!: ElementRef<HTMLInputElement>;
     
-    comparisonOptions:Array<ComparatorOption> = [  ComparatorOption.equal,
+    comparisonOptions:Array<ComparatorOption> = [  
+      ComparatorOption.equal,
       ComparatorOption.gt,
       ComparatorOption.gte,
       ComparatorOption.lt ,
-      ComparatorOption.lte]
+      ComparatorOption.lte,
+      ComparatorOption.ne
+    ]
  
 
     selectedColumnsFA = this.fb.array([
@@ -115,7 +118,7 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
       ]
     ]
 
-    result:Result | null= null
+    result:SqlResultInFirebase | null= null
 
     constructor(
       public dialogRef: MatDialogRef<JoinDialog>,
@@ -142,24 +145,7 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
         })
         allPromises.push( leftPromise )
       }
-      if( (this.data.rightNode.columns  && this.data.rightNode.columns.length == 0) ||
-        this.data.rightNode.sampleData == null){
-        let rightPromise = this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( right =>{
-              console.debug( right )
-              this.data.rightNode.columns.length = 0
-              right.forEach( c => this.data.rightNode.columns.push(c)) 
-
-        })
-        allPromises.push( rightPromise )
-
-        let tableName = this.data.rightNode.tableName
-        if( this.data.rightNode.sampleData == null){
-          let sampleData = this.getSampleData(tableName).then( result =>{
-            this.data.rightNode.sampleData = result
-          })
-          allPromises.push( sampleData ) 
-        }
-      }
+      this.refreshColumnsAndSampleData()
 
        
       
@@ -179,24 +165,6 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
             this.joinsFA.push( newJoinFG)
           })     
         }
-        
-        //generate a form control for each column name
-        this.columnsFA.clear()
-        this.data.rightNode.columns.forEach( c =>{
-          let selected = false
-          let alias = ""
-          let selectedColumn = this.data.rightNode.selectedColumns.find( s => s.exp == c.columnName)
-          if( selectedColumn && selectedColumn.isSelected ){
-            selected = true
-            alias = selectedColumn.alias
-          }
-          let g = this.fb.group({
-            columnName: [c.columnName],
-            selected: [selected],
-            alias:[alias]
-          })
-          this.columnsFA.push(g)
-        })             
 
         this.data.rightNode.children?.forEach( child =>{
           let prefix = child.name
@@ -306,6 +274,75 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
     onDeleteFilter(i:number){
       this.filtersFA.controls.splice(i,1)
     }    
+    getSampleData(tableName:string):Promise<SqlResultInFirebase>{
+      return new Promise(( resolve, reject ) => {
+        
+        let sql = "select * from " + tableName + " limit 10"
+        let connectionId = this.data.rightNode.connectionId
+
+        var req = {
+          connectionId:connectionId,
+          sql:sql
+        }
+        this.isLoading = true
+        this.urlSrv.post("executeSql",req).subscribe({ 
+          'next':(result:any)=>{
+            this.isLoading = false
+            console.log( result )
+            resolve( result )
+          },
+          'error':(reason)=>{   
+            this.isLoading = false     
+            reject( reason.error.error )
+          }
+        })         
+      })  
+    }
+    refreshColumnsAndSampleData(){
+      let rightPromise = this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( 
+        right =>{
+          console.debug( right )
+          this.data.rightNode.columns.length = 0
+          right.forEach( c => this.data.rightNode.columns.push(c)) 
+
+          //now recreate the columns form
+          this.columnsFA.clear()
+          this.data.rightNode.columns.forEach( c =>{
+            let selected = false
+            let alias = ""
+            let selectedColumn = this.data.rightNode.selectedColumns.find( s => s.exp == c.columnName)
+            if( selectedColumn && selectedColumn.isSelected ){
+              selected = true
+              alias = selectedColumn.alias
+            }
+            let g = this.fb.group({
+              columnName: [c.columnName],
+              selected: [selected],
+              alias:[alias]
+            })
+            this.columnsFA.push(g)
+          })            
+        })
+
+      let tableName = this.data.rightNode.tableName
+      let sampleData = this.getSampleData(tableName).then( result =>{
+        let sqlResult:SqlResultInFirebase = {
+          metadata:result.metadata,
+          resultSet:[]
+        }
+        for(let i=0; i<result.resultSet.length; i++){ 
+          let row = result.resultSet[i]             
+          let data:{[key: string]:any}={}
+          for( let c=0; c<row.length; c++){
+            data["k_" + c] = row[c]
+          }
+          sqlResult.resultSet.push(data)
+        }
+        this.data.rightNode.sampleData = sqlResult
+      })
+      
+    }
+
     onSubmit(){
 
       this.data.rightNode.joinCriteria.length = 0
@@ -370,29 +407,5 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
 
     }
 
-    getSampleData(tableName:string):Promise<Result>{
-      return new Promise(( resolve, reject ) => {
-        
-        let sql = "select * from " + tableName + " limit 10"
-        let connectionId = this.data.rightNode.connectionId
-
-        var req = {
-          connectionId:connectionId,
-          sql:sql
-        }
-        this.isLoading = true
-        this.urlSrv.post("executeSql",req).subscribe({ 
-          'next':(result:any)=>{
-            this.isLoading = false
-            console.log( result )
-            resolve( result )
-          },
-          'error':(reason)=>{   
-            this.isLoading = false     
-            reject( reason.error.error )
-          }
-        })         
-      })  
-    }
   }
   

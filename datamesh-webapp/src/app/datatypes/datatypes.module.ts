@@ -224,7 +224,7 @@ export interface JoinNode extends InfoNode{
   selectedColumns:SelectedColumn[]
   selectedChildColumns:{ [key: string]: SelectedColumn[] } 
   expressions:string[]
-  sampleData:Result | null
+  sampleData:SqlResultInFirebase | null
 }
 
 export interface JoinData {
@@ -283,7 +283,8 @@ export enum ComparatorOption {
   gt = ">",
   gte = ">=",
   lt = "<",
-  lte = "<="
+  lte = "<=",
+  ne = "<>"
 }
 
 export interface JoinCondition{
@@ -298,11 +299,16 @@ export class JoinNodeExecution{
   parameters?:any
 }
 
-export interface Result{
+export interface SqlResultInFirebase{
   resultSet:Array<any>
   metadata:[
     { 
+      display_size:number | null
+      internal_size:number
+      is_nullable:boolean
       name:string
+      precision:number
+      scale:number
       type_code:number 
     }
   ]

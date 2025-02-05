@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input , AfterViewInit} from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { Result, SelectedColumn } from 'app/datatypes/datatypes.module';
+import { SqlResultInFirebase, SelectedColumn } from 'app/datatypes/datatypes.module';
 
 @Component({
   selector: 'app-data-grid',
@@ -28,21 +28,18 @@ import { Result, SelectedColumn } from 'app/datatypes/datatypes.module';
   styleUrl: './data-grid.component.css'
 })
 export class DataGridComponent{
-  @Input() result!:Result
-  @Input() columnsFA = this.fb.array([
-    this.fb.group({
-      columnName: [''],
-      selected: [true],
-      alias:['']
-    })
-  ])   
+  @Input() result!:SqlResultInFirebase
+  @Input() columnsFA:FormArray<FormGroup<{columnName:FormControl, selected:FormControl, alias:FormControl }>> | null = null
 
   isLoading:boolean = false 
 
   
 
   constructor(private fb:FormBuilder){
-    this.columnsFA.clear()
+    if( this.columnsFA != null){
+      this.columnsFA.clear()
+    }
+    
 
   }
 
@@ -78,17 +75,12 @@ export class DataGridComponent{
       datatype == 0
       
     ){
-      if( val ){
-        if( val - Math.floor(val) ){
-          result = Number(val).toFixed(2)
-        }
-        else{
-          result = Math.floor(Number(val)) + ".__"
-        }      
+      if( val - Math.floor(val) > 0){
+        result = Number(val).toFixed(2)
       }
       else{
-        result = val
-      }
+        result = Math.floor(Number(val)) + ".__"
+      }      
     }              
     
     return result

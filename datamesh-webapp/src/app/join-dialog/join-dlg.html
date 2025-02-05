@@ -1,10 +1,16 @@
-<h1 mat-dialog-title>Join Properties</h1>
+
+<div class="bar">
+  <b>Join Properties</b>
+  <span class="spacer"></span>
+  <button mat-button mat-dialog-close>Cancel</button> 
+  <button [disabled]="data.rightNode.name.length < 1 || data.rightNode.name.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial (click)="onSubmit()">Ok</button>
+</div>
 
 @if( isLoading ){
   <mat-spinner></mat-spinner>
 }
 @else{
-<mat-dialog-content>
+
   <table>
     <tr>
       @if( data.leftNode ){
@@ -82,7 +88,8 @@
     }
     <mat-tab label="Columns">
 
-      <h4>{{data.rightNode.name}} - {{data.rightNode.tableName}} </h4>
+      <h4>{{data.rightNode.name}} - {{data.rightNode.tableName}} <button mat-button-button (click)="refreshColumnsAndSampleData()"><mat-icon>refresh</mat-icon></button> </h4>
+      
       @if( data.rightNode.sampleData != null ){
         <app-data-grid [result]="data.rightNode.sampleData" [columnsFA]="columnsFA"></app-data-grid>
       }
@@ -160,12 +167,6 @@
 
     </mat-tab>
   </mat-tab-group>  
-</mat-dialog-content>
-
-<mat-dialog-actions>
-  <button mat-button mat-dialog-close>Cancel</button> 
-  <button [disabled]="data.rightNode.name.length < 1 || data.rightNode.name.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial (click)="onSubmit()">Ok</button>
-</mat-dialog-actions>
 }
 
 
