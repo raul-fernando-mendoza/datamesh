@@ -30,7 +30,7 @@ ul{
     table-layout: fixed ;
 }
 .join-table .join-comparator{
-    max-width: 5%;
+    width: 5em;
     overflow: hidden;
 }
 .join-table .join-action{
@@ -49,7 +49,7 @@ ul{
     table-layout: fixed ;
 }
 .filter-table .filter-comparator{
-    max-width: 5%;
+    max-width: 7%;
     overflow: hidden;
 }
 .filter-table .filter-action{
