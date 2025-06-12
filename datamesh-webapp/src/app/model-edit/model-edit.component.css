@@ -57,6 +57,12 @@
   max-height: 10em;    
 }
 
+table .tree{
+  border:none;
+  border-collapse: collapse;
+  background-color: yellow;
+}
+
 table, th, td {
   border: 1px solid black;
   border-collapse: collapse;

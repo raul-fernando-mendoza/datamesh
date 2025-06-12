@@ -14,6 +14,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { SqlJupiterEditComponent } from 'app/sql-jupiter-edit/sql-jupiter-edit.component';
 import { CommonModule } from '@angular/common';
+import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
   selector: 'app-sql-jupiter-doc',
@@ -29,7 +30,8 @@ import { CommonModule } from '@angular/common';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
-    SqlJupiterEditComponent
+    SqlJupiterEditComponent,
+    MatDividerModule
   ]  
 })
 export class SqlJupiterDocComponent {

@@ -441,6 +441,7 @@ def getDFChild( infoNode):
     #now add the filters
     
     for filter in infoNode["filters"]: 
+        print("adding filter:", str(filter["leftValue"]) + filter["comparator"] + str(filter["rightValue"]) )
         df = df.where( str(filter["leftValue"]) + filter["comparator"] + str(filter["rightValue"]) )      
     
     childDFs = []

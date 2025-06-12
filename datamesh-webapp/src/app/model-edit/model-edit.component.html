@@ -31,10 +31,29 @@
               (cdkDropListDropped)="onDrop($event)"
               [cdkDropListEnterPredicate]="acceptPredicate"
               >
-                  leaf:
-                  <span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> 
-                  <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
-                  <span class="name">{{node.item.name}}</span>
+                  <!--leaf:-->
+                  <table class="tree">
+                    <tr>
+                      <td>
+                        <span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> 
+                      </td>
+                      <td>
+                        <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
+                        <span class="name">{{node.item.name}}</span>
+                        <table class="tree">
+                          <tr>
+                            <td>
+                              <ul>
+                                @for( c of node.item.filters;track c;let i = $index){
+                                  <li> {{c.leftValue}} {{c.comparator}} {{c.rightValue}} </li>
+                                }
+                                </ul>
+                            </td>
+                          </tr>
+                        </table>
+                      </td>
+                   </tr>
+                  </table>
               </div>
 
               @if( !isAdding ){
@@ -87,10 +106,30 @@
                 (cdkDropListDropped)="onDrop($event)"
                 [cdkDropListEnterPredicate]="acceptPredicate"
                 >
-                    hasChild:
-                    <span class="criteria">{{node.item.criteria }}</span> 
-                    <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' '}}</span>
-                    <span class="name">{{node.item.name}}</span>
+                    <!--hasChild:-->
+                    <table class="tree">
+                      <tr>
+                        <td>
+                          <span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> 
+                        </td>
+                        <td>
+                          <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
+                          <span class="name">{{node.item.name}}</span>
+                          <table class="tree">
+                            <tr>
+                              <td>
+                                <ul>
+                                  @for( c of node.item.filters;track c;let i = $index){
+                                    <li> {{c.leftValue}} {{c.comparator}} {{c.rightValue}} </li>
+                                  }
+                                  </ul>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                     </tr>
+                    </table>
+  
                 </div>
                 @if( !isAdding ){
                   <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">

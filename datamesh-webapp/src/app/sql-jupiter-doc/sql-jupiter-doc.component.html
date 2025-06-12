@@ -1,3 +1,4 @@
+SQLJUPITER-DOC
 <div class="bar" *ngIf="sqlJupiterGroup">
     <span>{{ sqlJupiterGroup.label }}</span> 
     <span class="spacer"></span>
@@ -26,6 +27,7 @@
                     <button mat-raised-button [disabled]="submitting" (click)="onSqlDelete(i)"><mat-icon>remove</mat-icon></button>    
 
                 </div>
+                <mat-divider class="sql-divider"></mat-divider>
                 <div >
                     <!--parent id:{{i}} - {{item.id}}-->
                     <app-sql-jupiter-edit *ngIf="item.className == 'SqlJupiter' " parentCollection="{{parentCollection}}" collection="{{item.className}}" id="{{item.id}}"></app-sql-jupiter-edit>
@@ -33,6 +35,7 @@
                 </div>
             </div>
         }
+        <mat-divider class="sql-divider"></mat-divider>
         <div class="header">
             <div class="spacer"></div>
             <button mat-button (click)="onAddSqlJupiter(sqlJupiterDoc!.itemList.length)"><mat-icon>join_inner</mat-icon>sql</button>

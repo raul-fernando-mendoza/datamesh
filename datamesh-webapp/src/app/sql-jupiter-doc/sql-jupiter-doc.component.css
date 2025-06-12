@@ -5,3 +5,6 @@ mat-form-field{
     background-color: green;
     display:inline;
 }
+.sql-divider{
+    margin-top:1em;
+}

@@ -114,31 +114,34 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     this.unsubscribe = this.firebaseService.onsnapShot( this.parentCollection + "/" + this.collection , this.id, 
     {
       "next":( (doc) =>{
-        this.sqlJupiter = doc.data() as SqlJupiterObj
-        //this.rows = this.sqlJupiter.sql.split('\n').length > this.MAX_ROWS ? this.MAX_ROWS : this.MIN_ROWS 
-        this.FG.controls.sql.setValue( this.sqlJupiter.sql )
-        this.FG.controls.connectionId.setValue( this.sqlJupiter.connectionId )
-        this.displayedColumns = ["idx"]
-        if( this.sqlJupiter.request_id && this.request_id != this.sqlJupiter.request_id){
-          this.request_id = this.sqlJupiter.request_id
-          this.readResults(this.sqlJupiter.request_id)
-        }
+        if( doc.exists() ){
+          this.sqlJupiter = doc.data() as SqlJupiterObj
+          //this.rows = this.sqlJupiter.sql.split('\n').length > this.MAX_ROWS ? this.MAX_ROWS : this.MIN_ROWS 
+          this.FG.controls.sql.setValue( this.sqlJupiter.sql )
+          this.FG.controls.connectionId.setValue( this.sqlJupiter.connectionId )
+          this.displayedColumns = ["idx"]
+          if( this.sqlJupiter.request_id && this.request_id != this.sqlJupiter.request_id){
+            this.request_id = this.sqlJupiter.request_id
+            this.readResults(this.sqlJupiter.request_id)
+          }
+        
         
 
-        if( this.elapsedSubscriber ){
-          clearInterval( this.elapsedSubscriber )
-        }
+          if( this.elapsedSubscriber ){
+            clearInterval( this.elapsedSubscriber )
+          }
 
-        if(this.activeRequestStatuses.has(this.sqlJupiter.request_status)){
-          this.elapsedSubscriber = interval(1000)
+          if(this.activeRequestStatuses.has(this.sqlJupiter.request_status)){
+            this.elapsedSubscriber = interval(1000)
 
-          let thiz = this
+            let thiz = this
 
-          this.elapsedSubscriber.subscribe( 
-            { 'next':() =>{
-              thiz.updateElapsedTime()
-            }
-          }) 
+            this.elapsedSubscriber.subscribe( 
+              { 'next':() =>{
+                thiz.updateElapsedTime()
+              }
+            }) 
+          }
         }
         
       }),
