@@ -102,7 +102,7 @@ export class Comparison{
   keyLeftRight:KeyLeftRight[] = []
 
   records:any
-  schema:any
+  schema:Array<Port> = []
 }
 
 export enum JoinType { "inner_join" , "left_join" , "outer_join" }

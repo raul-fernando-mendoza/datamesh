@@ -26,7 +26,7 @@
             {{ getChildrenIndex(node) + 1}}
           </td>           
           <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="port.datatype.split('(')[0]" [style.background-color]="getColor(node, port.name )">
-             <div class="cell">{{node.obj[port.name]}}</div>  
+             <div class="cell">{{getValue(node, port.name)}}</div>  
           </td>
         </tr>                                  
       </div> 
@@ -65,7 +65,7 @@
               <td class="index">
                 {{ getChildrenIndex(node) + 1}}
               </td>           
-              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="port.datatype.split('(')[0]">
+              <td *ngFor="let port of joinPort(node.parentNode.obj.leftPorts, node.parentNode.obj.rightPorts, node.parentNode.obj.keyLeftRight)" [class]="getType(port.name)">
                  <div class="cell">{{node.obj[port.name]}}</div>   
               </td>
             </tr>                                  

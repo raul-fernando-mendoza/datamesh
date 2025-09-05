@@ -62,8 +62,8 @@ def getEncryptedDocument(req):
 def executeJoin( req ):
     print("executeJoin called")
     print(json.dumps(req,indent=4))
-    leftSess = getSnowparkSession( req["left_connectionId"] )
-    rightSess = getSnowparkSession( req["right_connectionId"] )
+    leftSess = datamesh_base.getSnowparkSession( req["left_connectionId"] )
+    rightSess = datamesh_base.getSnowparkSession( req["right_connectionId"] )
 
     leftQry:str = req["leftQry"] if "leftQry" in req else None
     rightQry:str = req["rightQry"] if "rightQry" in req else None
@@ -95,7 +95,7 @@ def executeSql(req):
 def getFielsForQuery(req):
     print("getFielsForQuery called")
     print(json.dumps(req))
-    sess = getSnowparkSession( req["connectionId"] )
+    sess = datamesh_base.getSnowparkSession( req["connectionId"] )
     qry = req["qry"] if "qry" in req else None
     
     return datamesh_base.getFielsForQuery( sess, qry )

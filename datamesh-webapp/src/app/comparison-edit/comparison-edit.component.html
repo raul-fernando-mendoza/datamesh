@@ -17,6 +17,8 @@
       </div>          
 </div>   
 
+<button mat-button (click)="updatePorts()">refresh</button>
+
 <div [style.display]="this.comparison ? 'block' : 'none'">
 
 
@@ -149,7 +151,6 @@
       </table>      
 
     </mat-tab>
-
   </mat-tab-group>  
 
   <button mat-raised-button (click)="onExecute()">Execute</button> 

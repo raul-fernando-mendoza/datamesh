@@ -303,10 +303,11 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
         right =>{
           console.debug( right )
           this.data.rightNode.columns.length = 0
+          this.columnsFA.clear()
           right.forEach( c => this.data.rightNode.columns.push(c)) 
 
           //now recreate the columns form
-          this.columnsFA.clear()
+          
           this.data.rightNode.columns.forEach( c =>{
             let selected = false
             let alias = ""
@@ -322,6 +323,9 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
             })
             this.columnsFA.push(g)
           })            
+        },
+        error=>{
+          alert("error retriving columns")
         })
 
       let tableName = this.data.rightNode.tableName

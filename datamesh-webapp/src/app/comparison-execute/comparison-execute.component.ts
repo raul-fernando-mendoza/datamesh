@@ -481,4 +481,36 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     }
     return "white"
   }
+
+  getValue(node:TreeNode, label:string):string{
+    if(this.comparison){
+      let port = this.comparison.schema.find( (e) => e.name == label )
+      if( port ){
+        let v = node.obj[label]
+        
+        switch( port.datatype){
+          case 'datetime64[ns]': 
+            var d = new Date(v);
+            return d.toLocaleDateString(v)
+          default:
+            return v  
+        }
+      }
+    }
+    return ""
+  }
+  getType(label:string):string{
+    if(this.comparison){
+      let port = this.comparison.schema.find( (e) => e.name == label )
+      if( port ){
+        switch( port.datatype){
+          case 'datetime64[ns]': 
+            return "datetime"
+          default:
+            return port.datatype.split('(')[0] 
+        }
+      }
+    }
+    return ""
+  }  
 }

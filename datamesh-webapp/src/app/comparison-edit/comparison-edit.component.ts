@@ -289,7 +289,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
       keyParenRight: [],
       keyParentLeft: [],
       records: null,
-      schema: null
+      schema: []
     }
     
     this.firebaseService.setDoc("Comparison" , comparison.id, comparison).then( () =>{
