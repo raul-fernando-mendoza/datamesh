@@ -1,0 +1,42 @@
+FROM ubuntu:jammy
+WORKDIR .
+
+RUN apt-get update -y && \
+ apt-get install openjdk-11-jdk -y && \
+ apt-get install ssh -y && \
+ apt-get install iputils-ping -y && \
+ apt-get install -y iproute2 -y && \
+ apt-get install vim -y && \
+ apt-get install sudo -y && \
+ apt-get install wget -y && \
+ apt-get install python3-pip -y
+
+
+# pip
+COPY ./requirements.txt ./
+RUN pip install -r ./requirements.txt
+
+
+RUN useradd -ms /bin/bash hadoop && usermod -aG sudo hadoop
+RUN echo hadoop:U6aMy0wojraho | sudo chpasswd -e
+WORKDIR /home/hadoop
+RUN mkdir downloads && chown hadoop:hadoop downloads
+
+USER hadoop
+RUN mkdir -p ./opt/hadoop/logs
+
+COPY ./etc/* ./opt/hadoop/etc/hadoop/
+COPY ./home/* ./
+
+COPY ./spark_conf/* ./opt/spark/conf
+
+#gcloud folder
+RUN mkdir -p ./.config/gcloud
+RUN mkdir ./secrets
+RUN mkdir ./python
+
+#you must always end with root so services can be started
+USER root
+
+
+ 
