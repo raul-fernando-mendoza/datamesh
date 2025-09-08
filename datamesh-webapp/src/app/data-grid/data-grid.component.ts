@@ -10,22 +10,21 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { SqlResultInFirebase, SelectedColumn } from 'app/datatypes/datatypes.module';
 
 @Component({
-  selector: 'app-data-grid',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    FormsModule, 
-    MatFormFieldModule,
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatCheckboxModule,        
-    MatProgressSpinnerModule,
-  ],
-  templateUrl: './data-grid.component.html',
-  styleUrl: './data-grid.component.css'
+    selector: 'app-data-grid',
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        FormsModule,
+        MatFormFieldModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatCheckboxModule,
+        MatProgressSpinnerModule,
+    ],
+    templateUrl: './data-grid.component.html',
+    styleUrl: './data-grid.component.css'
 })
 export class DataGridComponent{
   @Input() result!:SqlResultInFirebase

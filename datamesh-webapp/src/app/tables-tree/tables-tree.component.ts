@@ -18,23 +18,22 @@ import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-tables-tree',
-  templateUrl: './tables-tree.component.html',
-  styleUrl: './tables-tree.component.css',
-  providers: [LoadmoreDatabase],
-  standalone: true,
-  imports: [
-    FormsModule, 
-    ReactiveFormsModule,
-    MatTreeModule, 
-    MatButtonModule, 
-    MatIconModule,
-    MatProgressBarModule,
-    MatSelectModule,
-    MatInputModule,
-    MatProgressSpinnerModule,
-    CdkDropList, CdkDrag
-  ]
+    selector: 'app-tables-tree',
+    templateUrl: './tables-tree.component.html',
+    styleUrl: './tables-tree.component.css',
+    providers: [LoadmoreDatabase],
+    imports: [
+        FormsModule,
+        ReactiveFormsModule,
+        MatTreeModule,
+        MatButtonModule,
+        MatIconModule,
+        MatProgressBarModule,
+        MatSelectModule,
+        MatInputModule,
+        MatProgressSpinnerModule,
+        CdkDropList, CdkDrag
+    ]
 })
 export class TablesTreeComponent implements OnInit{
 

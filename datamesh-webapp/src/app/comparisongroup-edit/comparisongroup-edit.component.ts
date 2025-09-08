@@ -15,19 +15,18 @@ import { CommonModule } from '@angular/common';
 
 
 @Component({
-  selector: 'app-comparisongroup-edit',
-  templateUrl: './comparisongroup-edit.component.html',
-  styleUrls: ['./comparisongroup-edit.component.css'],
-  standalone: true,
-  imports:[ 
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule
-  ]    
+    selector: 'app-comparisongroup-edit',
+    templateUrl: './comparisongroup-edit.component.html',
+    styleUrls: ['./comparisongroup-edit.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule
+    ]
 })
 export class ComparisonGroupEditComponent implements OnInit,OnDestroy{
   id:string|null = null

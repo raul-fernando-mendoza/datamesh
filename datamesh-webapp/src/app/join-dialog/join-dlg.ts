@@ -25,28 +25,27 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
     selector: 'join-dlg',
     templateUrl: 'join-dlg.html',
     styleUrl: 'join-dlg.css',
-    standalone: true,
-    imports:[ 
-      CommonModule,
-      MatButtonModule,
-      MatIconModule,
-      FormsModule, 
-      MatFormFieldModule,
-      ReactiveFormsModule,
-      MatFormFieldModule,
-      MatInputModule,    
-      MatDialogModule,
-      MatCheckboxModule,
-      MatSelectModule,
-      MatGridListModule,
-      MatRadioModule,
-      MatTabsModule,
-      MatProgressSpinnerModule,
-      MatAutocompleteModule,
-      MatExpansionModule,
-      DataGridComponent
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        FormsModule,
+        MatFormFieldModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDialogModule,
+        MatCheckboxModule,
+        MatSelectModule,
+        MatGridListModule,
+        MatRadioModule,
+        MatTabsModule,
+        MatProgressSpinnerModule,
+        MatAutocompleteModule,
+        MatExpansionModule,
+        DataGridComponent
     ]
-  })
+})
   export class JoinDialog implements OnInit{ 
     @ViewChild('input') input!: ElementRef<HTMLInputElement>;
     

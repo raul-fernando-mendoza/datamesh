@@ -14,19 +14,18 @@ import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-datasetgroup-edit',
-  templateUrl: './datasetgroup-edit.component.html',
-  styleUrls: ['./datasetgroup-edit.component.css'],
-  standalone: true,
-  imports:[ 
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,      
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule
-  ]   
+    selector: 'app-datasetgroup-edit',
+    templateUrl: './datasetgroup-edit.component.html',
+    styleUrls: ['./datasetgroup-edit.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule
+    ]
 })
 export class DatasetgroupEditComponent implements OnInit,OnDestroy{
   id:string|null = null

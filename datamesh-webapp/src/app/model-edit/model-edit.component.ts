@@ -27,27 +27,26 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @Component({
-  selector: 'app-model-edit',
-  standalone: true,
-  imports:[ 
-    CommonModule ,
-    MatIconModule,
-    MatButtonModule,
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTreeModule,
-    MatMenuModule,
-    CdkDropList, CdkDrag ,
-    MatProgressBarModule,
-    MatExpansionModule,
-    MatProgressSpinnerModule
-   ],
-  providers: [JoinDataSource],
-  templateUrl: './model-edit.component.html',
-  styleUrl: './model-edit.component.css'
+    selector: 'app-model-edit',
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatTreeModule,
+        MatMenuModule,
+        CdkDropList, CdkDrag,
+        MatProgressBarModule,
+        MatExpansionModule,
+        MatProgressSpinnerModule
+    ],
+    providers: [JoinDataSource],
+    templateUrl: './model-edit.component.html',
+    styleUrl: './model-edit.component.css'
 })
 export class ModelEditComponent {
   model:ModelObj | null = null

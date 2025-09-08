@@ -17,22 +17,21 @@ import { CommonModule } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
 
 @Component({
-  selector: 'app-sql-jupiter-doc',
-  templateUrl: './sql-jupiter-doc.component.html',
-  styleUrls: ['./sql-jupiter-doc.component.css'],
-  standalone: true,
-  imports:[
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    TextJupiterComponent,
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    SqlJupiterEditComponent,
-    MatDividerModule
-  ]  
+    selector: 'app-sql-jupiter-doc',
+    templateUrl: './sql-jupiter-doc.component.html',
+    styleUrls: ['./sql-jupiter-doc.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        TextJupiterComponent,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        SqlJupiterEditComponent,
+        MatDividerModule
+    ]
 })
 export class SqlJupiterDocComponent {
   

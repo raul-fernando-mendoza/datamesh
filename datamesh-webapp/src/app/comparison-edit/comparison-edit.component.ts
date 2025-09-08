@@ -37,24 +37,23 @@ const keyports = "keyports"
   //dataset:Dataset
 
 @Component({
-  selector: 'app-comparison-edit',
-  templateUrl: './comparison-edit.component.html',
-  styleUrls: ['./comparison-edit.component.css'],
-  standalone: true,
-  imports:[ 
-    CommonModule ,
-    MatIconModule,
-    MatButtonModule,
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatCheckboxModule,
-    MatTabsModule,
-    MatGridListModule,
-    MatTableModule,
-    CdkDropList, CdkDrag    
-  ]      
+    selector: 'app-comparison-edit',
+    templateUrl: './comparison-edit.component.html',
+    styleUrls: ['./comparison-edit.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatCheckboxModule,
+        MatTabsModule,
+        MatGridListModule,
+        MatTableModule,
+        CdkDropList, CdkDrag
+    ]
 })
 export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, OnDestroy{
 

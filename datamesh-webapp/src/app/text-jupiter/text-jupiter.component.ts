@@ -11,19 +11,18 @@ import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-text-jupiter',
-  templateUrl: './text-jupiter.component.html',
-  styleUrls: ['./text-jupiter.component.css'],
-  standalone: true,
-  imports:[
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule
-  ]    
+    selector: 'app-text-jupiter',
+    templateUrl: './text-jupiter.component.html',
+    styleUrls: ['./text-jupiter.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule
+    ]
 })
 export class TextJupiterComponent { 
   @Input() parentCollection!:string

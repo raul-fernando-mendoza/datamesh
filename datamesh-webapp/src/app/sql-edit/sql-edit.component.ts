@@ -29,20 +29,19 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'sql-edit',
-  templateUrl: './sql-edit.component.html',
-  styleUrls: ['./sql-edit.component.css'],
-  standalone: true,
-  providers: [{provide: NG_VALUE_ACCESSOR, useExisting: SqlEditComponent,multi:true}],
-  imports:[ 
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule
-  ] 
+    selector: 'sql-edit',
+    templateUrl: './sql-edit.component.html',
+    styleUrls: ['./sql-edit.component.css'],
+    providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: SqlEditComponent, multi: true }],
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule
+    ]
 })
 export class SqlEditComponent  implements AfterViewInit, ControlValueAccessor {
 

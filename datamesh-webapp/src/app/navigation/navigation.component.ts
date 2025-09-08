@@ -18,25 +18,24 @@ import {OverlayModule, Overlay, OverlayRef} from '@angular/cdk/overlay';
 import {TemplatePortal} from '@angular/cdk/portal';
 
 @Component({
-  selector: 'app-navigation',
-  templateUrl: './navigation.component.html',
-  styleUrls: ['./navigation.component.css'],
-  standalone: true,
-  imports:[ 
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatToolbarModule,
-    MatSidenavModule,
-    RouterModule,
-    MatExpansionModule,
-    MatTreeModule,
-    DatasetTreeComponent,
-    MatMenuModule,
-    TablesTreeComponent,
-    CdkDropList, CdkDrag, CdkDropListGroup,
-    OverlayModule
-  ]   
+    selector: 'app-navigation',
+    templateUrl: './navigation.component.html',
+    styleUrls: ['./navigation.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        MatToolbarModule,
+        MatSidenavModule,
+        RouterModule,
+        MatExpansionModule,
+        MatTreeModule,
+        DatasetTreeComponent,
+        MatMenuModule,
+        TablesTreeComponent,
+        CdkDropList, CdkDrag, CdkDropListGroup,
+        OverlayModule
+    ]
 })
 export class NavigationComponent {
   @ViewChild(TemplateRef) _dialogTemplate!: TemplateRef<any> ;

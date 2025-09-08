@@ -18,23 +18,22 @@ import { CommonModule } from '@angular/common';
 
 
 @Component({
-  selector: 'app-connection-edit',
-  templateUrl: './connection-edit.component.html',
-  styleUrls: ['./connection-edit.component.css'],
-  standalone: true,
-  imports:[ 
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,       
-    MatIconModule,
-    MatButtonModule,    
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatSelectModule
-  ]     
+    selector: 'app-connection-edit',
+    templateUrl: './connection-edit.component.html',
+    styleUrls: ['./connection-edit.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        MatIconModule,
+        MatButtonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatSelectModule
+    ]
 })
 export class ConnectionEditComponent {
 

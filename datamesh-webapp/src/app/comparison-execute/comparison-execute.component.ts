@@ -28,18 +28,17 @@ interface ComparisonRequest extends Comparison{
 }
 
 @Component({
-  selector: 'app-comparison-execute',
-  templateUrl: './comparison-execute.component.html',
-  styleUrls: ['./comparison-execute.component.css'],
-  standalone: true,
-  imports:[ 
-    CommonModule,
-    MatIconModule,    
-    MatButtonModule,
-    MatProgressSpinnerModule,
-    MatTreeModule,
-    MatProgressBarModule
-  ]    
+    selector: 'app-comparison-execute',
+    templateUrl: './comparison-execute.component.html',
+    styleUrls: ['./comparison-execute.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        MatProgressSpinnerModule,
+        MatTreeModule,
+        MatProgressBarModule
+    ]
 })
 export class ComparisonExecuteComponent implements AfterViewInit{
   @ViewChild(MatTree) tree!: MatTree<TreeNode> ; 

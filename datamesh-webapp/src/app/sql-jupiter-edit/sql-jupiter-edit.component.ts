@@ -31,21 +31,20 @@ interface Transaction {
 const SUFFIX = "_2"
 
 @Component({
-  selector: 'app-sql-jupiter-edit',
-  templateUrl: './sql-jupiter-edit.component.html',
-  styleUrls: ['./sql-jupiter-edit.component.css'],
-  standalone: true,
-  imports:[
-    CommonModule,
-    MatButtonModule,
-    MatIconModule,    
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule, 
-    SqlEditComponent,
-    MatSelectModule
-  ]
+    selector: 'app-sql-jupiter-edit',
+    templateUrl: './sql-jupiter-edit.component.html',
+    styleUrls: ['./sql-jupiter-edit.component.css'],
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        SqlEditComponent,
+        MatSelectModule
+    ]
 })
 export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy{
   @Input() parentCollection!:string

@@ -12,18 +12,17 @@ interface Transaction {
 }
 
 @Component({
-  selector: 'app-welcome',
-  templateUrl: './welcome.component.html',
-  styleUrls: ['./welcome.component.css'],
-  standalone: true,
-  imports:[
-    CommonModule,
-    MatCardModule,
-    MatIconModule,
-    MatButtonModule,
-    CurrencyPipe,
-    MatTableModule
-  ]
+    selector: 'app-welcome',
+    templateUrl: './welcome.component.html',
+    styleUrls: ['./welcome.component.css'],
+    imports: [
+        CommonModule,
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule,
+        CurrencyPipe,
+        MatTableModule
+    ]
 })
 export class WelcomeComponent {
 

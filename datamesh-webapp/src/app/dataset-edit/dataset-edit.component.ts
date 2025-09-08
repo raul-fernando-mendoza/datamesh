@@ -18,21 +18,20 @@ import {MatTableModule} from '@angular/material/table';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-dataset-edit',
-  templateUrl: './dataset-edit.component.html',
-  styleUrls: ['./dataset-edit.component.css'],
-  standalone: true,
-  imports:[ 
-    CommonModule ,
-    MatIconModule,
-    MatButtonModule,    
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatTableModule
-  ]   
+    selector: 'app-dataset-edit',
+    templateUrl: './dataset-edit.component.html',
+    styleUrls: ['./dataset-edit.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatTableModule
+    ]
 })
 export class DatasetEditComponent implements OnInit{
 

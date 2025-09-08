@@ -16,18 +16,17 @@ export interface DataName {
 @Component({
     selector: 'name-dlg',
     templateUrl: 'name-dlg.html',
-    standalone: true,
-    imports:[ 
-      CommonModule,
-      MatButtonModule,
-      MatIconModule,
-      FormsModule, 
-      ReactiveFormsModule,
-      MatFormFieldModule,
-      MatInputModule,    
-      MatDialogModule
-    ]    
-  })
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatIconModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatDialogModule
+    ]
+})
   export class DialogNameDialog { 
     constructor(
       public dialogRef: MatDialogRef<DialogNameDialog>,

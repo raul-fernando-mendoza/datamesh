@@ -59,23 +59,21 @@ export interface FlatNode {
  * @title Tree with checkboxes
  */
 @Component({
-  selector: 'app-dataset-tree',
-  templateUrl: './dataset-tree.component.html',
-  styleUrls: ['./dataset-tree.component.css'],
-  standalone: true,
-  imports:[ 
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,    
-    FormsModule, 
-    ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatTreeModule,
-    MatMenuModule,
-    CdkDropList, CdkDrag
-  ]   
-
+    selector: 'app-dataset-tree',
+    templateUrl: './dataset-tree.component.html',
+    styleUrls: ['./dataset-tree.component.css'],
+    imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatTreeModule,
+        MatMenuModule,
+        CdkDropList, CdkDrag
+    ]
 })
 export class DatasetTreeComponent implements OnInit, OnDestroy {
 
