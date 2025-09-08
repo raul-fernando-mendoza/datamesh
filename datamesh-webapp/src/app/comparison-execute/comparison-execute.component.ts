@@ -73,7 +73,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     }      
   }
   ngAfterViewInit(): void {
-
+/* to be updated
     this.tree.treeControl.expansionModel.changed.subscribe(change => {
       if ( (change as SelectionChange<TreeNode>).added ){
         change.added.map( node =>{
@@ -88,6 +88,7 @@ export class ComparisonExecuteComponent implements AfterViewInit{
     });
 
     this.update()
+    */
   }
   reload(){
     var oldData = this.dataSource.data
