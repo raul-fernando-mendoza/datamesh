@@ -54,3 +54,5 @@ certificates/__pycache__/
 .firebaserc
 .vscode
 .angular
+
+package-lock.json
