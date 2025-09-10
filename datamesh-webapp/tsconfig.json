@@ -24,6 +24,9 @@
       "dom"
     ]
   },
+  "ts-node": {
+    "esm": true
+  },  
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
