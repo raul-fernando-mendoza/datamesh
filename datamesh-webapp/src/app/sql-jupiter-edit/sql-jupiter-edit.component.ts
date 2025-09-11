@@ -1,11 +1,11 @@
-import { AfterViewInit, Component, Input ,OnDestroy, OnInit} from '@angular/core';
+import { AfterViewInit, Component, Input, OnDestroy, OnInit, DOCUMENT } from '@angular/core';
 import { Connection, SqlJupiter, SqlJupiterObj, SqlResultCollection, SqlResultObj } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { db } from '../../environments/environment'
 import { FormBuilder } from '@angular/forms';
 import { UrlService } from '../url.service';
 import { ngxCsv } from 'ngx-csv/ngx-csv';
-import { CommonModule, DATE_PIPE_DEFAULT_TIMEZONE, DOCUMENT } from '@angular/common';
+import { CommonModule, DATE_PIPE_DEFAULT_TIMEZONE } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import { DialogNameDialog } from '../name-dialog/name-dlg';
 import { MatDialog } from '@angular/material/dialog';

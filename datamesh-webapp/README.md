@@ -15,3 +15,4 @@ firebase firestore:indexes
 https://stackblitz.com/edit/ngx-editor-codemirror?file=src%2Fmain.ts,src%2Fdoc.ts
 
 
+ng update @angular/core@20 @angular/material@20 typescript@5.9.2 ngx-quill@28

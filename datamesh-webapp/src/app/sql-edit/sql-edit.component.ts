@@ -1,4 +1,4 @@
-import { AfterViewInit, EventEmitter, Inject, Input, Optional, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, EventEmitter, Inject, Input, Optional, Output, ViewChild, DOCUMENT } from '@angular/core';
 import { HostBinding } from '@angular/core';
 import { Self } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
@@ -6,7 +6,7 @@ import { ControlValueAccessor, NgControl, NG_VALUE_ACCESSOR } from '@angular/for
 import { MatFormFieldControl } from '@angular/material/form-field';
 import { Observable, Subject } from 'rxjs';
 
-import { basicSetup, minimalSetup } from 'codemirror';
+import {basicSetup} from "codemirror";
 import { javascript } from '@codemirror/lang-javascript';
 import { sql } from '@codemirror/lang-sql';
 import { Compartment, EditorState, Extension } from '@codemirror/state';
@@ -21,7 +21,7 @@ import {
   syntaxHighlighting,
   defaultHighlightStyle,
 } from '@codemirror/language';
-import { CommonModule, DOCUMENT } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
