@@ -4,7 +4,6 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { importProvidersFrom } from '@angular/core';
 import { AppComponent } from './app/app.component';
 import { MatDialogModule } from '@angular/material/dialog';
-import { QuillModule } from 'ngx-quill';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatCardModule } from '@angular/material/card';
@@ -37,7 +36,7 @@ import { withInterceptorsFromDi, provideHttpClient } from '@angular/common/http'
 
 bootstrapApplication(AppComponent, {
     providers: [
-        importProvidersFrom(BrowserModule, AppRoutingModule, LayoutModule, MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatSlideToggleModule, MatTableModule, MatPaginatorModule, MatSortModule, MatProgressSpinnerModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatMenuModule, MatSelectModule, MatTreeModule, MatDividerModule, MatCheckboxModule, MatTabsModule, MatProgressBarModule, MatCardModule, MatGridListModule, MatExpansionModule, QuillModule, MatDialogModule),
+        importProvidersFrom(BrowserModule, AppRoutingModule, LayoutModule, MatToolbarModule, MatButtonModule, MatSidenavModule, MatIconModule, MatListModule, MatSlideToggleModule, MatTableModule, MatPaginatorModule, MatSortModule, MatProgressSpinnerModule, FormsModule, ReactiveFormsModule, MatFormFieldModule, MatInputModule, MatMenuModule, MatSelectModule, MatTreeModule, MatDividerModule, MatCheckboxModule, MatTabsModule, MatProgressBarModule, MatCardModule, MatGridListModule, MatExpansionModule, MatDialogModule),
         provideHttpClient(withInterceptorsFromDi()),
         provideAnimations()
     ]

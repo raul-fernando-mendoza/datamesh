@@ -32,7 +32,6 @@
     "codemirror": "^6.0.1",
     "firebase": "^9.18.0",
     "ngx-csv": "^0.3.2",
-    "ngx-quill": "^28.0.1",
     "parchment": "^3.0.0",
     "quill": "^2.0.3",
     "rxjs": "~7.8.0",
