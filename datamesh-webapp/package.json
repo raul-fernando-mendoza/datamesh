@@ -29,6 +29,7 @@
     "@codemirror/view": "^6.22.1",
     "@material/dialog": "^15.0.0-canary.684e33d25.0",
     "and": "0.0.3",
+    "angular-split": "^20.0.0",
     "codemirror": "^6.0.1",
     "firebase": "^9.18.0",
     "ngx-csv": "^0.3.2",

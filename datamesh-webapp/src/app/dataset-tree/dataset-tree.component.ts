@@ -184,7 +184,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
       })
       this.unsubscribeMap.clear()  
 
-      this.unsubscribe = this.firebaseService.onsnapShotQuery({collectionPath:this.groupCollection,orderByField:"updateon",orderDirection:"desc"},{
+      this.unsubscribe = this.firebaseService.onsnapShotQuery(this.groupCollection,{
         "next":( (set:any)=>{
           console.log("reload parent")
           var datasets:TreeNode[] = []
@@ -224,7 +224,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
   }  
   loadDataForGroup(groupNode:TreeNode):Promise<void>{
     return new Promise<void>((resolve, reject) =>{
-      let unsubscribe = this.firebaseService.onsnapShotQuery({collectionPath:this.dataCollection,fieldPath:"groupId",opStr:"==", value: groupNode.item.id},{
+      let unsubscribe = this.firebaseService.onsnapShotQuery(this.dataCollection,{
         "next":( (set:any) =>{
           
           groupNode.children.length = 0

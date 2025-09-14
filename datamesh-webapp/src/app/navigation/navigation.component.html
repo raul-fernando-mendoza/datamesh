@@ -15,18 +15,15 @@
 
 
   </mat-toolbar>
-  <mat-drawer-container cdkDropListGroup >
-    <mat-drawer  #sidenav mode="side" opened >
+  <mat-drawer-container>
+    
+
+    <mat-drawer  #sidenav mode="over" close >
+
+      <button [routerLink]="['/connection/list']" mat-button><mat-icon>cloud</mat-icon>Connections</button>
 
       <mat-accordion>
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              Tables
-            </mat-panel-title>
-          </mat-expansion-panel-header>  
-          <app-tables-tree></app-tables-tree>        
-        </mat-expansion-panel>
+
         <mat-expansion-panel>
           <mat-expansion-panel-header>
             <mat-panel-title>

@@ -12,7 +12,6 @@ import {MatTreeModule} from '@angular/material/tree';
 import { DatasetTreeComponent } from 'app/dataset-tree/dataset-tree.component';
 import {MatMenuModule} from '@angular/material/menu';
 import { CommonModule } from '@angular/common';
-import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
 import {CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropListGroup} from '@angular/cdk/drag-drop'
 import {OverlayModule, Overlay, OverlayRef} from '@angular/cdk/overlay';
 import {TemplatePortal} from '@angular/cdk/portal';
@@ -32,7 +31,6 @@ import {TemplatePortal} from '@angular/cdk/portal';
         MatTreeModule,
         DatasetTreeComponent,
         MatMenuModule,
-        TablesTreeComponent,
         CdkDropList, CdkDrag, CdkDropListGroup,
         OverlayModule
     ]

@@ -1,25 +1,45 @@
 <div class="header">
+    <button mat-icon-button routerLink="/connection/list"><mat-icon>arrow_back</mat-icon></button> 
     <span>Connection Edit</span>
     <span class="spacer"></span>
-    <span *ngIf="connection">{{id}}</span>
-    <button *ngIf="connection" mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+    @if( id() ){
+      <span>{{id()}}</span>
+      <button mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+    }
 </div>
-<div [formGroup]="FG">
-        <mat-form-field appearance="fill">
-            <mat-label>Connection name</mat-label>
-            <input matInput placeholder="connection name" formControlName="label" required (change)="firebaseService.onChange($event, 'Connection' ,id, 'label')">
-            <mat-error *ngIf="FG.controls.label.invalid">{{getErrorMessage()}}</mat-error>
-        </mat-form-field>
+@if( !id() ){
+  <div [formGroup]="FG">
+    <mat-form-field appearance="fill">
+        <mat-label>Connection name</mat-label>
+        <input matInput placeholder="connection name" formControlName="label" required>
+        <mat-error>{{getErrorMessage(FG.controls.label)}}</mat-error>
+        
+    </mat-form-field>
 
-        <mat-form-field appearance="fill">
-          <mat-label>Credentials</mat-label>
-          <textarea  class="sql" matInput rows="10" formControlName="credentials" (change)="onCredentialsChange($event)"></textarea> 
-          <mat-error *ngIf="FG.controls.label.invalid">{{getErrorMessage()}}</mat-error>
+    <div>  
+      <button mat-raised-button routerLink="..">Cancelar</button>    
+      <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Continuar</button>
+    </div>       
+  </div>    
+}
+@else{
+  @if( connection ){
+    <div [formGroup]="FG">
+      <mat-form-field appearance="fill">
+          <mat-label>Connection name</mat-label>
+          <input matInput placeholder="connection name" formControlName="label" required (change)="firebaseService.onChange($event, 'Connection' ,id(), 'label')">
+          <mat-error>{{getErrorMessage(FG.controls.label)}}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Credentials</mat-label>
+        <textarea matInput rows="10" formControlName="credentials" (change)="onCredentialsChange($event)"></textarea> 
+        <mat-error>{{getErrorMessage(FG.controls.label)}}</mat-error>
       </mat-form-field>        
-    
-      <div *ngIf="!connection">  
-        <button mat-raised-button (click)="onCancel()">Cancelar</button>     
-        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onCreateNew()">Submit</button>
-      </div>       
-</div>  
+    </div>  
+  }
+  @else{
+    <mat-spinner></mat-spinner>
+  }
+}
 

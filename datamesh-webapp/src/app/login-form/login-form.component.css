@@ -1,0 +1,96 @@
+
+.rax-icon{
+  object-fit: cover; 
+  width: 60%; 
+  display:block;
+  margin-left: auto;
+  margin-right: auto; 
+  margin-bottom: 20px;   
+}
+
+.title{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  margin-top:20px;
+  margin-bottom: 20px; 
+}
+.google-image{
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top:20px;
+  margin-bottom: 20px;
+}
+
+re-captcha{
+  display:flex;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top:20px;
+  margin-bottom: 20px;
+}
+
+
+.full-width {
+  width: 100%;
+}
+.login-card {
+  max-width: 80%;
+  margin: 20px auto;
+}
+
+.mat-radio-button {
+  display: block;
+  margin: 5px 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.col {
+  flex: 1;
+  margin-right: 20px;
+}
+
+.col:last-child {
+  margin-right: 0;
+}
+
+re-captcha.is-invalid > div {
+  border: 1px solid #dc3545 !important;
+  border-radius: 0.2rem;
+}
+.spacer {
+  flex: 1 1 auto;
+}
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.container{
+  display:flex;
+}
+.container .span{
+  min-width: 500px;
+}
+
+.login-handset{
+  margin-left:auto;
+  margin-right:auto;
+  max-width: 80%;
+}
+.login-desktop{
+  margin-left:auto;
+  margin-right:auto;
+  max-width: 40%;
+}
+
+mat-divider{
+  margin-bottom: 2em;
+}

@@ -64,37 +64,37 @@ export class FirebaseService {
 
 
 
-  onsnapShotQuery({
-    collectionPath,
-    fieldPath,
-    opStr,
-    value,
-    orderByField,
-    orderDirection,
-    startAtPage,
-    pageSize
-  }:QryPar
-    ,observer: {
-      next?: (snapshot: any) => void;
+  onsnapShotQuery(
+    collectionPath:string,
+    observer: {
+      next?: (snapshot: QuerySnapshot) => void;
       error?: (error: FirestoreError) => void;
       complete?: () => void;
-    }
+    },    
+    fieldPath:string = "",
+    opStr:WhereFilterOp = "==",
+    value:string = "",
+    orderByField = "",
+    orderDirection:OrderByDirection = "asc",
+    startAtPage = 0,
+    pageSize = 0
+
       ):Unsubscribe{
 
     var q :Query<DocumentData> 
     var queryFilterConstraints: QueryNonFilterConstraint[]  = []
     
-    if( orderByField != null ){
+    if( orderByField  ){
       queryFilterConstraints.push(  orderBy(orderByField , orderDirection) )
     }
-    if( pageSize != null){
+    if( pageSize ){
       queryFilterConstraints.push(  limit(pageSize ) )
     }    
-    if( startAtPage != null && pageSize != null){
+    if( startAtPage  && pageSize != null){
       queryFilterConstraints.push( startAt( (startAtPage-1) * pageSize ) )
     }
 
-    if ( fieldPath != null && opStr!=null && value!=null){
+    if ( fieldPath && opStr && value){
       q = query(collection(db, collectionPath), where(fieldPath, opStr, value), ...queryFilterConstraints)
     }      
     else{
@@ -114,11 +114,12 @@ export class FirebaseService {
   }
 
   onChange(event:any, collectionPath:string, id:string|null, propertyName:string){
-    var value:any = event.target.value      
-    var values:any = {}
-    values[propertyName]=value 
-    values["updateon"] = new Date()
     if( id ){
+      var value:any = event.target.value      
+      var values:any = {}
+      values[propertyName]=value 
+      values["updateon"] = new Date()
+    
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
       },
@@ -128,23 +129,24 @@ export class FirebaseService {
     }
   }
   onCheckboxChange(event:any, collectionPath:string, id:string|null, propertyName:string){
-    var value:boolean = event.checked     
-    var values:any = {}
-    values[propertyName]=value   
-    values["updateon"] = new Date()
     if( id ){
+      var value:boolean = event.checked     
+      var values:any = {}
+      values[propertyName]=value   
+      values["updateon"] = new Date()
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
       })
     }
   }  
   onArrayCheckboxChange(event:any, collectionPath:string, id:string|null, array:any, propertyName:string, index:number, key:string){
-    var value:boolean = event.checked     
-    var values:any = {}
-    array[index][key] = value
-    values[propertyName]=array   
-    values["updateon"] = new Date()
     if( id ){
+      var value:boolean = event.checked     
+      var values:any = {}
+      array[index][key] = value
+      values[propertyName]=array   
+      values["updateon"] = new Date()
+    
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
       },
@@ -154,14 +156,15 @@ export class FirebaseService {
     }
   }   
   onSelectionChange(event:MatSelectChange, collectionPath:string, id:string|null, propertyName:string){
-    var value = event.source.ngControl.value  
-    var values:any = {}
-    if( value == undefined ){
-      values[propertyName]=null     
-    }
-    else values[propertyName]=value  
-    values["updateon"] = new Date() 
     if( id ){
+
+      var value = event.source.ngControl.value  
+      var values:any = {}
+      if( value == undefined ){
+        values[propertyName]=null     
+      }
+      else values[propertyName]=value  
+      values["updateon"] = new Date() 
       updateDoc( doc( db, collectionPath, id), values ).then( ()=>{
         console.log("update property")
       },

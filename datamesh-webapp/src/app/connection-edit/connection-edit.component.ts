@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit} from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Component, OnDestroy, OnInit, signal} from '@angular/core';
+import { FormBuilder, FormControl, Validators } from '@angular/forms';
 import * as uuid from 'uuid';
 import { StringUtilService } from '../string-util.service';
-import { ActivatedRoute, Route, Router } from '@angular/router';
+import { ActivatedRoute, Route, Router, RouterModule } from '@angular/router';
 import { FirebaseService } from '../firebase.service';
 import {MatSelectModule} from '@angular/material/select';
 import { UrlService } from '../url.service';
@@ -15,6 +15,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CommonModule } from '@angular/common';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { IfStmt } from '@angular/compiler';
+import { AuthService } from 'app/auth.service';
 
 
 @Component({
@@ -22,71 +25,86 @@ import { CommonModule } from '@angular/common';
     templateUrl: './connection-edit.component.html',
     styleUrls: ['./connection-edit.component.css'],
     imports: [
-        CommonModule,
+      CommonModule,
         MatIconModule,
         MatButtonModule,
-        MatIconModule,
-        MatButtonModule,
-        FormsModule,
         ReactiveFormsModule,
         MatFormFieldModule,
         MatInputModule,
-        MatSelectModule,
-        MatSelectModule
+        RouterModule,
+        MatProgressSpinnerModule
     ]
 })
-export class ConnectionEditComponent {
+export class ConnectionEditComponent implements OnInit, OnDestroy{
 
-  connection:Connection|null = null
-  id:string | null =null
-  groupId:string|null = null
+  connection:any 
+  id = signal("")
 
   FG = this.fb.group({
     label:['',[Validators.required]],
-    description:[''],
-    credentials:['',[Validators.required]],
+    credentials:[''],
   })
+
+  unsubscribe:any
 
 
   constructor( 
     private fb:FormBuilder 
-   ,private stringUtilService:StringUtilService
    ,private activatedRoute:ActivatedRoute
    ,private router:Router
    ,public firebaseService:FirebaseService
    ,private urlService:UrlService
-   ,public connectionsService:ConnectionsService,
+   ,public connectionsService:ConnectionsService
+   ,private authService:AuthService
+
    ){
-     this.activatedRoute.params.subscribe(res => {
-       if("id" in res){
-         this.id = res["id"]
-         this.update()
-       }  
-       else if("groupId" in res){
-         this.groupId = res["groupId"]
-       }
-     })      
+    this.activatedRoute.params.subscribe(res => {
+      if("id" in res){
+        console.log("change id" + res["id"])
+        this.id.set(res["id"])
+      }
+    })      
   }  
+  ngOnDestroy(): void {
+    if( this.unsubscribe ){
+      this.unsubscribe()
+    }
+  }
     
 
 
 
   ngOnInit(): void {
-    this.update()
+    if( this.id() ){
+      this.unsubscribe = this.firebaseService.onsnapShot(ConnectionCollection.collectionName, this.id(), {
+        next:(doc)=>{
+          this.update()
+        },
+        error:(reason)=>{
+          alert("Error loading connection" + reason)
+        },
+        complete:()=>{
+          console.log("do nothing")
+        }
+      })
+    }
   }
   update(){
-    if( this.id ){
-
+    console.log("running update")
+    if( this.id() ){
       var req = {
         "collectionId": ConnectionCollection.collectionName,
-        "id": this.id
+        "id": this.id()
       }
       this.urlService.post("getEncryptedDocument" , req).subscribe({
-        'next':(result)=>{
-          console.log( result )
-          this.connection = result as Connection
-          this.FG.controls.label.setValue( this.connection.label! )
-          this.FG.controls.credentials.setValue( this.connection.credentials! )
+        'next':(obj)=>{
+          
+          let connection = obj as Connection
+          
+          this.FG.controls.label.setValue( connection.label! )
+          this.FG.controls.credentials.setValue( connection.credentials! )
+          console.log("setting new connection:" + connection)
+          this.connection = signal( connection )
         },
         'error':(reason)=>{
           alert("Error:" + reason)
@@ -95,65 +113,51 @@ export class ConnectionEditComponent {
     }  
   }
 
-  getErrorMessage() {
-    if (this.FG.controls.label.hasError('required')) {
+  getErrorMessage(control:FormControl) {
+    if (control.hasError('required')) {
       return 'You must enter a value';
     }
 
-    return this.FG.controls.label.hasError('name') ? 'Not valid name' : '';
+    return control.hasError('name') ? 'Not valid name' : '';
   }
   onCreateNew(){
     var id= uuid.v4()
-    var thiz = this
-
-    var groupId:string = this.groupId!
 
     var connection:Connection = {
       id:id,
       label:this.FG.controls.label.value ? this.FG.controls.label.value : "",
       credentials:this.FG.controls.credentials.value ? this.FG.controls.credentials.value : "",
-      groupId:groupId
+      owner:this.authService.getUserUid()!
     }
     var req = {
       "collectionId": ConnectionCollection.collectionName,
       "id": id,
       "data": connection,
-      "unencriptedFields":["id", "label","groupId"]
+      "owner":this.authService.getUserUid(),
+      "unencriptedFields":["id", "label","groupId", "owner"]
     }
     this.urlService.post("setEncryptedDocument" , req).subscribe({
       'next':(data)=>{
-        thiz.id = id
-        thiz.connectionsService.getConnections(true).then( ()=>{
-          thiz.update()
-        })
+        this.router.navigate(["/connection/edit",id])
       },
       'error':(reason)=>{
-        alert("Error:" + reason)
+        alert("Error creando nuevo:" + reason)
       }
     })
   }  
-  onCancel(){
-    this.router.navigate(["/"])
-  }
   onDelete(){
-    if( this.id && this.connection){
-      if( confirm("are you sure to delete:" + this.connection.label) ){
-        this.firebaseService.deleteDoc(ConnectionCollection.collectionName, this.id ).then( ()=>{
-          this.connectionsService.getConnections(true).then( ()=>{
-            this.router.navigate(["/"])
-          })           
-        },
-        reason =>{
-          alert("Error removing connection:" + reason)
-        })
-      }
+    let id:string = this.id()
+    if( confirm("are you sure to delete:" + this.connection().label) ){
+      this.firebaseService.deleteDoc(ConnectionCollection.collectionName, id ).then( ()=>{
+        this.router.navigate(["/connection/list"])
+      },
+      reason =>{
+        alert("Error removing connection:" + reason)
+      })
     }
   }  
   onCredentialsChange($event:any){
-    var id= this.id
-    var thiz = this
-
-    var groupId:string = this.groupId!
+    var id= this.id()
 
     var connection:Connection = {
       credentials:this.FG.controls.credentials.value ? this.FG.controls.credentials.value : "",
@@ -162,14 +166,12 @@ export class ConnectionEditComponent {
       "collectionId": ConnectionCollection.collectionName,
       "id": id,
       "data": connection,
+      "owner":this.connection().owner,
       "unencriptedFields":["id", "label","groupId"]
     }
     this.urlService.post("setEncryptedDocument" , req).subscribe({
       'next':(data)=>{
-        thiz.id = id
-        thiz.connectionsService.getConnections(true).then( ()=>{
-          this.router.navigate(["/"])
-        })    
+          console.log("modified")
       },
       'error':(reason)=>{
         alert("Error:" + reason)

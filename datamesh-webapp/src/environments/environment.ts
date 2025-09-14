@@ -2,7 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
-
+import { Auth, getAuth } from "firebase/auth";
 
 export const environment = {
   firebaseConfig: {
@@ -25,4 +25,4 @@ const app = initializeApp(environment.firebaseConfig);
 // Initialize Cloud Firestore and get a reference to the service
 export const db = getFirestore(app);
 export const storage = getStorage(app);
-  
+export const auth:Auth = getAuth(app)  

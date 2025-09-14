@@ -20,7 +20,6 @@ interface Transaction {
         MatCardModule,
         MatIconModule,
         MatButtonModule,
-        CurrencyPipe,
         MatTableModule
     ]
 })
