@@ -20,7 +20,17 @@
 
     <mat-drawer  #sidenav mode="over" close >
 
-      <button [routerLink]="['/connection/list']" mat-button><mat-icon>cloud</mat-icon>Connections</button>
+      <mat-list>
+        <mat-list-item>
+          <button [routerLink]="['/connection/list']" mat-button><mat-icon>cloud</mat-icon>Connections</button>
+        </mat-list-item>
+        <mat-list-item>
+          <button [routerLink]="['/model/list']" mat-button><mat-icon>design_services</mat-icon>Models</button>
+        </mat-list-item>
+      </mat-list>
+
+      
+      
 
       <mat-accordion>
 

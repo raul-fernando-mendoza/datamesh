@@ -1,11 +1,11 @@
 import { Component,  OnDestroy, OnInit, signal } from '@angular/core';
 import { MatButton, MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon-module.d';
+import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
+import { AuthService } from 'app/auth.service';
 import { Model, ModelCollection } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
-import { UserLoginService } from 'app/user-login.service';
 
 @Component({
   selector: 'app-model-list',
@@ -24,13 +24,13 @@ export class ModelList  implements OnInit, OnDestroy{
   
 
   constructor(private firestore:FirebaseService,
-    private userLoginService: UserLoginService ){
+    private authService: AuthService ){
     
     
   }
   ngOnInit(): void {
-    let userid = this.userLoginService.getUserUid();
-    this.unsubscribe = this.firestore.onsnapShotQuery( this.collection, [],{
+    let userid = this.authService.getUserUid();
+    this.unsubscribe = this.firestore.onsnapShotQuery( this.collection, [{fieldPath:"owner",opStr:"==",value:userid!}],{
       next: (snapshot) =>{
         var models:Array<Model> = []
         snapshot.docs.map( doc =>{
@@ -46,8 +46,7 @@ export class ModelList  implements OnInit, OnDestroy{
       complete: () =>{
         console.log("do nothing")
       } 
-    },
-    "owner","==",userid!)
+    })
   }
   ngOnDestroy(): void {
     if( this.unsubscribe ){

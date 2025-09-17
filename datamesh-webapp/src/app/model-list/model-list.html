@@ -1,0 +1,13 @@
+@if( !models ){
+    loading...
+}
+@else{
+    Models<button mat-icon-button [routerLink]="['/connection/new']"><mat-icon>add</mat-icon></button> 
+    <mat-list>
+    @for( m of models(); track m.id){
+        <mat-list-item>
+            <button [routerLink]="['/connection/edit',m.id]" mat-button>{{m.id}} - {{m.label}}</button>
+        </mat-list-item>
+    }
+</mat-list>
+}

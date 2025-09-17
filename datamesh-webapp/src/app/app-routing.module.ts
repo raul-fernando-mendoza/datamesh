@@ -10,6 +10,7 @@ import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
 import { LoginFormComponent } from './login-form/login-form.component';
 import { ModelEditComponent } from './model-edit/model-edit.component';
+import { ModelList } from './model-list/model-list';
 import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
 import { TablesTreeComponent } from './tables-tree/tables-tree.component';
 import { WelcomeComponent } from './welcome/welcome.component';
@@ -65,6 +66,9 @@ const routes: Routes = [
   { path: 'connection/edit/:id', component:ConnectionEditComponent },
   { path: 'connection/new', component:ConnectionEditComponent },
   
+  { path: 'model/list', component:ModelList, canActivate: [loginGuard('/loginForm/connection-list')] },
+
+
   { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent }, 
   
   { path: 'SqlJupiterDoc/create/:groupId', component:SqlJupiterDocComponent },

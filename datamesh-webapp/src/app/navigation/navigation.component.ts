@@ -15,6 +15,7 @@ import { CommonModule } from '@angular/common';
 import {CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropListGroup} from '@angular/cdk/drag-drop'
 import {OverlayModule, Overlay, OverlayRef} from '@angular/cdk/overlay';
 import {TemplatePortal} from '@angular/cdk/portal';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
     selector: 'app-navigation',
@@ -32,7 +33,8 @@ import {TemplatePortal} from '@angular/cdk/portal';
         DatasetTreeComponent,
         MatMenuModule,
         CdkDropList, CdkDrag, CdkDropListGroup,
-        OverlayModule
+        OverlayModule,
+        MatListModule
     ]
 })
 export class NavigationComponent {
