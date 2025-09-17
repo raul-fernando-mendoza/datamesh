@@ -34,7 +34,11 @@ export class ConnectionList implements OnInit, OnDestroy {
     
   }
   ngOnInit(): void {
-    this.unsubscribe = this.firestore.onsnapShotQuery( this.collection, {
+    this.unsubscribe = this.firestore.onsnapShotQuery( this.collection, 
+      [
+        {fieldPath:"owner",opStr:"==",value:this.authService.getUserUid()!}
+      ],
+      {
       next: (snapshot) =>{
         var connections:Array<Connection> = []
         snapshot.docs.map( doc =>{
@@ -50,8 +54,8 @@ export class ConnectionList implements OnInit, OnDestroy {
       complete: () =>{
         console.log("do nothing")
       } 
-    },
-    "owner","==",this.authService.getUserUid()!)
+    }
+    )
   }
   ngOnDestroy(): void {
     if( this.unsubscribe ){

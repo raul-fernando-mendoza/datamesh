@@ -298,7 +298,7 @@ export class ComparisonEditComponent implements OnInit, AfterViewInit, OnInit, O
       this.router.navigate(["Comparison-edit",this.comparison.id])    
     },
     reason =>{
-      alert("ERROR:" + reason )
+      alert("ERROR onCreateNew:" + reason )
     })
     
   }   

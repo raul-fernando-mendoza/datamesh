@@ -78,6 +78,9 @@ export class ConnectionEditComponent implements OnInit, OnDestroy{
     if( this.id() ){
       this.unsubscribe = this.firebaseService.onsnapShot(ConnectionCollection.collectionName, this.id(), {
         next:(doc)=>{
+          let c = doc.data() as Connection
+          console.log("receive:" + c.label)
+          this.FG.controls.label.setValue( c.label! )
           this.update()
         },
         error:(reason)=>{
@@ -101,13 +104,13 @@ export class ConnectionEditComponent implements OnInit, OnDestroy{
           
           let connection = obj as Connection
           
-          this.FG.controls.label.setValue( connection.label! )
+          
           this.FG.controls.credentials.setValue( connection.credentials! )
           console.log("setting new connection:" + connection)
           this.connection = signal( connection )
         },
-        'error':(reason)=>{
-          alert("Error:" + reason)
+        'error':(error)=>{
+          alert("Error connection update:" + error.message)
         }
       })
     }  
@@ -174,7 +177,7 @@ export class ConnectionEditComponent implements OnInit, OnDestroy{
           console.log("modified")
       },
       'error':(reason)=>{
-        alert("Error:" + reason)
+        alert("Error onCredentialsChange:" + reason)
       }
     })
   }

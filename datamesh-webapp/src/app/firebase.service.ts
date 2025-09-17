@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { db } from '../environments/environment'
-import { Timestamp as FirebaseTimeStamp, collection, doc, limit, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp, orderBy, QueryConstraint, Query, QueryNonFilterConstraint, startAt, OrderByDirection} from "firebase/firestore"; 
+import { Timestamp as FirebaseTimeStamp, collection, doc, limit, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp, orderBy, QueryConstraint, Query, QueryNonFilterConstraint, startAt, OrderByDirection, QueryFieldFilterConstraint} from "firebase/firestore"; 
 import { Directionality } from '@angular/cdk/bidi';
 import { MatSelectChange } from '@angular/material/select';
 
@@ -43,7 +43,7 @@ export class FirebaseService {
         resolve( docs )
       },
       reason =>{
-        alert("ERROR:" + reason)
+        alert("ERROR getDocs:" + reason)
       })
     })
      
@@ -66,14 +66,17 @@ export class FirebaseService {
 
   onsnapShotQuery(
     collectionPath:string,
+    filterList:[{
+      fieldPath:string ,
+      opStr:WhereFilterOp,
+      value:string
+    }]|[],
     observer: {
       next?: (snapshot: QuerySnapshot) => void;
       error?: (error: FirestoreError) => void;
       complete?: () => void;
     },    
-    fieldPath:string = "",
-    opStr:WhereFilterOp = "==",
-    value:string = "",
+    
     orderByField = "",
     orderDirection:OrderByDirection = "asc",
     startAtPage = 0,
@@ -82,6 +85,16 @@ export class FirebaseService {
       ):Unsubscribe{
 
     var q :Query<DocumentData> 
+
+      
+ 
+    let constraints:Array<QueryFieldFilterConstraint> = []
+    
+    filterList.map( f =>{
+      let q = where(f.fieldPath, f.opStr, f.value)
+      constraints.push( q )
+    })  
+    
     var queryFilterConstraints: QueryNonFilterConstraint[]  = []
     
     if( orderByField  ){
@@ -90,16 +103,17 @@ export class FirebaseService {
     if( pageSize ){
       queryFilterConstraints.push(  limit(pageSize ) )
     }    
+
+
+      
+    if(queryFilterConstraints){
+      q = query(collection(db, collectionPath),...queryFilterConstraints); 
+    }
     if( startAtPage  && pageSize != null){
       queryFilterConstraints.push( startAt( (startAtPage-1) * pageSize ) )
     }
 
-    if ( fieldPath && opStr && value){
-      q = query(collection(db, collectionPath), where(fieldPath, opStr, value), ...queryFilterConstraints)
-    }      
-    else{
-      q = query(collection(db, collectionPath),...queryFilterConstraints); 
-    }
+    q = query(collection(db, collectionPath), ...constraints, ...queryFilterConstraints)
 
     return onSnapshot(q, observer )
      
@@ -124,7 +138,7 @@ export class FirebaseService {
         console.log("update property")
       },
       error => {
-        alert("Error: updating document:" + collectionPath + "/" + id)
+        alert("Error updating document:" + collectionPath + "/" + id)
       })
     }
   }
@@ -169,7 +183,7 @@ export class FirebaseService {
         console.log("update property")
       },
       reason=>{
-        alert("ERROR:" + reason)
+        alert("ERROR on selection change:" + reason)
       })
     }
   }  

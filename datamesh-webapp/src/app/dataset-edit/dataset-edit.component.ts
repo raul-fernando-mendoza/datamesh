@@ -117,7 +117,7 @@ export class DatasetEditComponent implements OnInit{
           this.datasource = this.dataset.ports
         },
         reason=>{
-          alert("ERROR:" + reason)        
+          alert("ERROR update:" + reason)        
       })
     }
   }

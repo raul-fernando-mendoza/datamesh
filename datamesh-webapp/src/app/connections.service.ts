@@ -31,7 +31,7 @@ export class ConnectionsService {
             if( reason.error && reason.error.error ){
               errorMessage = reason.error.error
             }
-            alert("ERROR:" + errorMessage)
+            alert("ERROR getConnections:" + errorMessage)
             reject( reason )
         })
       }
