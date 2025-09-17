@@ -4,7 +4,7 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { JoinCondition, JoinData, JoinNode, ModelCollection, ModelObj, JoinNodeExecution, SnowFlakeTable } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
@@ -25,6 +25,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { AuthService } from 'app/auth.service';
 
 @Component({
     selector: 'app-model-edit',
@@ -42,7 +43,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
         CdkDropList, CdkDrag,
         MatProgressBarModule,
         MatExpansionModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        RouterModule
     ],
     providers: [JoinDataSource],
     templateUrl: './model-edit.component.html',
@@ -51,7 +53,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 export class ModelEditComponent {
   model:ModelObj | null = null
   id:string | null = null
-  groupId:string|null = null
+  groupId:string|null = 'default'
 
   unsubscribe:Unsubscribe | null = null
 
@@ -101,6 +103,7 @@ export class ModelEditComponent {
    ,private urlService:UrlService
    ,private dao:DaoService
    ,private dialog: MatDialog
+   ,private authService:AuthService
    ){
      this.activatedRoute.params.subscribe(res => {
        if("id" in res){
@@ -172,12 +175,15 @@ export class ModelEditComponent {
       groupId: this.groupId!,
       description: '',
       credentials: '',
-      owner: '',
+      owner: this.authService.getUserUid()!,
       data: []
     }
     return this.firebaseService.setDoc( ModelCollection.collectionName, model.id, model).then( () =>{
       this.id = model.id
       this.router.navigate([ModelCollection.collectionName,"edit",this.id])
+    },
+    error=>{
+      alert("Error: model new" + error)
     })
   }
   save(){

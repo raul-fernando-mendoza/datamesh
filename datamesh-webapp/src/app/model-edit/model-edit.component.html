@@ -1,10 +1,11 @@
 <div class="header">
-    <span>Model Edit</span>
-    @if( model ){
-        <span class="spacer"></span>
-        <span >{{id}}</span>
-        <button  mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
-    }
+  <button mat-icon-button routerLink="/model/list"><mat-icon>arrow_back</mat-icon></button> 
+  <span>Model Edit</span>
+  @if( model ){
+      <span class="spacer"></span>
+      <span >{{id}}</span>
+      <button  mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+  }
 </div>
 
 <div [formGroup]="FG">
