@@ -59,7 +59,9 @@ export function loginGuard2(
 
 const routes: Routes = [ 
 
+
   { path:"loginForm/:intendedPath",pathMatch:'full',component:LoginFormComponent},
+  { path:"loginForm",pathMatch:'full',component:LoginFormComponent},
 
   { path: 'connection/list', component:ConnectionList, canActivate: [loginGuard('/loginForm/connection-list')] },
 

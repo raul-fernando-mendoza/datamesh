@@ -56,3 +56,4 @@ certificates/__pycache__/
 .angular
 
 package-lock.json
+~*

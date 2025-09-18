@@ -1,4 +1,4 @@
-import { Component, Query, QueryList, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, Query, QueryList, signal, TemplateRef, ViewChild, ViewContainerRef } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatSidenavModule} from '@angular/material/sidenav';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatTreeModule} from '@angular/material/tree';
 import { DatasetTreeComponent } from 'app/dataset-tree/dataset-tree.component';
@@ -16,6 +16,9 @@ import {CdkDropList, CdkDrag, CdkDragDrop, moveItemInArray, transferArrayItem, C
 import {OverlayModule, Overlay, OverlayRef} from '@angular/cdk/overlay';
 import {TemplatePortal} from '@angular/cdk/portal';
 import { MatListModule } from '@angular/material/list';
+import { AuthService } from 'app/auth.service';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from 'environments/environment';
 
 @Component({
     selector: 'app-navigation',
@@ -32,15 +35,24 @@ import { MatListModule } from '@angular/material/list';
         MatTreeModule,
         DatasetTreeComponent,
         MatMenuModule,
-        CdkDropList, CdkDrag, CdkDropListGroup,
         OverlayModule,
         MatListModule
     ]
 })
-export class NavigationComponent {
+export class NavigationComponent implements OnInit, OnDestroy {
   @ViewChild(TemplateRef) _dialogTemplate!: TemplateRef<any> ;
   private _portal!: TemplatePortal ;
   private _overlayRef!: OverlayRef ;
+
+  isLoggedIn = signal(false)
+  authUnsubscribe = onAuthStateChanged( auth, (user) => {
+    if( auth.currentUser ){
+      this.isLoggedIn.set(true);
+    }
+    else{
+      this.isLoggedIn.set(false);
+    }
+  })        
 
   isOpen = false;
 
@@ -67,7 +79,13 @@ export class NavigationComponent {
 
   constructor(private breakpointObserver: BreakpointObserver, 
     private _overlay: Overlay, 
-    private _viewContainerRef: ViewContainerRef) {   
+    private _viewContainerRef: ViewContainerRef,
+    private authService:AuthService,
+    private router:Router
+    ) {   
+  }
+  ngOnInit(): void {
+
   }
 
   drop(event: CdkDragDrop<string[]>) {
@@ -101,10 +119,17 @@ export class NavigationComponent {
 
   ngOnDestroy() {
     this._overlayRef.dispose();
+    this.authUnsubscribe()
   }
 
   openDialog() {
     this._overlayRef.attach(this._portal);
   }  
+
+  onLogOut(){
+    this.authService.logout().then( ()=>{
+      this.router.navigate(["/"])
+    })
+  }
 
 }

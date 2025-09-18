@@ -6,10 +6,18 @@
     </button>  
     <button [routerLink]="['/']" mat-icon-button><mat-icon>home</mat-icon></button>
     <span class="spacer"></span>
+    @if( isLoggedIn() ){
+      <button (click)="onLogOut()" mat-button><mat-icon>logout</mat-icon>logout</button>        
+    }
+    @else{
+      <button [routerLink]="['/loginForm']" mat-button><mat-icon>login</mat-icon>login</button>        
+    }
+
+
     <button *ngIf="!(isHandset$ | async)">
       <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
       <mat-menu #menu="matMenu">
-        <a href="jupiter-sql" mat-menu-item>Item 1</a>
+        <a href='/loginForm' mat-menu-item>Item 1</a>
       </mat-menu>        
     </button>
 
@@ -20,87 +28,97 @@
 
     <mat-drawer  #sidenav mode="over" close >
 
-      <mat-list>
-        <mat-list-item>
-          <button [routerLink]="['/connection/list']" mat-button><mat-icon>cloud</mat-icon>Connections</button>
-        </mat-list-item>
-        <mat-list-item>
-          <button [routerLink]="['/model/list']" mat-button><mat-icon>design_services</mat-icon>Models</button>
-        </mat-list-item>
-      </mat-list>
+      @if(isLoggedIn()){
 
+        <mat-list>
+          <mat-list-item>
+            <button [routerLink]="['/connection/list']" mat-button><mat-icon>cloud</mat-icon>Connections</button>
+          </mat-list-item>
+          <mat-list-item>
+            <button [routerLink]="['/model/list']" mat-button><mat-icon>design_services</mat-icon>Models</button>
+          </mat-list-item>
+        </mat-list>
+        <mat-accordion>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Connection
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-dataset-tree title="sql-jupiter" groupCollection="ConnectionGroup" dataCollection="Connection">
+            </app-dataset-tree>
+          </mat-expansion-panel>      
+          <!--
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Sql-jupiter
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-dataset-tree title="sql-jupiter" groupCollection="SqlJupiterGroup" dataCollection="SqlJupiterDoc">
+            </app-dataset-tree>
+          </mat-expansion-panel>
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Dataset
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-dataset-tree title="Dataset" groupCollection="DatasetGroup" dataCollection="Dataset" [isItemDraggable]="true">
+            </app-dataset-tree>
+          </mat-expansion-panel>        
+          <mat-expansion-panel >
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Comparisons
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-dataset-tree title="Comparisons" groupCollection="ComparisonGroup" dataCollection="Comparison">
+            </app-dataset-tree>
+          </mat-expansion-panel>
+  
+
+          <mat-expansion-panel >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Models
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <app-dataset-tree title="Models" groupCollection="ModelGroup" dataCollection="Model">
+          </app-dataset-tree>
+          </mat-expansion-panel>                
+
+          <mat-expansion-panel >
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                Self aware panel
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <p>I'm visible because I am open</p>
+          </mat-expansion-panel>
+          -->  
+        </mat-accordion> 
+        }     
+      </mat-drawer>
+      <mat-drawer-content>
+        <!--
+        <div
+        cdkDropList
+        #doneList="cdkDropList"
+        [cdkDropListData]="done"
+        [cdkDropListConnectedTo]="[todoList]"
+        class="example-list"
+        (cdkDropListDropped)="drop($event)"
+        >
+          @for (item of done; track item) {
+            <div class="example-box" cdkDrag>{{item}}</div>
+          }
+        </div>
+        <div class="big" cdkDropList>
+          <div class="example-box" cdkDrag [cdkDragData]="123">321</div>
+        </div>
+        -->
       
-      
-
-      <mat-accordion>
-
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              Sql-jupiter
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <app-dataset-tree title="sql-jupiter" groupCollection="SqlJupiterGroup" dataCollection="SqlJupiterDoc">
-          </app-dataset-tree>
-        </mat-expansion-panel>
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              Dataset
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <app-dataset-tree title="Dataset" groupCollection="DatasetGroup" dataCollection="Dataset" [isItemDraggable]="true">
-          </app-dataset-tree>
-        </mat-expansion-panel>        
-        <mat-expansion-panel >
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              Comparisons
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <app-dataset-tree title="Comparisons" groupCollection="ComparisonGroup" dataCollection="Comparison">
-          </app-dataset-tree>
-        </mat-expansion-panel>
- 
-
-        <mat-expansion-panel >
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            Models
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <app-dataset-tree title="Models" groupCollection="ModelGroup" dataCollection="Model">
-        </app-dataset-tree>
-        </mat-expansion-panel>                
-
-        <mat-expansion-panel >
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              Self aware panel
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <p>I'm visible because I am open</p>
-        </mat-expansion-panel>
-      </mat-accordion>      
-    </mat-drawer>
-    <mat-drawer-content>
-      <!--
-      <div
-      cdkDropList
-      #doneList="cdkDropList"
-      [cdkDropListData]="done"
-      [cdkDropListConnectedTo]="[todoList]"
-      class="example-list"
-      (cdkDropListDropped)="drop($event)"
-      >
-        @for (item of done; track item) {
-          <div class="example-box" cdkDrag>{{item}}</div>
-        }
-      </div>
-      <div class="big" cdkDropList>
-        <div class="example-box" cdkDrag [cdkDragData]="123">321</div>
-      </div>
-      -->
       <router-outlet></router-outlet>
     </mat-drawer-content>
   </mat-drawer-container>    

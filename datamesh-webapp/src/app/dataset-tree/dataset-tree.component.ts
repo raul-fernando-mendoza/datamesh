@@ -18,6 +18,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import { CommonModule } from '@angular/common';
 import { MatMenuModule } from '@angular/material/menu';
 import {DragDropModule} from '@angular/cdk/drag-drop';
+import { AuthService } from 'app/auth.service';
 
 export interface Data{
   id:string
@@ -110,6 +111,7 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
     private router:Router,
     private route: ActivatedRoute,
     private fb:FormBuilder,
+    private authService:AuthService
   ) {
     this.treeFlattener = new MatTreeFlattener(
       this.transformer,
@@ -183,8 +185,9 @@ export class DatasetTreeComponent implements OnInit, OnDestroy {
         unsubscribe()
       })
       this.unsubscribeMap.clear()  
+      let userid:string =this.authService.getUserUid()!
 
-      this.unsubscribe = this.firebaseService.onsnapShotQuery(this.groupCollection,[],{
+      this.unsubscribe = this.firebaseService.onsnapShotQuery(this.groupCollection,[{fieldPath:"owner",opStr:"==","value":userid}],{
         "next":( (set:any)=>{
           console.log("reload parent")
           var datasets:TreeNode[] = []

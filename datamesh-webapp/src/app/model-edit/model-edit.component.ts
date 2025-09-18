@@ -40,7 +40,7 @@ import { AuthService } from 'app/auth.service';
         MatSelectModule,
         MatTreeModule,
         MatMenuModule,
-        CdkDropList, CdkDrag,
+        CdkDropList,
         MatProgressBarModule,
         MatExpansionModule,
         MatProgressSpinnerModule,
