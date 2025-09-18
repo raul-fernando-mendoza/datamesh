@@ -26,6 +26,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import {MatExpansionModule} from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { AuthService } from 'app/auth.service';
+import { AngularSplitModule, SplitAreaComponent, SplitComponent } from 'angular-split';
 
 @Component({
     selector: 'app-model-edit',
@@ -44,7 +45,10 @@ import { AuthService } from 'app/auth.service';
         MatProgressBarModule,
         MatExpansionModule,
         MatProgressSpinnerModule,
-        RouterModule
+        RouterModule,
+        AngularSplitModule,
+        SplitComponent,
+        SplitAreaComponent
     ],
     providers: [JoinDataSource],
     templateUrl: './model-edit.component.html',
