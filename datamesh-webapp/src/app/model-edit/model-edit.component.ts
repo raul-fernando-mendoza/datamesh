@@ -27,6 +27,7 @@ import {MatExpansionModule} from '@angular/material/expansion';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { AuthService } from 'app/auth.service';
 import { AngularSplitModule, SplitAreaComponent, SplitComponent } from 'angular-split';
+import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
 
 @Component({
     selector: 'app-model-edit',
@@ -48,7 +49,8 @@ import { AngularSplitModule, SplitAreaComponent, SplitComponent } from 'angular-
         RouterModule,
         AngularSplitModule,
         SplitComponent,
-        SplitAreaComponent
+        SplitAreaComponent,
+        TablesTreeComponent,
     ],
     providers: [JoinDataSource],
     templateUrl: './model-edit.component.html',
