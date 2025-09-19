@@ -18,7 +18,7 @@ import { MatTreeModule} from '@angular/material/tree';
 import { NestedTreeControl} from '@angular/cdk/tree';
 import { JoinDataSource, TreeNode } from './join-datasource';
 import { MatMenuModule } from '@angular/material/menu';
-import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { DaoService } from 'app/dao.service';
 import { JoinDialog } from 'app/join-dialog/join-dlg';
 import { MatDialog } from '@angular/material/dialog';
@@ -42,7 +42,7 @@ import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
         MatSelectModule,
         MatTreeModule,
         MatMenuModule,
-        CdkDropList,
+        CdkDropListGroup, CdkDropList, CdkDrag,
         MatProgressBarModule,
         MatExpansionModule,
         MatProgressSpinnerModule,

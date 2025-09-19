@@ -1,5 +1,5 @@
 <div class="flexcontainer">
-  <as-split direction="horizontal">
+  <as-split direction="horizontal" cdkDropListGroup>
     <as-split-area [size]="30">
       <app-tables-tree></app-tables-tree>
     </as-split-area>
@@ -34,36 +34,36 @@
                           This padding value depends on the mat-icon-button width. -->
                         <mat-tree-node *matTreeNodeDef="let node">
                           <div
-                          [id]="node.item.id"
-                          cdkDropList
-                          #doneList="cdkDropList"
-                          class="example-list"
-                          (cdkDropListDropped)="onDrop($event)"
-                          [cdkDropListEnterPredicate]="acceptPredicate"
+                            [id]="node.item.id"
+                            cdkDropList
+                            #doneList="cdkDropList"
+                            class="example-list"
+                            (cdkDropListDropped)="onDrop($event)"
+                            [cdkDropListEnterPredicate]="acceptPredicate"
                           >
-                              <!--leaf:-->
-                              <table class="tree">
-                                <tr>
-                                  <td>
-                                    <span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> 
-                                  </td>
-                                  <td>
-                                    <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
-                                    <span class="name">{{node.item.name}}</span>
-                                    <table class="tree">
-                                      <tr>
-                                        <td>
-                                          <ul>
-                                            @for( c of node.item.filters;track c;let i = $index){
-                                              <li> {{c.leftValue}} {{c.comparator}} {{c.rightValue}} </li>
-                                            }
-                                            </ul>
-                                        </td>
-                                      </tr>
-                                    </table>
-                                  </td>
-                               </tr>
-                              </table>
+                            <!--leaf:-->
+                            <table class="tree">
+                              <tr>
+                                <td>
+                                  <span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> 
+                                </td>
+                                <td>
+                                  <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
+                                  <span class="name">{{node.item.name}}</span>
+                                  <table class="tree">
+                                    <tr>
+                                      <td>
+                                        <ul>
+                                          @for( c of node.item.filters;track c;let i = $index){
+                                            <li> {{c.leftValue}} {{c.comparator}} {{c.rightValue}} </li>
+                                          }
+                                          </ul>
+                                      </td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                            </table>
                           </div>
             
                           @if( !isAdding ){
