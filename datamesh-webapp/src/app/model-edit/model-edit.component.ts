@@ -42,7 +42,7 @@ import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
         MatSelectModule,
         MatTreeModule,
         MatMenuModule,
-        CdkDropListGroup, CdkDropList, CdkDrag,
+        CdkDropListGroup, CdkDropList,
         MatProgressBarModule,
         MatExpansionModule,
         MatProgressSpinnerModule,

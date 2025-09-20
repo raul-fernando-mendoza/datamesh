@@ -197,7 +197,9 @@
                     <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
                 }
             </div>
-            <div>
+
+          </as-split-area>
+          <as-split-area [size]="60">
               @if( isLoading ){
                 <mat-spinner></mat-spinner>
               }
@@ -223,11 +225,6 @@
                     </div>
                   }
               }
-            </div>    
-
-          </as-split-area>
-          <as-split-area [size]="60">
-            <p>BUTTON</p>
           </as-split-area>
         </as-split>
       </div>
