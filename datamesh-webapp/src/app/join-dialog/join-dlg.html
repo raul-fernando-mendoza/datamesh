@@ -164,7 +164,45 @@
         }
       </table>
       <button mat-icon-button (click)="onAddFilter()"><mat-icon>add</mat-icon></button>
-
+    </mat-tab>
+    <mat-tab label="post-transformations">
+      <mat-list>
+      @for( p of data.rightNode.postTransformations; track p.id){
+        
+        @if( isEditinPostTransformation() == p.id ){
+          <div [formGroup]="postTransformationForm">
+            <mat-form-field>
+              <mat-label>transformation label</mat-label>
+              <input  matInput formControlName="label">
+            </mat-form-field> 
+                  
+            <button mat-icon-button (click)="onSubmitPostTransformation(p.id)"><mat-icon>done</mat-icon></button>
+            <button mat-icon-button (click)="onCancelTransformation()"><mat-icon>cancel</mat-icon></button>
+          </div>
+        }
+        @else{        
+          <mat-list-item>
+            
+            <button mat-button (click)="onAddPostTransformation(p.id)">{{ p.label }}</button>
+            <button mat-icon-button (click)="onDeleteTransformation(p.id)"><mat-icon>delete</mat-icon></button>
+          </mat-list-item>
+        }
+        
+      }
+      </mat-list>
+      @if( isEditinPostTransformation() == "new" ){
+        <div [formGroup]="postTransformationForm">
+          <mat-form-field>
+            <mat-label>transformation label</mat-label>
+            <input  matInput formControlName="label">
+          </mat-form-field> 
+        </div>        
+        <button mat-icon-button (click)="onSubmitPostTransformation('new')"><mat-icon>done</mat-icon></button>
+        <button mat-icon-button (click)="onCancelTransformation()"><mat-icon>cancel</mat-icon></button>
+      }
+      @else{
+        <button mat-icon-button (click)="onAddPostTransformation('new')"><mat-icon>add</mat-icon></button>
+      }
     </mat-tab>
   </mat-tab-group>  
 }

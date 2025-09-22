@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinCondition, JoinData, JoinNode, ModelCollection, ModelObj, JoinNodeExecution, SnowFlakeTable } from 'app/datatypes/datatypes.module';
+import { JoinCondition, JoinData, JoinNode, ModelCollection, ModelObj, JoinNodeExecution, SnowFlakeTable, Transformation } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -296,7 +296,8 @@ export class ModelEditComponent {
         columns: [],
         selectedChildColumns: {},
         expressions: [],
-        sampleData:null
+        sampleData:null,
+        postTransformations:[]
       }
       
       if( !parentNode ){
@@ -333,7 +334,8 @@ export class ModelEditComponent {
       columns: [],
       selectedChildColumns: {},
       expressions: [],
-      sampleData:null
+      sampleData:null,
+      postTransformations:[]
     }    
 
     if( parentNode ){

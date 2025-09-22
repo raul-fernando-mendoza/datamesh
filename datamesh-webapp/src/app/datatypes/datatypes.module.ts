@@ -210,7 +210,11 @@ export interface SelectedColumn {
   isSelected:boolean
 }
 
-
+export interface Transformation{
+  id:string
+  type:string
+  label:string
+}
 
 export interface JoinNode extends InfoNode{
   id:string
@@ -225,7 +229,10 @@ export interface JoinNode extends InfoNode{
   selectedChildColumns:{ [key: string]: SelectedColumn[] } 
   expressions:string[]
   sampleData:SqlResultInFirebase | null
+  postTransformations:Transformation[]
 }
+
+
 
 export interface JoinData {
   leftNode:JoinNode

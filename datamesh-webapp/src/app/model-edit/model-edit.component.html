@@ -61,6 +61,13 @@
                                       </td>
                                     </tr>
                                   </table>
+                                  <table>
+                                    @for( p of node.item.postTransformations; track p.id){
+                                    <tr>
+                                      <td>{{p.label}}</td>
+                                    </tr>
+                                    }
+                                  </table>
                                 </td>
                               </tr>
                             </table>

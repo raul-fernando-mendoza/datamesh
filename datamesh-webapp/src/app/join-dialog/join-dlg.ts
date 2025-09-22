@@ -1,13 +1,13 @@
-import {  Component,  ElementRef,  Inject, OnInit, SimpleChange, ViewChild } from '@angular/core';
+import {  Component,  ElementRef,  Inject, OnInit, signal, SimpleChange, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { FormArray, FormBuilder, FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase } from 'app/datatypes/datatypes.module';
+import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase, Transformation } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -19,6 +19,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { UrlService } from 'app/url.service';
 import { DataGridComponent } from 'app/data-grid/data-grid.component';
+import { uuidv4 } from '@firebase/util';
+import { MatListModule } from '@angular/material/list';
 
 
 @Component({
@@ -43,7 +45,8 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
         MatProgressSpinnerModule,
         MatAutocompleteModule,
         MatExpansionModule,
-        DataGridComponent
+        DataGridComponent,
+        MatListModule
     ]
 })
   export class JoinDialog implements OnInit{ 
@@ -58,7 +61,6 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
       ComparatorOption.ne
     ]
  
-
     selectedColumnsFA = this.fb.array([
       {
         columnName: [''],
@@ -118,6 +120,13 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
     ]
 
     result:SqlResultInFirebase | null= null
+
+    
+    isEditinPostTransformation = signal("")
+
+    postTransformationForm = this.fb.group({
+      label: ['']
+    })
 
     constructor(
       public dialogRef: MatDialogRef<JoinDialog>,
@@ -410,5 +419,48 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
 
     }
 
+    onAddPostTransformation(id:string){
+      if( 'new' == id ){
+        this.postTransformationForm.controls.label.setValue("")      
+      }
+      else{
+        let p = this.data.rightNode.postTransformations.find( e => e.id == id)
+        if( p ){
+          this.postTransformationForm.controls.label.setValue(p.label)
+        }
+      }
+      this.isEditinPostTransformation.set(id)
+    }
+    onCancelTransformation(){
+      this.isEditinPostTransformation.set("")
+    }    
+    onSubmitPostTransformation(id:string){
+      if( !this.data.rightNode.postTransformations ){
+        this.data.rightNode.postTransformations = []
+      }
+      let label = this.postTransformationForm.controls.label.value
+      if( this.isEditinPostTransformation() == "new" && label ){
+        let transformation: Transformation = {
+          id:uuidv4(),
+          type:"description",
+          label:label
+        }
+        this.data.rightNode.postTransformations.push(transformation)
+        this.isEditinPostTransformation.set("")
+      }
+      else{
+        let p = this.data.rightNode.postTransformations.find( e => e.id == id)
+        if( p ){
+          let newLabel = this.postTransformationForm.controls.label.value 
+          p.label = newLabel ? newLabel : ""
+        }
+      } 
+      this.isEditinPostTransformation.set("")     
+    }
+
+    onDeleteTransformation(id:string){
+      let idx = this.data.rightNode.postTransformations.findIndex( e => e.id == id)
+      this.data.rightNode.postTransformations.splice(idx,1)
+    }
   }
   
