@@ -65,12 +65,13 @@ const routes: Routes = [
 
   { path: 'connection/list', component:ConnectionList, canActivate: [loginGuard('/loginForm/connection-list')] },
 
-  { path: 'connection/edit/:id', component:ConnectionEditComponent },
   { path: 'connection/new', component:ConnectionEditComponent },
+  { path: 'connection/edit/:id', component:ConnectionEditComponent },
+  
   
   { path: 'model/list', component:ModelList, canActivate: [loginGuard('/loginForm/connection-list')] },
-  { path: 'model/edit/:id', component:ModelEditComponent },
-  { path: 'model/new', component:ModelEditComponent },
+  { path: 'model/:id', pathMatch:'full', component:ModelEditComponent },
+  
 
   { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent }, 
   

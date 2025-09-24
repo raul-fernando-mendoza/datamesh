@@ -6,7 +6,7 @@
     <mat-list>
     @for( m of models(); track m.id){
         <mat-list-item>
-            <button [routerLink]="['/model/edit',m.id]" mat-button>{{m.id}} - {{m.label}}</button>
+            <button [routerLink]="['/model',m.id]" mat-button>{{m.id}} - {{m.label}}</button>
         </mat-list-item>
     }
 </mat-list>

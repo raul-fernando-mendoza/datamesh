@@ -1,3 +1,14 @@
+@if( id == 'new'){
+  <div [formGroup]="FG">
+    <mat-form-field class="name" appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="label" (change)="firebaseService.onChange($event,'Model',id,'label')">
+    </mat-form-field>  
+    <button mat-icon-button (click)="onCreate()"><mat-icon>done</mat-icon></button>
+    <button mat-icon-button routerLink="/model/list"><mat-icon>cancel</mat-icon></button>
+  </div>      
+}
+@else{
 <div class="flexcontainer">
   <as-split direction="horizontal" cdkDropListGroup>
     <as-split-area [size]="30">
@@ -238,5 +249,5 @@
     </as-split-area>
   </as-split>
 </div>
-
+}
 

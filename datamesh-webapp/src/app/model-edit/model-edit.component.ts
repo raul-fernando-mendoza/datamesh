@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -56,7 +56,7 @@ import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
     templateUrl: './model-edit.component.html',
     styleUrl: './model-edit.component.css'
 })
-export class ModelEditComponent {
+export class ModelEditComponent implements OnInit, AfterViewInit{
   model:ModelObj | null = null
   id:string | null = null
   groupId:string|null = 'default'
@@ -113,14 +113,24 @@ export class ModelEditComponent {
    ){
      this.activatedRoute.params.subscribe(res => {
        if("id" in res){
+        if( this.id && this.id != res["id"]){
          this.id = res["id"]
+         if( this.unsubscribe )
+          this.unsubscribe()
          this.update()
+        }
+        else{
+          this.id = res["id"]
+        }
        }  
        else if("groupId" in res){
          this.groupId = res["groupId"]
        }
      }) 
   }  
+  ngAfterViewInit(): void {
+    console.log("after view init")
+  }
     
   flatModelMap = new Map<string,JoinNode>()
 
@@ -136,14 +146,12 @@ export class ModelEditComponent {
 
   update(){
     
-    if( this.id ){
+    if( this.id && this.id != 'new' ){
       this.unsubscribe = onSnapshot( doc( db,ModelCollection.collectionName, this.id ),
           (docRef) =>{
                 if( docRef.exists()){
                   this.model=docRef.data() as ModelObj
                   this.FG.controls.label.setValue( this.model.label!)
-                }
-                if( this.model ){
                   this.flatModelMap.clear()
                   this.loadFlatModel(this.model.data)
                   this.dataSource.setData(this.model.data) 
@@ -166,14 +174,14 @@ export class ModelEditComponent {
     }
   }  
   onSubmit(){
-    if( !this.model ){
-      this.create()
+    if( this.id == 'new' ){
+      this.onCreate()
     }
     else{
       this.save()
     }
   }
-  create():Promise<void>{
+  onCreate():Promise<void>{
     //create new
     let model:ModelObj = {
       id: uuid.v4(),
