@@ -4,6 +4,7 @@ import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
 import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
 import { Timestamp } from 'firebase/firestore';
 import { ModelEditComponent } from 'app/model-edit/model-edit.component';
+import { MatTabBodyPortal } from '@angular/material/tabs';
 
 
 
@@ -198,9 +199,9 @@ export class ConnectionCollection{
   static collectionName = "Connection"
 }
 
-export interface InfoNode{
-  id:string
-  name:string
+export class InfoNode{
+  id!:string
+  name!:string
   children?:InfoNode[]
 }
 
@@ -210,57 +211,66 @@ export interface SelectedColumn {
   isSelected:boolean
 }
 
-export interface Transformation{
+export interface TransformationContainer{
   id:string
   type:string
   label:string
+  transformation:JoinCondition
 }
 
-export interface JoinNode extends InfoNode{
-  id:string
-  name: string
-  connectionId:string
-  tableName:string
-  columns: SnowFlakeColumn[]
-  children?: JoinNode[]
-  joinCriteria:JoinCondition[]
-  filters:JoinCondition[]  
-  selectedColumns:SelectedColumn[]
-  selectedChildColumns:{ [key: string]: SelectedColumn[] } 
-  expressions:string[]
-  sampleData:SqlResultInFirebase | null
-  postTransformations:Transformation[]
+export interface JoinNode{
+  id?:string
+  name?: string
+  connectionId?:string
+  tableName?:string
+  columns?: SnowFlakeColumn[]
+  joinCriteria?:JoinCondition[]
+  sampleData?:SqlResultInFirebase | null
+  transformations?:TransformationContainer[]
 }
 
+
+export class JoinNodeObj implements JoinNode{
+  public static className = "JoinNode"
+  id!:string
+  name!: string
+  connectionId!:string
+  tableName!:string
+  columns: SnowFlakeColumn[] = []
+  joinCriteria:JoinCondition[] = []
+  sampleData:SqlResultInFirebase | null = null
+  transformations:TransformationContainer[] = []
+}
 
 
 export interface JoinData {
-  leftNode:JoinNode
-  rightNode:JoinNode
+  leftNode:JoinNodeObj
+  rightNode:JoinNodeObj
 }
 
 export interface Model{
   id?:string
   label?:string
   description?:string
-  credentials?:string
-  owner?:string,
-  group?:string,
-  groupId?:string,
-  data?:JoinNode[]
-  joinNodeExecution?:JoinNodeExecution
+  owner?:string
+  updateon?:string
+  createon?:string
 }
-export class ModelObj{
+
+function pad2(n:number) { return n < 10 ? '0' + n : n }
+
+export function getCurrentTimeStamp(){
+  let date = new Date()
+  return date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2( date.getDate()) + pad2( date.getHours() ) + pad2( date.getMinutes() ) + pad2( date.getSeconds() ) 
+}
+export class ModelObj implements Model{
+  static collectionName = "Model"
   id!:string
   label!:string
   description:string = ""
-  credentials:string = ""
   owner!:string
-  groupId!:string
-  data:JoinNode[] = []
-}
-export class ModelCollection{
-  static collectionName = "Model"
+  updateon:string = getCurrentTimeStamp()
+  createon:string = getCurrentTimeStamp()
 }
 
 export enum TreeOption {

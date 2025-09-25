@@ -1,4 +1,4 @@
-
+<!--
 <div class="bar">
   <b>Join Properties</b>
   <span class="spacer"></span>
@@ -97,10 +97,12 @@
         @for( childFA of childColumnsSelectedFA; track childFA; let idx = $index){
         <mat-expansion-panel>
           <mat-expansion-panel-header>
+            
             <mat-panel-title> @if(data.rightNode.children){ {{data.rightNode.children[idx].name}} }</mat-panel-title>
             <mat-panel-description>
               @if(data.rightNode.children){ {{data.rightNode.children[idx].tableName}} } 
             </mat-panel-description>
+            
           </mat-expansion-panel-header>
           <table>
             @for( ch of childFA; track ch ; let k = $index){
@@ -207,5 +209,5 @@
   </mat-tab-group>  
 }
 
-
+-->
  

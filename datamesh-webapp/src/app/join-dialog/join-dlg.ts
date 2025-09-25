@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase, Transformation } from 'app/datatypes/datatypes.module';
+import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -173,16 +173,17 @@ import { MatListModule } from '@angular/material/list';
             this.joinsFA.push( newJoinFG)
           })     
         }
-
+/*
         this.data.rightNode.children?.forEach( child =>{
           let prefix = child.name
           child.selectedColumns.forEach( selectedColumn =>{
             console.log("")  
           })
         })
-
+*/
         //load the childs selected columns
         this.childColumnsSelectedFA.length = 0
+        /*
         //iterate over each children       
         for( let i =0; this.data.rightNode.children && i < this.data.rightNode.children.length; i++){
           // first initialize the FA
@@ -229,7 +230,7 @@ import { MatListModule } from '@angular/material/list';
           this.filtersFA.push( newFilterFG)
         })  
 
-
+*/
         
       }
       ,error=>{
@@ -307,6 +308,7 @@ import { MatListModule } from '@angular/material/list';
       })  
     }
     refreshColumnsAndSampleData(){
+      /*
       let rightPromise = this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( 
         right =>{
           console.debug( right )
@@ -315,6 +317,7 @@ import { MatListModule } from '@angular/material/list';
           right.forEach( c => this.data.rightNode.columns.push(c)) 
 
           //now recreate the columns form
+          
           
           this.data.rightNode.columns.forEach( c =>{
             let selected = false
@@ -335,6 +338,7 @@ import { MatListModule } from '@angular/material/list';
         error=>{
           alert("error retriving columns")
         })
+        
 
       let tableName = this.data.rightNode.tableName
       let sampleData = this.getSampleData(tableName).then( result =>{
@@ -352,10 +356,11 @@ import { MatListModule } from '@angular/material/list';
         }
         this.data.rightNode.sampleData = sqlResult
       })
-      
+      */
     }
 
-    onSubmit(){
+    onSubmit(){}
+/*    
 
       this.data.rightNode.joinCriteria.length = 0
       this.joinsFA.controls.forEach( joinFG =>{
@@ -462,5 +467,7 @@ import { MatListModule } from '@angular/material/list';
       let idx = this.data.rightNode.postTransformations.findIndex( e => e.id == id)
       this.data.rightNode.postTransformations.splice(idx,1)
     }
+    */
   }
+  
   

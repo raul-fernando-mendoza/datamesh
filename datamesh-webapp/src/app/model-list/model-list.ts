@@ -4,7 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 import { AuthService } from 'app/auth.service';
-import { Model, ModelCollection } from 'app/datatypes/datatypes.module';
+import { Model, ModelObj } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 
 @Component({
@@ -18,7 +18,7 @@ import { FirebaseService } from 'app/firebase.service';
   styleUrl: './model-list.css'
 })
 export class ModelList  implements OnInit, OnDestroy{
-  collection = ModelCollection.collectionName
+  collection = ModelObj.collectionName
   models = signal<Array<Model>|null>(null)
   unsubscribe:any
   

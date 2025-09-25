@@ -2,7 +2,7 @@
   <div [formGroup]="FG">
     <mat-form-field class="name" appearance="fill">
         <mat-label>Name</mat-label>
-        <input matInput formControlName="label" (change)="firebaseService.onChange($event,'Model',id,'label')">
+        <input matInput formControlName="label" >
     </mat-form-field>  
     <button mat-icon-button (click)="onCreate()"><mat-icon>done</mat-icon></button>
     <button mat-icon-button routerLink="/model/list"><mat-icon>cancel</mat-icon></button>
@@ -22,7 +22,7 @@
             <div class="header">
               <button mat-icon-button routerLink="/model/list"><mat-icon>arrow_back</mat-icon></button> 
               <span>Model Edit</span>
-              @if( model ){
+              @if( model() ){
                   <span class="spacer"></span>
                   <span >{{id}}</span>
                   <button  mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
@@ -39,7 +39,7 @@
                     @if( isLoading ){
                       <mat-progress-bar mode="determinate" value="40"></mat-progress-bar>
                     }
-                    <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="example-tree">
+                    <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" class="example-tree">
                         <!-- This is the tree node template for leaf nodes -->
                         <!-- There is inline padding applied to this node using styles.
                           This padding value depends on the mat-icon-button width. -->
@@ -52,14 +52,17 @@
                             (cdkDropListDropped)="onDrop($event)"
                             [cdkDropListEnterPredicate]="acceptPredicate"
                           >
-                            <!--leaf:-->
                             <table class="tree">
                               <tr>
+                                <td><mat-icon>table</mat-icon></td>
                                 <td>
-                                  <span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> 
+                                  {{node.item.id}}
+                                  <!--
+                                  <span class="criteria">{{getJoinCriteriaText(node.item) }}</span> 
+                                  -->
                                 </td>
                                 <td>
-                                  <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
+                                  <!--<span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>-->
                                   <span class="name">{{node.item.name}}</span>
                                   <table class="tree">
                                     <tr>
@@ -81,7 +84,7 @@
                                   </table>
                                 </td>
                               </tr>
-                            </table>
+                            </table> 
                           </div>
             
                           @if( !isAdding ){
@@ -89,14 +92,13 @@
                               <mat-icon>more_vert</mat-icon>
                             </button>
                             <mat-menu #menu="matMenu">
-                              <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
                               <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
                               <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                               <button mat-icon-button (click)="onPlay(node.item)"><mat-icon>play_arrow</mat-icon></button>
                             </mat-menu>
                           }              
                         </mat-tree-node>
-            
+            <!--
                         <mat-tree-node *matTreeNodeDef="let node; when: isNew">
                           <div [formGroup]="newJoinFG">
                             <mat-form-field class="name" appearance="fill">
@@ -114,7 +116,8 @@
                             </mat-form-field>
                             <button mat-icon-button (click)="EditSubmit(node.item)"><mat-icon>check</mat-icon></button>
                           </div>                      
-                        </mat-tree-node>              
+                        </mat-tree-node>  
+                        -->            
                         <!-- This is the tree node template for expandable nodes -->
                         <mat-nested-tree-node
                             *matTreeNodeDef="let node; when: hasChild"
@@ -123,7 +126,7 @@
                             <button mat-icon-button matTreeNodeToggle
                                     [attr.aria-label]="'Toggle ' + node.name">
                               <mat-icon class="mat-icon-rtl-mirror">
-                                {{treeControl.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                                {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                               </mat-icon>
                             </button>
                             <div
@@ -138,7 +141,8 @@
                                 <table class="tree">
                                   <tr>
                                     <td>
-                                      <span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> 
+                                      {{node.item.id}}
+                                      <!--<span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> -->
                                     </td>
                                     <td>
                                       <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
@@ -164,30 +168,20 @@
                                 <mat-icon>more_vert</mat-icon>
                               </button>
                               <mat-menu #menu="matMenu">
-                                <button mat-icon-button (click)="Edit(node.item)"><mat-icon>edit</mat-icon></button>
                                 <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
                                 <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                                 <button mat-icon-button (click)="onPlay(node.item)"><mat-icon>play_arrow</mat-icon></button>
                               </mat-menu>
                             }                    
                           </div>  
-                          <mat-tree-node *matTreeNodeDef="let node; when: isEditing">
-                            <div [formGroup]="newJoinFG">
-                              <mat-form-field class="name" appearance="fill">
-                                  <mat-label>Name</mat-label>
-                                  <input matInput formControlName="table">
-                              </mat-form-field>
-                              <button mat-icon-button (click)="EditSubmit(node.item)"><mat-icon>check</mat-icon></button>
-                            </div>                      
-                          </mat-tree-node> 
             
                           <!-- There is inline padding applied to this div using styles.
                               This padding value depends on the mat-icon-button width.  -->
-                          <div [class.example-tree-invisible]="!treeControl.isExpanded(node)"
+                          <div [class.example-tree-invisible]="!tree.isExpanded(node)"
                               role="group">
                             <ng-container matTreeNodeOutlet></ng-container>
                           </div>
-                          @if( treeControl.isExpanded(node) && !isAdding ){
+                          @if( tree.isExpanded(node) && !isAdding ){
                             <div role="group">
             <!--                <button mat-icon-button   (click)="Add(node.item)"><mat-icon>create_new_folder</mat-icon></button> -->
                             </div>
@@ -203,21 +197,21 @@
                         (cdkDropListDropped)="onDrop($event)"
                         [cdkDropListEnterPredicate]="acceptPredicate"
                         > 
-                        <!-->           
+                        <!--          
                           <button mat-icon-button (click)="Add(null)"><mat-icon>create_new_folder</mat-icon></button>
                         -->
                         <mat-icon>create_new_folder</mat-icon>
                         </div>  
                       }          
                 
-                @if(!model){
+                @if(!model()){
                     <button mat-raised-button (click)="onCancel()">Cancelar</button>     
                     <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
                 }
             </div>
 
           </as-split-area>
-          <as-split-area [size]="60">
+          <as-split-area [size]="40">
               @if( isLoading ){
                 <mat-spinner></mat-spinner>
               }

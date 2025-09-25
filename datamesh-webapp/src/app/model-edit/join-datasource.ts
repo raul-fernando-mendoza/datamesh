@@ -24,18 +24,9 @@ export class JoinDataSource extends MatTreeNestedDataSource<TreeNode>{
     }
     
 
-    constructor(private _treeControl:NestedTreeControl<TreeNode>) {
+    constructor() {
       super()
-      this.observable.next([]);
-      
-      this._treeControl.expansionModel.changed.subscribe(change => {
-        if (
-          (change as SelectionChange<TreeNode>).added ||
-          (change as SelectionChange<TreeNode>).removed
-        ) {
-          //console.log(change as SelectionChange<TreeNode>);
-        }
-      });        
+      this.observable.next([]);       
     }
 
     override connect(collectionViewer: CollectionViewer): Observable<TreeNode[]>{
@@ -62,8 +53,6 @@ export class JoinDataSource extends MatTreeNestedDataSource<TreeNode>{
           tree[tree.length -1].isLast = true
         }
         this.observable.next(tree);
-        this._treeControl.dataNodes = tree
-        this._treeControl.expandAll()
     }
     addNodeChildren(parentNode:TreeNode, children: InfoNode[] | undefined){
       if(children){
