@@ -27,6 +27,9 @@ import { MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { AuthService } from 'app/auth.service';
 import { AngularSplitModule, SplitAreaComponent, SplitComponent } from 'angular-split';
 import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import {MatTabsModule} from '@angular/material/tabs';
+import { MatListModule } from '@angular/material/list';
 
 @Component({
     selector: 'app-model-edit',
@@ -50,6 +53,9 @@ import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
         SplitComponent,
         SplitAreaComponent,
         TablesTreeComponent,
+        MatSidenavModule,
+        MatTabsModule,
+        MatListModule
     ],
     providers: [JoinDataSource],
     templateUrl: './model-edit.component.html',
@@ -162,6 +168,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
                   this.loadRawModel().then( () =>{
                     this.dataSource.setData(this.infoNodes) 
                     this.tree.expandAll()
+                    this.selectedJoinNode.set(null)
                   },
                   reason=>{
                     alert("Error reloading JoinNodes:" + reason.error)
@@ -417,7 +424,7 @@ getCollectionPath( id:string ){
     }
   }
 
-  getSampleData(tableName:string, connectionId:string):Promise<SqlResultInFirebase>{
+  getSampleData(tableName:string, connectionId:string):Promise<any>{
     return new Promise(( resolve, reject ) => {
       
       let sql = "select * from " + tableName + " limit 10"
@@ -521,7 +528,7 @@ getCollectionPath( id:string ){
             
             let sqlResult:SqlResultInFirebase = {
               metadata:result.metadata,
-              resultSet:[]
+              resultSet:Array<{ [key: string]: any }>()
             }
             for(let i=0; i<result.resultSet.length; i++){ 
               let row = result.resultSet[i]             
@@ -567,7 +574,7 @@ getCollectionPath( id:string ){
 
         let sqlResult:SqlResultInFirebase = {
           metadata:result.metadata,
-          resultSet:[]
+          resultSet:Array<{ [key: string]: any }>()
         }
         for(let i=0; i<result.resultSet.length; i++){ 
           let row = result.resultSet[i]             
@@ -614,26 +621,32 @@ getCollectionPath( id:string ){
     return str
   }
 
-  onEditJoinNode(parentNode:JoinNodeObj, node:JoinNodeObj){
+  onEditJoinNode(parentNode:InfoNode, node:InfoNode){
     console.log(node)
+    if( parentNode && node ){
+      let collectionPath:string = this.getCollectionPath(node.id)!
+      let leftNode = this.flatJoinNodeMap.get(parentNode.id)!
+      let rightNode = this.flatJoinNodeMap.get(node.id)
 
-    let data: JoinData = {
-      leftNode: parentNode,
-      rightNode: node
-    }
-    const dialogRef = this.dialog.open(JoinDialog, {
-      height: '95%',
-      width: '95%',
-      data: data
-    });
-  
-    dialogRef.afterClosed().subscribe(data => {
-      console.log('The dialog was closed');
-      if( data != undefined ){
-        console.debug( data )
-        this.save()
+      let data: JoinData = {
+        leftNode: leftNode,
+        rightNode: rightNode!,
+        rightCollectionPath:collectionPath
       }
-    })
+      const dialogRef = this.dialog.open(JoinDialog, {
+        height: '95%',
+        width: '95%',
+        data: data
+      });
+    
+      dialogRef.afterClosed().subscribe(data => {
+        console.log('The dialog was closed');
+        if( data != undefined ){
+          console.debug( data )
+          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+        }
+      })
+    }
   }
   /*
   onPlay(node:JoinNode | null){

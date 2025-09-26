@@ -57,10 +57,10 @@
                               <tr>
                                 <td><mat-icon>table</mat-icon></td>
                                 <td>
-                                  {{node.item.id}}
-                                  <!--
+                                  <div>{{node.item.id}}</div>
+                                  
                                   <span class="criteria">{{getJoinCriteriaText(node.item) }}</span> 
-                                  -->
+                                
                                 </td>
                                 <td>
                                   <!--<span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>-->
@@ -142,8 +142,8 @@
                                 <table class="tree">
                                   <tr>
                                     <td>
-                                      {{node.item.id}}
-                                      <!--<span class="criteria">{{getJoinCriteriaText(node.item.joinCriteria) }}</span> -->
+                                      <div>{{node.item.id}}</div>
+                                      <span class="criteria">{{getJoinCriteriaText(node.item) }}</span> 
                                     </td>
                                     <td>
                                       <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
@@ -209,31 +209,58 @@
                     <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
                 }
             </div>
-
           </as-split-area>
           <as-split-area [size]="40">
-            {{ selectedJoinNodePath() }}
-            @if( result() ){
-              result().records: {{ result() }}
-              <div class="view">
-                  <div class="wrapper">
-                      <table *ngIf="result().metadata && result().resultSet">
-                          <thead>
-                              <tr>
-                                  <td class="sticky-col first-col"> idx </td>
-                                  <th *ngFor="let h of result().metadata">{{ h["name"] + "-" +  h["type_code"] }}</th>
-                              </tr>
-                          </thead>
-                          <tbody>                
-                              <tr *ngFor="let row of result().resultSet; index as i">
-                                  <td class="sticky-col first-col">{{ i + 1 }}</td>
-                                  <td *ngFor="let column of result().metadata; index as c" [ngClass]="{'number': isNumber(column['type_code']) }">{{ format(column['type_code'], row["k_" + c]) }} </td> 
-                              </tr>
-                          </tbody>                
-                      </table>  
+            @if( selectedJoinNode() ){
+            <mat-drawer-container class="example-container">
+              <mat-drawer mode="side" opened position="end">
+                <mat-tab-group>
+                  <mat-tab label="transformations"> transformations </mat-tab>
+                  <mat-tab label="Joins"> 
+                    List of joins:
+                    
+                    <mat-list>
+
+                    @for( j of selectedJoinNode()!.joinCriteria; track j.id){
+                      <mat-list-item>
+                        {{ j.leftValue }} {{ j.comparator }} {{ j.rightValue }}
+                      </mat-list-item>
+                    }
+                    @empty{
+                      you need to add a join!
+                    }
+                    </mat-list>
+
+                  </mat-tab>
+                </mat-tab-group>
+              </mat-drawer>
+              <mat-drawer-content>
+                {{ selectedJoinNodePath() }}
+                @if( result() ){
+                  result().records: {{ result() }}
+                  <div class="view">
+                      <div class="wrapper">
+                          <table *ngIf="result().metadata && result().resultSet">
+                              <thead>
+                                  <tr>
+                                      <td class="sticky-col first-col"> idx </td>
+                                      <th *ngFor="let h of result().metadata">{{ h["name"] + "-" +  h["type_code"] }}</th>
+                                  </tr>
+                              </thead>
+                              <tbody>                
+                                  <tr *ngFor="let row of result().resultSet; index as i">
+                                      <td class="sticky-col first-col">{{ i + 1 }}</td>
+                                      <td *ngFor="let column of result().metadata; index as c" [ngClass]="{'number': isNumber(column['type_code']) }">{{ format(column['type_code'], row["k_" + c]) }} </td> 
+                                  </tr>
+                              </tbody>                
+                          </table>  
+                      </div>
                   </div>
-              </div>
-            }
+                }
+    
+              </mat-drawer-content>
+            </mat-drawer-container>
+            }            
           </as-split-area>
         </as-split>
       </div>

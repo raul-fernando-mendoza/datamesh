@@ -5,11 +5,6 @@
   <button [disabled]="data.rightNode.name.length < 1 || data.rightNode.name.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial (click)="onSubmit()">Ok</button>
 </div>
 
-@if( isLoading ){
-  <mat-spinner></mat-spinner>
-}
-@else{
-
   <table>
     <tr>
       @if( data.leftNode ){
@@ -45,7 +40,7 @@
                 (focus)="filterLeft(i)">
                 <mat-autocomplete #autoleft="matAutocomplete">
                   @for (option of filteredLeftOptions; track option) {
-                    <mat-option [value]="option.columnName">{{option.columnName}}</mat-option>
+                    <mat-option [value]="option.name">{{option.name}}</mat-option>
                   }
                 </mat-autocomplete>              
               </mat-form-field>
@@ -71,7 +66,7 @@
                 (focus)="filterJoinExp(i)">
                 <mat-autocomplete #auto="matAutocomplete">
                   @for (option of filteredOptions; track option) {
-                    <mat-option [value]="option.columnName">{{option.columnName}}</mat-option>
+                    <mat-option [value]="option.name">{{option.name}}</mat-option>
                   }
                 </mat-autocomplete>              
               </mat-form-field>
@@ -85,6 +80,7 @@
       <button mat-button (click)="onAddJoin()">add</button>
     </mat-tab>
     }
+    <!--
     <mat-tab label="Columns">
 
       <h4>{{data.rightNode.name}} - {{data.rightNode.tableName}} <button mat-button-button (click)="refreshColumnsAndSampleData()"><mat-icon>refresh</mat-icon></button> </h4>
@@ -93,6 +89,7 @@
         <app-data-grid [result]="data.rightNode.sampleData" [columnsFA]="columnsFA"></app-data-grid>
       }
       <mat-accordion>
+        
         @for( childFA of childColumnsSelectedFA; track childFA; let idx = $index){
         <mat-expansion-panel>
           <mat-expansion-panel-header>
@@ -120,8 +117,11 @@
           </table> 
         </mat-expansion-panel>
         }
+        
       </mat-accordion>     
     </mat-tab>
+    -->
+    <!--
     <mat-tab label="filters">
       <table class="filter-table">
         @for( f of filtersFA.controls; track f ; let i = $index){
@@ -166,6 +166,8 @@
       </table>
       <button mat-icon-button (click)="onAddFilter()"><mat-icon>add</mat-icon></button>
     </mat-tab>
+    -->
+    <!--
     <mat-tab label="post-transformations">
       <mat-list>
       @for( p of data.rightNode.postTransformations; track p.id){
@@ -205,8 +207,9 @@
         <button mat-icon-button (click)="onAddPostTransformation('new')"><mat-icon>add</mat-icon></button>
       }
     </mat-tab>
+    -->
   </mat-tab-group>  
-}
+
 
 
  

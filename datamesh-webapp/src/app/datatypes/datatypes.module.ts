@@ -216,7 +216,7 @@ export interface TransformationContainer{
   type:string
   label:string
   transformation:JoinCondition|null
-  sampleData?:any | null
+  sampleData?:SqlResultInFirebase
 }
 
 export interface JoinNode{
@@ -224,7 +224,6 @@ export interface JoinNode{
   name?: string
   connectionId?:string
   tableName?:string
-  columns?: SnowFlakeColumn[]
   joinCriteria?:JoinCondition[]
   transformations?:TransformationContainer[]
 }
@@ -246,6 +245,7 @@ export class JoinNodeObj implements JoinNode{
 export interface JoinData {
   leftNode:JoinNodeObj
   rightNode:JoinNodeObj
+  rightCollectionPath:string
 }
 
 export interface Model{
@@ -305,6 +305,7 @@ export enum ComparatorOption {
 }
 
 export interface JoinCondition{
+  id:string
   leftValue:string
   comparator:ComparatorOption
   rightValue:string
@@ -316,8 +317,18 @@ export class JoinNodeExecution{
   parameters?:any
 }
 
+export interface SnowFlakeNativeColumn{
+  display_size:number | null
+  internal_size:number
+  is_nullable:boolean
+  name:string
+  precision:number
+  scale:number
+  type_code:number 
+}
+
 export interface SqlResultInFirebase{
-  resultSet:Array<any>
+  resultSet:Array<{ [key: string]: any }>
   metadata:[
     { 
       display_size:number | null

@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase } from 'app/datatypes/datatypes.module';
+import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase, SnowFlakeNativeColumn } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -19,9 +19,9 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { UrlService } from 'app/url.service';
 import { DataGridComponent } from 'app/data-grid/data-grid.component';
-import { uuidv4 } from '@firebase/util';
 import { MatListModule } from '@angular/material/list';
-
+import * as uuid from 'uuid';
+import { FirebaseService } from 'app/firebase.service';
 
 @Component({
     selector: 'join-dlg',
@@ -98,8 +98,11 @@ import { MatListModule } from '@angular/material/list';
       })
     ])   
 
-    filteredOptions: SnowFlakeColumn[] = [];
-    filteredLeftOptions: SnowFlakeColumn[] = [];
+    leftColumns!:SnowFlakeNativeColumn[]
+    rightColumns!:SnowFlakeNativeColumn[]
+
+    filteredOptions: SnowFlakeNativeColumn[] = [];
+    filteredLeftOptions: SnowFlakeNativeColumn[] = [];
 
     childColumnsSelectedFA = [
       [
@@ -133,31 +136,34 @@ import { MatListModule } from '@angular/material/list';
       private fb:FormBuilder,
       private dao:DaoService,
       private urlSrv:UrlService,
+      private firebaseService:FirebaseService,
       @Inject(MAT_DIALOG_DATA) public data:JoinData) {}
 
     ngOnInit(): void {
      
-      this.isLoading = true
+   
 
       let allPromises:Array<Promise<void>> = []
 
-      if( this.data.leftNode!= null && this.data.leftNode.columns.length == 0){
-        let leftPromise   = this.dao.getTableColumns(this.data.leftNode.connectionId, this.data.leftNode.tableName ).then( left =>{
-          this.isLoading = false
-          this.data.leftNode.columns.length = 0
+      let leftNode = this.data.leftNode
+      let rightNode = this.data.rightNode
 
-          left.forEach( c => this.data.leftNode!.columns.push(c))            
+      this.leftColumns = leftNode.transformations[0].sampleData!.metadata
+      this.rightColumns = rightNode.transformations[0].sampleData!.metadata
 
- 
+      this.joinsFA.clear()
 
-        })
-        allPromises.push( leftPromise )
-      }
-      this.refreshColumnsAndSampleData()
-
-       
-      
-
+      if( this.data.leftNode ){          
+        this.data.rightNode.joinCriteria.forEach( j =>{
+          let newJoinFG = this.fb.group({
+            columnName: [j.leftValue],
+            comparator: [j.comparator],
+            exp:[j.rightValue]
+          })
+          this.joinsFA.push( newJoinFG)
+        })     
+      }      
+      /*
       Promise.all( allPromises ).then( () =>{
         this.isLoading = false
 
@@ -180,7 +186,7 @@ import { MatListModule } from '@angular/material/list';
             console.log("")  
           })
         })
-*/
+
         //load the childs selected columns
         this.childColumnsSelectedFA.length = 0
         /*
@@ -230,13 +236,14 @@ import { MatListModule } from '@angular/material/list';
           this.filtersFA.push( newFilterFG)
         })  
 
-*/
+
         
       }
       ,error=>{
         this.isLoading = false
         alert("error retriving columns")
       })
+*/      
     }
 
     onAddJoin(){
@@ -250,6 +257,8 @@ import { MatListModule } from '@angular/material/list';
     onDeleteJoin(i:number){
       this.joinsFA.controls.splice(i,1)
     }    
+
+    /*
     onDelete(i:number){
       this.filtersFA.controls.splice(i,1)
     }
@@ -259,17 +268,19 @@ import { MatListModule } from '@angular/material/list';
       const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
       this.filteredOptions = this.data.rightNode.columns.filter(o => o.columnName.toLowerCase().includes(filterValue.toLowerCase()));
     }
-
+*/
     filterLeft(i:number): void {
       let formFG = this.joinsFA.controls[i]
       const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
-      this.filteredLeftOptions = this.data.leftNode.columns.filter(o => o.columnName.toLowerCase().includes(filterValue.toLowerCase()));
+      this.filteredLeftOptions = this.leftColumns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
     }   
+    
     filterJoinExp(i:number): void {
       let formFG = this.joinsFA.controls[i]
       const filterValue = formFG.controls.exp.value ? formFG.controls.exp.value : ""
-      this.filteredOptions = this.data.rightNode.columns.filter(o => o.columnName.toLowerCase().includes(filterValue.toLowerCase()));
-    }     
+      this.filteredOptions = this.rightColumns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
+    }   
+    /*  
 
     onAddFilter(){
       let newFilter = this.fb.group({
@@ -308,7 +319,7 @@ import { MatListModule } from '@angular/material/list';
       })  
     }
     refreshColumnsAndSampleData(){
-      /*
+      
       let rightPromise = this.dao.getTableColumns(this.data.rightNode.connectionId, this.data.rightNode.tableName ).then( 
         right =>{
           console.debug( right )
@@ -356,25 +367,35 @@ import { MatListModule } from '@angular/material/list';
         }
         this.data.rightNode.sampleData = sqlResult
       })
-      */
+      
     }
-
-    onSubmit(){}
-/*    
-
-      this.data.rightNode.joinCriteria.length = 0
+*/
+    onSubmit(){  
+      let joinCriteria:JoinCondition[] = []
       this.joinsFA.controls.forEach( joinFG =>{
         let columnName = joinFG.controls.columnName.value 
         let comparator:ComparatorOption = joinFG.controls.comparator.value ? joinFG.controls.comparator.value : ComparatorOption.equal
         let exp = joinFG.controls.exp.value
         let joinCondition:JoinCondition = {
+          id:uuid.v4(),
           leftValue: columnName ? columnName : "",
           comparator: comparator ,
           rightValue: exp ? exp : ""
         } 
-        this.data.rightNode.joinCriteria.push(joinCondition)
+        joinCriteria.push(joinCondition)
       })
+      let parts = this.data.rightCollectionPath.split("/")
+      parts.splice(parts.length-1,1)
+      let path = parts.join("/")
+      let id = this.data.rightCollectionPath.split("/").reverse()[0]
 
+      let newJoinNode:JoinNode = {
+        joinCriteria: joinCriteria
+      }
+      
+      this.firebaseService.updateDoc( path, id , newJoinNode)
+    }
+/*
       this.data.rightNode.selectedColumns.length = 0
       this.columnsFA.controls.forEach( columnFG =>{
         let columnName = columnFG.controls.columnName.value! 
