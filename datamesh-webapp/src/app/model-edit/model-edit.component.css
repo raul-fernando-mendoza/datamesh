@@ -55,8 +55,7 @@
   position: relative;
   overflow: auto;
   border: 1px solid black;
-  white-space: nowrap;
-  max-height: 10em;    
+  white-space: nowrap;   
 }
 
 table .tree{

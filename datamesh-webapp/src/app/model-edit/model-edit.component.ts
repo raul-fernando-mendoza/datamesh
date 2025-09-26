@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinCondition, JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp } from 'app/datatypes/datatypes.module';
+import { JoinCondition, JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, TransformationContainer } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -101,7 +101,15 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   isLoading = false
 
-  result:any | null
+  
+
+  infoNodes:InfoNode[] = []
+  flatJoinNodeMap = new Map<string,JoinNodeObj>()
+  flatInfoNodes = new Map<string, InfoNode>()  
+
+  selectedJoinNodePath = signal("")
+  selectedJoinNode = signal<JoinNode|null>(null)
+  result = signal<any | null>(null)
   
   constructor( 
     private fb:FormBuilder 
@@ -134,11 +142,40 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   ngAfterViewInit(): void {
     console.log("after view init")
   }
-    
-  infoNodes:InfoNode[] = []
-  flatJoinNodeMap = new Map<string,JoinNodeObj>()
-  flatInfoNodes = new Map<string, InfoNode>()
+  ngOnInit() {
+    this.update()
+  }    
 
+  update(){
+    
+    if( this.id && this.id != 'new' ){
+      this.unsubscribe = onSnapshot( doc( db,ModelObj.collectionName, this.id ),
+          (docRef) =>{
+                if( docRef.exists()){
+                  let model=docRef.data() as ModelObj
+
+                  this.model.set(model)
+
+                  this.FG.controls.label.setValue( model.label!)
+                  
+                  this.dataSource.setData([])
+                  this.loadRawModel().then( () =>{
+                    this.dataSource.setData(this.infoNodes) 
+                    this.tree.expandAll()
+                  },
+                  reason=>{
+                    alert("Error reloading JoinNodes:" + reason.error)
+                  })
+                  
+                  //this.dataSource.setData(this.data)
+                }
+          },
+          (reason:any) =>{
+              alert("ERROR update comparison list:" + reason)
+          }  
+      )
+    }
+  }
   getPath( id:string, parentInfoNodes:InfoNode[] ):InfoNode[]|null{
     for(let i = 0; i<parentInfoNodes.length; i++){
       if( parentInfoNodes[i].id == id ){
@@ -160,6 +197,20 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
     return null
   }
+
+getCollectionPath( id:string ){
+  var path = this.getPath( id , this.infoNodes)
+  var model = this.model()!
+  if( path ){
+    var pathWithNodes = ""
+    for(let i =0; i< path.length; i++){
+      pathWithNodes = pathWithNodes + "/" + JoinNodeObj.className + "/" + path[i].id
+    }
+    var fullPath = ModelObj.collectionName + "/" + model.id + pathWithNodes
+    return fullPath
+  }
+  return null
+}
   
   
   loadRawModel():Promise<void>{
@@ -238,35 +289,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   }
 
 
-  update(){
-    
-    if( this.id && this.id != 'new' ){
-      this.unsubscribe = onSnapshot( doc( db,ModelObj.collectionName, this.id ),
-          (docRef) =>{
-                if( docRef.exists()){
-                  let model=docRef.data() as ModelObj
-
-                  this.model.set(model)
-
-                  this.FG.controls.label.setValue( model.label!)
-                  
-                  this.loadRawModel().then( () =>{
-                    this.dataSource.setData(this.infoNodes) 
-                    this.tree.expandAll()
-                  },
-                  reason=>{
-                    alert("Error reloading JoinNodes:" + reason.error)
-                  })
-                  
-                  //this.dataSource.setData(this.data)
-                }
-          },
-          (reason:any) =>{
-              alert("ERROR update comparison list:" + reason)
-          }  
-      )
-    }
-  }    
+      
   onDelete(){
     if(this.id && this.model){
       if( confirm("are you sure to delete:" + this.model()!.label) ){
@@ -312,9 +335,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     this.router.navigate(["/"])
   }
 
-  ngOnInit() {
-    this.update()
-  }
+
   /*
   Edit(node:JoinNode | null){
     if( this.model  && node ){
@@ -395,6 +416,31 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       })      
     }
   }
+
+  getSampleData(tableName:string, connectionId:string):Promise<SqlResultInFirebase>{
+    return new Promise(( resolve, reject ) => {
+      
+      let sql = "select * from " + tableName + " limit 10"
+
+      var req = {
+        connectionId:connectionId,
+        sql:sql
+      }
+      this.isLoading = true
+      this.urlService.post("executeSql",req).subscribe({ 
+        'next':(result:any)=>{
+          this.isLoading = false
+          console.log( result )
+          resolve( result )
+        },
+        'error':(reason)=>{   
+          this.isLoading = false     
+          reject( reason.error.error )
+        }
+      })         
+    })  
+  }
+
   
   acceptPredicate(drag: CdkDrag, drop: CdkDropList) {
     return true //drag.data.startsWith("G") ;
@@ -449,31 +495,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }    
 
     if( parentNode ){
-      /*
-      let data: JoinData = {
-        leftNode: parentNode,
-        rightNode: rightJoinNode
-      }
-      const dialogRef = this.dialog.open(JoinDialog, {
-        height: '60%',
-        width: '60%',
-        data: data
-      });
-    
-      dialogRef.afterClosed().subscribe(data => {
-        console.log('The dialog was closed');
-        if( data != undefined ){
-          console.debug( data )
-          
-          if( !parentNode.children ){
-            parentNode.children = []
-          }
-          parentNode.children.push(rightJoinNode)
-          this.save()
-          
-        }
-      })
-      */
       console.log( e.container )
       let infoNode = this.flatInfoNodes.get(parentNode.id)
       if( infoNode != null){
@@ -495,15 +516,38 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
             sampleData: null,
             transformations: []
           }
-    
-          this.firebaseService.setDoc( parentPath + "/"  + JoinNodeObj.className, newJoin.id, newJoin  )
-          .then( () =>{
-            this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
-          })          
+
+          this.getSampleData( tableName, connectionId).then( result =>{
+            
+            let sqlResult:SqlResultInFirebase = {
+              metadata:result.metadata,
+              resultSet:[]
+            }
+            for(let i=0; i<result.resultSet.length; i++){ 
+              let row = result.resultSet[i]             
+              let data:{[key: string]:any}={}
+              for( let c=0; c<row.length; c++){
+                data["k_" + c] = row[c]
+              }
+              sqlResult.resultSet.push(data)
+            }    
+
+            let transformationContainer:TransformationContainer = {
+              id: uuid.v4(),
+              type: 'rawRead',
+              label: 'initial',
+              transformation: null,
+              sampleData:sqlResult
+            }
+            newJoin.transformations = [transformationContainer]
+                         
+            this.firebaseService.setDoc( parentPath + "/"  + JoinNodeObj.className, newJoin.id, newJoin  )
+            .then( () =>{
+              this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+            })
+          })
         }
       }
-      
-
     }
     else{
       console.log(parentNode)
@@ -519,16 +563,42 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         transformations: []
       }
 
-      this.firebaseService.setDoc( [ ModelObj.collectionName , this.model()!.id , JoinNodeObj.className].join("/"), newJoin.id, newJoin  )
-      .then( () =>{
-        let model:Model = {
-          updateon:getCurrentTimeStamp()
+      this.getSampleData( tableName, connectionId).then( result =>{
+
+        let sqlResult:SqlResultInFirebase = {
+          metadata:result.metadata,
+          resultSet:[]
         }
-        this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, model)
+        for(let i=0; i<result.resultSet.length; i++){ 
+          let row = result.resultSet[i]             
+          let data:{[key: string]:any}={}
+          for( let c=0; c<row.length; c++){
+            data["k_" + c] = row[c]
+          }
+          sqlResult.resultSet.push(data)
+        }        
+            
+        let transformationContainer:TransformationContainer = {
+          id: uuid.v4(),
+          type: 'rawRead',
+          label: 'initial',
+          transformation: null,
+          sampleData:sqlResult
+        }
+        newJoin.transformations = [transformationContainer]
+
+        this.firebaseService.setDoc( [ ModelObj.collectionName , this.model()!.id , JoinNodeObj.className].join("/"), newJoin.id, newJoin  )
+        .then( () =>{
+          let model:Model = {
+            updateon:getCurrentTimeStamp()
+          }
+          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, model)
+        },
+        reason =>{
+          alert("Error saving results:" + reason.error)
+        })
       })
     }
-    
-
   } 
 
   getJoinCriteriaText(infoNode: InfoNode){
@@ -565,6 +635,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       }
     })
   }
+  /*
   onPlay(node:JoinNode | null){
     if( this.model  && node ){      
       console.log(this.model()!.id)
@@ -581,9 +652,18 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       })
     } 
   }    
+  */
+  getDataType( datatype:any):string{
+    switch ( datatype ){
+      case 2:return "String"
+      case 8:return "TimestampType"
+    }
+    return datatype
+  }
+
   format( datatype:any, val:any){
     let result = val
-    if( datatype.startsWith("TimestampType") && val){
+    if( datatype == 8 && val){
       let date = new Date(val)
       let pstOffset = 480; // this is the offset for the Pacific Standard Time timezone     
       let str = new Date(date.getTime() + (pstOffset) * 60 * 1000).toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
@@ -601,10 +681,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     if( 3 == datatype && val){
         result = val
     } 
-    if( val && (
-      datatype.startsWith("LongType") ||
-      datatype.startsWith("DecimalType")
-      )
+    if( val == 0 || datatype==0
     ){
       if( val - Math.floor(val) ){
         result = Number(val).toFixed(2)
@@ -617,9 +694,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     return result
   }
   isNumber(datatype:any){
-    if(     
-      datatype.startsWith("LongType") ||
-      datatype.startsWith("DecimalType" ) ){
+    
+    if(datatype == 3){
       return true
     }
     return false
@@ -633,5 +709,20 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     let time: Array<String> = [ String(d.getHours()).padStart(2 ,"0"), String(d.getMinutes()).padStart(2 ,"0"), String(d.getSeconds()).padStart(2 ,"0")];
     // Return the formatted string
     return date.join("/") + " "  + time.join(":")
+  }
+
+  onJoinNodeSelected(node:InfoNode){
+    
+    let fullPath = this.getCollectionPath( node.id )
+    if( fullPath ){
+      this.selectedJoinNodePath.set(fullPath)
+      let joinNodeObj = this.flatJoinNodeMap.get( node.id )
+      if( joinNodeObj ){
+        this.selectedJoinNode.set(joinNodeObj)
+        let result = joinNodeObj.transformations[0].sampleData
+        this.result.set(result)
+      }
+    }
+    
   }
 }

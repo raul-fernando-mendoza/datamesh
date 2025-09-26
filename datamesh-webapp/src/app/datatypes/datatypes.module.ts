@@ -215,7 +215,8 @@ export interface TransformationContainer{
   id:string
   type:string
   label:string
-  transformation:JoinCondition
+  transformation:JoinCondition|null
+  sampleData?:any | null
 }
 
 export interface JoinNode{
@@ -225,7 +226,6 @@ export interface JoinNode{
   tableName?:string
   columns?: SnowFlakeColumn[]
   joinCriteria?:JoinCondition[]
-  sampleData?:SqlResultInFirebase | null
   transformations?:TransformationContainer[]
 }
 

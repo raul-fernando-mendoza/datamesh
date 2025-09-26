@@ -43,7 +43,7 @@
                         <!-- This is the tree node template for leaf nodes -->
                         <!-- There is inline padding applied to this node using styles.
                           This padding value depends on the mat-icon-button width. -->
-                        <mat-tree-node *matTreeNodeDef="let node">
+                        <mat-tree-node *matTreeNodeDef="let node" >
                           <div
                             [id]="node.item.id"
                             cdkDropList
@@ -51,6 +51,7 @@
                             class="example-list"
                             (cdkDropListDropped)="onDrop($event)"
                             [cdkDropListEnterPredicate]="acceptPredicate"
+                            (click)="onJoinNodeSelected(node.item)"
                           >
                             <table class="tree">
                               <tr>
@@ -94,7 +95,6 @@
                             <mat-menu #menu="matMenu">
                               <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
                               <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
-                              <button mat-icon-button (click)="onPlay(node.item)"><mat-icon>play_arrow</mat-icon></button>
                             </mat-menu>
                           }              
                         </mat-tree-node>
@@ -121,8 +121,9 @@
                         <!-- This is the tree node template for expandable nodes -->
                         <mat-nested-tree-node
                             *matTreeNodeDef="let node; when: hasChild"
+                            
                             >
-                          <div class="mat-tree-node">
+                          <div class="mat-tree-node" (click)="onJoinNodeSelected(node.item)">
                             <button mat-icon-button matTreeNodeToggle
                                     [attr.aria-label]="'Toggle ' + node.name">
                               <mat-icon class="mat-icon-rtl-mirror">
@@ -170,7 +171,6 @@
                               <mat-menu #menu="matMenu">
                                 <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
                                 <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
-                                <button mat-icon-button (click)="onPlay(node.item)"><mat-icon>play_arrow</mat-icon></button>
                               </mat-menu>
                             }                    
                           </div>  
@@ -212,31 +212,28 @@
 
           </as-split-area>
           <as-split-area [size]="40">
-              @if( isLoading ){
-                <mat-spinner></mat-spinner>
-              }
-              @else{
-                  @if( result ){
-                    <div class="view">
-                        <div class="wrapper">
-                            <table *ngIf="result.records && result.schema">
-                                <thead>
-                                    <tr>
-                                        <td class="sticky-col first-col"> idx </td>
-                                        <th *ngFor="let h of result.schema">{{ h["name"] }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>                
-                                    <tr *ngFor="let row of result.records; index as i">
-                                        <td class="sticky-col first-col">{{ i + 1 }}</td>
-                                        <td *ngFor="let column of result.schema; index as c" [ngClass]="{'number': isNumber(column.datatype) }">{{ format(column.datatype, row[column.name]) }}</td> 
-                                    </tr>
-                                </tbody>                
-                            </table>  
-                        </div>
-                    </div>
-                  }
-              }
+            {{ selectedJoinNodePath() }}
+            @if( result() ){
+              result().records: {{ result() }}
+              <div class="view">
+                  <div class="wrapper">
+                      <table *ngIf="result().metadata && result().resultSet">
+                          <thead>
+                              <tr>
+                                  <td class="sticky-col first-col"> idx </td>
+                                  <th *ngFor="let h of result().metadata">{{ h["name"] + "-" +  h["type_code"] }}</th>
+                              </tr>
+                          </thead>
+                          <tbody>                
+                              <tr *ngFor="let row of result().resultSet; index as i">
+                                  <td class="sticky-col first-col">{{ i + 1 }}</td>
+                                  <td *ngFor="let column of result().metadata; index as c" [ngClass]="{'number': isNumber(column['type_code']) }">{{ format(column['type_code'], row["k_" + c]) }} </td> 
+                              </tr>
+                          </tbody>                
+                      </table>  
+                  </div>
+              </div>
+            }
           </as-split-area>
         </as-split>
       </div>
