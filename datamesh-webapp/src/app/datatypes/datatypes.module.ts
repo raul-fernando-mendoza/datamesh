@@ -211,11 +211,22 @@ export interface SelectedColumn {
   isSelected:boolean
 }
 
+export interface Transformation{
+  id:string
+}
+
+export class FilterTransformation implements Transformation{
+  id!:string
+  leftValue!:string
+  comparator!:ComparatorOption
+  rightValue!:string
+}
+
 export interface TransformationContainer{
   id:string
-  type:string
+  type:'rawRead' | 'filter'
   label:string
-  transformation:JoinCondition|null
+  transformation:Transformation
   sampleData?:SqlResultInFirebase
 }
 
@@ -310,6 +321,8 @@ export interface JoinCondition{
   comparator:ComparatorOption
   rightValue:string
 }
+
+
 
 
 export class JoinNodeExecution{

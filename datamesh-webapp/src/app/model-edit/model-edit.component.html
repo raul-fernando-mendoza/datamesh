@@ -69,19 +69,22 @@
                                     <tr>
                                       <td>
                                         <ul>
-                                          @for( c of node.item.filters;track c;let i = $index){
-                                            <li> {{c.leftValue}} {{c.comparator}} {{c.rightValue}} </li>
+                                          @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
+                                            <li>
+                                            @if( t.type == "rawRead"){
+                                              Raw Read
+                                            }
+                                            @else if( t.type == "filter"){
+                                              getFilterTransformationText(t) 
+                                            }
+                                            </li>
+                                          }
+                                          @empty{
+                                            no transformations found
                                           }
                                           </ul>
                                       </td>
                                     </tr>
-                                  </table>
-                                  <table>
-                                    @for( p of node.item.postTransformations; track p.id){
-                                    <tr>
-                                      <td>{{p.label}}</td>
-                                    </tr>
-                                    }
                                   </table>
                                 </td>
                               </tr>
@@ -152,10 +155,20 @@
                                         <tr>
                                           <td>
                                             <ul>
-                                              @for( c of node.item.filters;track c;let i = $index){
-                                                <li> {{c.leftValue}} {{c.comparator}} {{c.rightValue}} </li>
+                                              @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
+                                                <li>
+                                                @if( t.type == "rawRead"){
+                                                  Raw Read
+                                                }
+                                                @else if( t.type == "filter"){
+                                                  getFilterTransformationText(t) 
+                                                }
+                                                </li>
                                               }
-                                              </ul>
+                                              @empty{
+                                                no transformations found
+                                              }
+                                            </ul>
                                           </td>
                                         </tr>
                                       </table>
@@ -215,7 +228,23 @@
             <mat-drawer-container class="example-container">
               <mat-drawer mode="side" opened position="end">
                 <mat-tab-group>
-                  <mat-tab label="transformations"> transformations </mat-tab>
+                  <mat-tab label="transformations">
+                    <mat-list>
+                    @for( t of selectedJoinNode()!.transformations!;track t.id;let i = $index){
+                      <mat-list-item>
+                      @if( t.type == "rawRead"){
+                        initial Read
+                      }
+                      @else if( t.type == "filter"){
+                        getFilterTransformationText(t) 
+                      }
+                    </mat-list-item>
+                    }
+                    @empty{
+                      no transformations found
+                    }   
+                    </mat-list>                 
+                  </mat-tab>
                   <mat-tab label="Joins"> 
                     List of joins:
                     

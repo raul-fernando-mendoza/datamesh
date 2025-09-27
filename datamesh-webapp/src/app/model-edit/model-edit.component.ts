@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinCondition, JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, TransformationContainer } from 'app/datatypes/datatypes.module';
+import { JoinCondition, JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, TransformationContainer, FilterTransformation, Transformation } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -205,19 +205,19 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     return null
   }
 
-getCollectionPath( id:string ){
-  var path = this.getPath( id , this.infoNodes)
-  var model = this.model()!
-  if( path ){
-    var pathWithNodes = ""
-    for(let i =0; i< path.length; i++){
-      pathWithNodes = pathWithNodes + "/" + JoinNodeObj.className + "/" + path[i].id
+  getCollectionPath( id:string ){
+    var path = this.getPath( id , this.infoNodes)
+    var model = this.model()!
+    if( path ){
+      var pathWithNodes = ""
+      for(let i =0; i< path.length; i++){
+        pathWithNodes = pathWithNodes + "/" + JoinNodeObj.className + "/" + path[i].id
+      }
+      var fullPath = ModelObj.collectionName + "/" + model.id + pathWithNodes
+      return fullPath
     }
-    var fullPath = ModelObj.collectionName + "/" + model.id + pathWithNodes
-    return fullPath
+    return null
   }
-  return null
-}
   
   
   loadRawModel():Promise<void>{
@@ -543,7 +543,7 @@ getCollectionPath( id:string ){
               id: uuid.v4(),
               type: 'rawRead',
               label: 'initial',
-              transformation: null,
+              transformation: { id:uuid.v4() },
               sampleData:sqlResult
             }
             newJoin.transformations = [transformationContainer]
@@ -589,7 +589,7 @@ getCollectionPath( id:string ){
           id: uuid.v4(),
           type: 'rawRead',
           label: 'initial',
-          transformation: null,
+          transformation: { id:uuid.v4() },
           sampleData:sqlResult
         }
         newJoin.transformations = [transformationContainer]
@@ -737,5 +737,10 @@ getCollectionPath( id:string ){
       }
     }
     
+  }
+
+  getFilterTransformationText(t:Transformation ){
+    let tf = t as FilterTransformation
+    return tf.leftValue + " " + tf.comparator + " " + tf.rightValue
   }
 }
