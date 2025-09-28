@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj } from 'app/datatypes/datatypes.module';
+import { SnowFlakeColumn, ComparatorOption, JoinCondition, JoinNode, JoinData, SelectedColumn, SqlResultObj, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, TransformationContainer, JoinNodeObj } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -22,12 +22,11 @@ import { DataGridComponent } from 'app/data-grid/data-grid.component';
 import { MatListModule } from '@angular/material/list';
 import * as uuid from 'uuid';
 import { FirebaseService } from 'app/firebase.service';
-import { ResolveEnd } from '@angular/router';
 
 @Component({
-    selector: 'join-dlg',
-    templateUrl: 'join-dlg.html',
-    styleUrl: 'join-dlg.css',
+    selector: 'filter-dlg',
+    templateUrl: 'filter-dlg.html',
+    styleUrl: 'filter-dlg.css',
     imports: [
         CommonModule,
         MatButtonModule,
@@ -50,7 +49,7 @@ import { ResolveEnd } from '@angular/router';
         MatListModule
     ]
 })
-  export class JoinDialog implements OnInit{ 
+  export class FilterDialog implements OnInit{ 
     @ViewChild('input') input!: ElementRef<HTMLInputElement>;
     
     comparisonOptions:Array<ComparatorOption> = [  
@@ -62,108 +61,38 @@ import { ResolveEnd } from '@angular/router';
       ComparatorOption.ne
     ]
  
-    selectedColumnsFA = this.fb.array([
-      {
-        columnName: [''],
-        selected: [true],
-        alias:['']
-      }
-    ])  
-
-    filteredFA = this.fb.array([]) 
-
-    isLoading = false
 
 
-    joinsFA = this.fb.array([
+
+    filterFA =
       this.fb.group({
         columnName: [''],
         comparator: [ComparatorOption.equal],
         exp:['']
       })
-    ])  
 
-    columnsFA = this.fb.array([
-      this.fb.group({
-        columnName: [''],
-        selected: [true],
-        alias:['']
-      })
-    ])     
 
-    filtersFA = this.fb.array([
-      this.fb.group({
-        columnName: [''],
-        comparator: [ComparatorOption.equal],
-        exp:['']
-      })
-    ])   
-
-    leftColumns!:SnowFlakeNativeColumn[]
-    rightColumns!:SnowFlakeNativeColumn[]
+    columns!:SnowFlakeNativeColumn[]
 
     filteredOptions: SnowFlakeNativeColumn[] = [];
-    filteredLeftOptions: SnowFlakeNativeColumn[] = [];
-
-    childColumnsSelectedFA = [
-      [
-        this.fb.group({
-          columnName: [''],
-          selected: [true],
-          alias:['']
-        }),        
-      ]
-      ,
-      [
-        this.fb.group({
-          columnName: [''],
-          selected: [true],
-          alias:['']
-        }),        
-      ]
-    ]
 
     result:SqlResultInFirebase | null= null
-
     
-    isEditinPostTransformation = signal("")
-
-    postTransformationForm = this.fb.group({
-      label: ['']
-    })
-
     constructor(
-      public dialogRef: MatDialogRef<JoinDialog>,
+      public dialogRef: MatDialogRef<FilterDialog>,
       private fb:FormBuilder,
-      private dao:DaoService,
-      private urlSrv:UrlService,
       private firebaseService:FirebaseService,
-      @Inject(MAT_DIALOG_DATA) public data:JoinData) {}
+      @Inject(MAT_DIALOG_DATA) public data:JoinNodeActionData) {}
 
     ngOnInit(): void {
-     
-   
+      let node = this.data.node
+      let idx = this.data.currentTransactionIndex
+      
 
-      let allPromises:Array<Promise<void>> = []
+      this.columns = node.transformations[idx].sampleData!.metadata
 
-      let leftNode = this.data.leftNode
-      let rightNode = this.data.rightNode
-
-      this.leftColumns = leftNode.transformations[0].sampleData!.metadata
-      this.rightColumns = rightNode.transformations[0].sampleData!.metadata
-
-      this.joinsFA.clear()
-
-      if( this.data.leftNode ){          
-        this.data.rightNode.joinCriteria.forEach( j =>{
-          let newJoinFG = this.fb.group({
-            columnName: [j.leftValue],
-            comparator: [j.comparator],
-            exp:[j.rightValue]
-          })
-          this.joinsFA.push( newJoinFG)
-        })     
-      }      
+      
+      
       /*
       Promise.all( allPromises ).then( () =>{
         this.isLoading = false
@@ -180,7 +109,7 @@ import { ResolveEnd } from '@angular/router';
             this.joinsFA.push( newJoinFG)
           })     
         }
-/*
+
         this.data.rightNode.children?.forEach( child =>{
           let prefix = child.name
           child.selectedColumns.forEach( selectedColumn =>{
@@ -247,17 +176,7 @@ import { ResolveEnd } from '@angular/router';
 */      
     }
 
-    onAddJoin(){
-      let newJoinFG = this.fb.group({
-        columnName: [""],
-        comparator: [ComparatorOption.equal],
-        exp:[""]
-      })
-      this.joinsFA.push( newJoinFG)
-    }
-    onDeleteJoin(i:number){
-      this.joinsFA.controls.splice(i,1)
-    }    
+  
 
     /*
     onDelete(i:number){
@@ -270,16 +189,10 @@ import { ResolveEnd } from '@angular/router';
       this.filteredOptions = this.data.rightNode.columns.filter(o => o.columnName.toLowerCase().includes(filterValue.toLowerCase()));
     }
 */
-    filterLeft(i:number): void {
-      let formFG = this.joinsFA.controls[i]
-      const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
-      this.filteredLeftOptions = this.leftColumns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
-    }   
     
-    filterJoinExp(i:number): void {
-      let formFG = this.joinsFA.controls[i]
-      const filterValue = formFG.controls.exp.value ? formFG.controls.exp.value : ""
-      this.filteredOptions = this.rightColumns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
+    filter(): void {
+      const filterValue = this.filterFA.controls.exp.value ? this.filterFA.controls.exp.value : ""
+      this.filteredOptions = this.columns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
     }   
     /*  
 
@@ -372,30 +285,35 @@ import { ResolveEnd } from '@angular/router';
     }
 */
     onSubmit(){  
-      let joinCriteria:JoinCondition[] = []
-      this.joinsFA.controls.forEach( joinFG =>{
-        let columnName = joinFG.controls.columnName.value 
-        let comparator:ComparatorOption = joinFG.controls.comparator.value ? joinFG.controls.comparator.value : ComparatorOption.equal
-        let exp = joinFG.controls.exp.value
-        let joinCondition:JoinCondition = {
-          id:uuid.v4(),
-          leftValue: columnName ? columnName : "",
-          comparator: comparator ,
-          rightValue: exp ? exp : ""
-        } 
-        joinCriteria.push(joinCondition)
-      })
-
-      let newJoinNode:JoinNode = {
-        joinCriteria: joinCriteria
+      let columnName = this.filterFA.controls.columnName.value 
+      let comparator:ComparatorOption = this.filterFA.controls.comparator.value ? this.filterFA.controls.comparator.value : ComparatorOption.equal
+      let exp = this.filterFA.controls.exp.value
+      let f:FilterTransformation = {
+        id:uuid.v4(),
+        leftValue: columnName ? columnName : "",
+        comparator: comparator ,
+        rightValue: exp ? exp : ""
+      } 
+      let t:TransformationContainer = {
+        id: uuid.v4(),
+        type: 'filter',
+        label: 'Filter ' + f.leftValue  + f.comparator + f.rightValue,
+        transformation: f
       }
-      
-      this.firebaseService.updateDoc( this.data.rightCollectionPath + "/" + JoinNodeObj.className, this.data.rightNode.id , newJoinNode).then( ()=>{
-        console.log("update join")
+
+      this.data.node.transformations
+
+      let joinNodeUpdate:JoinNode = {
+        transformations:[ ...this.data.node.transformations , t]
+      }
+ 
+      this.firebaseService.updateDoc( this.data.collectionPath + "/" + JoinNodeObj.className, this.data.node.id, joinNodeUpdate).then( ()=>{
+        console.log("editing filter done")
       },
-      reason=>{
-        alert("error saving join" + reason.error)
+      reason =>{
+        alert("Error: Editing filter:" + reason.error)
       })
+      
     }
 /*
       this.data.rightNode.selectedColumns.length = 0

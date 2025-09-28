@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinCondition, JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, TransformationContainer, FilterTransformation, Transformation } from 'app/datatypes/datatypes.module';
+import { JoinCondition, JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, TransformationContainer, FilterTransformation, Transformation, JoinNodeActionData } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -30,6 +30,7 @@ import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import {MatTabsModule} from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
+import { FilterDialog } from './filter-dlg';
 
 @Component({
     selector: 'app-model-edit',
@@ -114,7 +115,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   flatInfoNodes = new Map<string, InfoNode>()  
 
   selectedJoinNodePath = signal("")
-  selectedJoinNode = signal<JoinNode|null>(null)
+  selectedJoinNode = signal<JoinNodeObj|null>(null)
   result = signal<any | null>(null)
   
   constructor( 
@@ -207,8 +208,11 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   getCollectionPath( id:string ){
     var path = this.getPath( id , this.infoNodes)
+
+    
     var model = this.model()!
     if( path ){
+      path.splice(path.length - 1, 1)
       var pathWithNodes = ""
       for(let i =0; i< path.length; i++){
         pathWithNodes = pathWithNodes + "/" + JoinNodeObj.className + "/" + path[i].id
@@ -641,9 +645,14 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     
       dialogRef.afterClosed().subscribe(data => {
         console.log('The dialog was closed');
-        if( data != undefined ){
+        if( data ){
           console.debug( data )
-          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
+            console.log("node updated")
+          },
+          reason=>{
+            alert("Error onEditJoinNode: " + reason.error)
+          })
         }
       })
     }
@@ -739,8 +748,38 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     
   }
 
-  getFilterTransformationText(t:Transformation ){
-    let tf = t as FilterTransformation
+  getFilterTransformationText(t:TransformationContainer ){
+    let tf = t.transformation as FilterTransformation
     return tf.leftValue + " " + tf.comparator + " " + tf.rightValue
   }
+
+  addFilter(){
+    if( this.selectedJoinNode() ){
+      let n = this.selectedJoinNode()!
+      let collectionPath:string = this.getCollectionPath(n.id)!
+      let node = this.flatJoinNodeMap.get(n.id)!
+
+      let data: JoinNodeActionData = {
+        node: node,
+        collectionPath: collectionPath,
+        currentTransactionIndex: 0,
+        action: 'add'
+      }
+      const dialogRef = this.dialog.open(FilterDialog, {
+        height: '95%',
+        width: '95%',
+        data: data
+      });
+    
+      dialogRef.afterClosed().subscribe(data => {
+        console.log('The dialog was closed');
+        if( data ){
+          console.debug( data )
+          //this.firebaseService.updateDoc()
+          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+        }
+      })
+    }
+  }
+
 }

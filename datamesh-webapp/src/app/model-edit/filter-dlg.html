@@ -1,0 +1,180 @@
+<div class="bar">
+  <b>Filter</b>
+  <span class="spacer"></span>
+  <button mat-button mat-dialog-close>Cancel</button> 
+  <button [disabled]="data.node.name.length < 1 || data.node.name.length > 200" mat-button [mat-dialog-close]="data" cdkFocusInitial (click)="onSubmit()">Ok</button>
+</div>
+
+  <mat-tab-group>  
+    <mat-tab  label="Filter">
+      
+      <table class="join-table">
+          <tr [formGroup]="filterFA">
+            <td class="join-field"> 
+              <mat-form-field appearance="fill" >
+                <input #input{{i}}
+                type="text"
+                placeholder="Pick column"
+                matInput
+                formControlName="columnName"
+                [matAutocomplete]="autoleft"
+                (input)="filter()"
+                (focus)="filter()">
+                <mat-autocomplete #autoleft="matAutocomplete">
+                  @for (option of filteredOptions; track option) {
+                    <mat-option [value]="option.name">{{option.name}}</mat-option>
+                  }
+                </mat-autocomplete>              
+              </mat-form-field>
+            </td>
+            <td class="join-comparator">
+              <mat-form-field>
+                <mat-select  formControlName="comparator">
+                  @for( c of comparisonOptions; track c; let i=$index ){
+                    <mat-option [value]="c">{{ c }}</mat-option>   
+                  }
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td class="filter-field">
+              <mat-form-field appearance="fill">
+                <mat-label>value to filter</mat-label>
+                <input matInput placeholder="manual entry" formControlName="exp">
+              </mat-form-field> 
+            </td>
+          </tr>
+      </table>
+    </mat-tab>
+    <!--
+    <mat-tab label="Columns">
+
+      <h4>{{data.rightNode.name}} - {{data.rightNode.tableName}} <button mat-button-button (click)="refreshColumnsAndSampleData()"><mat-icon>refresh</mat-icon></button> </h4>
+      
+      @if( data.rightNode.sampleData != null ){
+        <app-data-grid [result]="data.rightNode.sampleData" [columnsFA]="columnsFA"></app-data-grid>
+      }
+      <mat-accordion>
+        
+        @for( childFA of childColumnsSelectedFA; track childFA; let idx = $index){
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            
+            <mat-panel-title> @if(data.rightNode.children){ {{data.rightNode.children[idx].name}} }</mat-panel-title>
+            <mat-panel-description>
+              @if(data.rightNode.children){ {{data.rightNode.children[idx].tableName}} } 
+            </mat-panel-description>
+            
+          </mat-expansion-panel-header>
+          <table>
+            @for( ch of childFA; track ch ; let k = $index){
+              <tr [formGroup]="ch">
+                <td>  
+                  <mat-checkbox formControlName="selected"  > {{ch.controls.columnName.value}} </mat-checkbox> 
+                </td>
+                <td>  
+                  <mat-form-field appearance="fill">
+                    <mat-label>Alias</mat-label>
+                    <input matInput formControlName="alias">
+                  </mat-form-field>
+                </td>          
+              </tr> 
+            } 
+          </table> 
+        </mat-expansion-panel>
+        }
+        
+      </mat-accordion>     
+    </mat-tab>
+    -->
+    <!--
+    <mat-tab label="filters">
+      <table class="filter-table">
+        @for( f of filtersFA.controls; track f ; let i = $index){
+          <tr [formGroup]="f">
+            <td class="filter-field"> 
+              <mat-form-field appearance="fill" >
+                <input #input{{i}}
+                type="text"
+                placeholder="Pick column"
+                matInput
+                formControlName="columnName"
+                [matAutocomplete]="auto"
+                (input)="filter(i)"
+                (focus)="filter(i)">
+                <mat-autocomplete #auto="matAutocomplete">
+                  @for (option of filteredOptions; track option) {
+                    <mat-option [value]="option.columnName">{{option.columnName}}</mat-option>
+                  }
+                </mat-autocomplete>              
+              </mat-form-field>
+            </td>
+            <td class="filter-comparator">
+              <mat-form-field>
+                <mat-select formControlName="comparator">
+                  @for( c of comparisonOptions; track c; let i=$index ){
+                    <mat-option [value]="c">{{ c }}</mat-option>   
+                  }
+                </mat-select>
+              </mat-form-field>
+            </td>
+            <td class="filter-field">
+                <mat-form-field appearance="fill">
+                  <mat-label>value to filter</mat-label>
+                  <input matInput placeholder="manual entry" formControlName="exp">
+                </mat-form-field> 
+            </td>
+            <td class="filter-action">
+              <button mat-icon-button (click)="onDeleteFilter(i)"><mat-icon>delete</mat-icon></button>
+            </td>
+          </tr>
+        }
+      </table>
+      <button mat-icon-button (click)="onAddFilter()"><mat-icon>add</mat-icon></button>
+    </mat-tab>
+    -->
+    <!--
+    <mat-tab label="post-transformations">
+      <mat-list>
+      @for( p of data.rightNode.postTransformations; track p.id){
+        
+        @if( isEditinPostTransformation() == p.id ){
+          <div [formGroup]="postTransformationForm">
+            <mat-form-field>
+              <mat-label>transformation label</mat-label>
+              <input  matInput formControlName="label">
+            </mat-form-field> 
+                  
+            <button mat-icon-button (click)="onSubmitPostTransformation(p.id)"><mat-icon>done</mat-icon></button>
+            <button mat-icon-button (click)="onCancelTransformation()"><mat-icon>cancel</mat-icon></button>
+          </div>
+        }
+        @else{        
+          <mat-list-item>
+            
+            <button mat-button (click)="onAddPostTransformation(p.id)">{{ p.label }}</button>
+            <button mat-icon-button (click)="onDeleteTransformation(p.id)"><mat-icon>delete</mat-icon></button>
+          </mat-list-item>
+        }
+        
+      }
+      </mat-list>
+      @if( isEditinPostTransformation() == "new" ){
+        <div [formGroup]="postTransformationForm">
+          <mat-form-field>
+            <mat-label>transformation label</mat-label>
+            <input  matInput formControlName="label">
+          </mat-form-field> 
+        </div>        
+        <button mat-icon-button (click)="onSubmitPostTransformation('new')"><mat-icon>done</mat-icon></button>
+        <button mat-icon-button (click)="onCancelTransformation()"><mat-icon>cancel</mat-icon></button>
+      }
+      @else{
+        <button mat-icon-button (click)="onAddPostTransformation('new')"><mat-icon>add</mat-icon></button>
+      }
+    </mat-tab>
+    -->
+  </mat-tab-group>  
+
+
+
+ 

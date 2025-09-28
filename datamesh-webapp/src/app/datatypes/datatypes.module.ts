@@ -259,6 +259,15 @@ export interface JoinData {
   rightCollectionPath:string
 }
 
+export interface JoinNodeActionData {
+  node:JoinNodeObj
+  collectionPath:string
+  
+  currentTransactionIndex:number
+  action:"edit" | "insertBefore" | "insertAfter" | "add"
+
+}
+
 export interface Model{
   id?:string
   label?:string

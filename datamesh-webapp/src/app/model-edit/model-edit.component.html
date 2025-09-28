@@ -64,7 +64,7 @@
                                 </td>
                                 <td>
                                   <!--<span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>-->
-                                  <span class="name">{{node.item.name}}</span>
+                                  <span class="name">67 {{node.item.name}}</span>
                                   <table class="tree">
                                     <tr>
                                       <td>
@@ -75,7 +75,7 @@
                                               Raw Read
                                             }
                                             @else if( t.type == "filter"){
-                                              getFilterTransformationText(t) 
+                                              {{ getFilterTransformationText(t) }}
                                             }
                                             </li>
                                           }
@@ -96,7 +96,7 @@
                               <mat-icon>more_vert</mat-icon>
                             </button>
                             <mat-menu #menu="matMenu">
-                              <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
+                              <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>join_inner</mat-icon></button>
                               <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                             </mat-menu>
                           }              
@@ -161,7 +161,7 @@
                                                   Raw Read
                                                 }
                                                 @else if( t.type == "filter"){
-                                                  getFilterTransformationText(t) 
+                                                  {{ getFilterTransformationText(t) }}
                                                 }
                                                 </li>
                                               }
@@ -182,7 +182,7 @@
                                 <mat-icon>more_vert</mat-icon>
                               </button>
                               <mat-menu #menu="matMenu">
-                                <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>filter_list</mat-icon></button>
+                                <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>join_inner</mat-icon></button>
                                 <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                               </mat-menu>
                             }                    
@@ -229,6 +229,12 @@
               <mat-drawer mode="side" opened position="end">
                 <mat-tab-group>
                   <mat-tab label="transformations">
+                    <button mat-icon-button [matMenuTriggerFor]="menuActions" aria-label="menu">
+                      <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menuActions="matMenu">
+                      <button mat-button (click)="addFilter()">Add new filter</button>
+                    </mat-menu>                     
                     <mat-list>
                     @for( t of selectedJoinNode()!.transformations!;track t.id;let i = $index){
                       <mat-list-item>
@@ -236,7 +242,7 @@
                         initial Read
                       }
                       @else if( t.type == "filter"){
-                        getFilterTransformationText(t) 
+                        {{getFilterTransformationText(t)}} 
                       }
                     </mat-list-item>
                     }
@@ -286,7 +292,6 @@
                       </div>
                   </div>
                 }
-    
               </mat-drawer-content>
             </mat-drawer-container>
             }            
