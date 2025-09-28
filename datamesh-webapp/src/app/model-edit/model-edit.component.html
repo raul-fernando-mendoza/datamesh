@@ -244,6 +244,14 @@
                       @else if( t.type == "filter"){
                         {{getFilterTransformationText(t)}} 
                       }
+                      <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
+                        <mat-icon>more_vert</mat-icon>
+                      </button>
+                      <mat-menu #filterActions="matMenu">
+                        @if( i > 0){
+                        <button mat-icon-button (click)="removeFilter(i)"><mat-icon>delete</mat-icon></button>
+                        }
+                      </mat-menu> 
                     </mat-list-item>
                     }
                     @empty{

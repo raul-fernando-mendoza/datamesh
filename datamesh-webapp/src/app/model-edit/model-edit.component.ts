@@ -781,5 +781,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       })
     }
   }
-
+  removeFilter(i:number){
+      let selectedJoinNode = this.selectedJoinNode()!
+      selectedJoinNode.transformations.splice( i, 1)
+  }
 }
