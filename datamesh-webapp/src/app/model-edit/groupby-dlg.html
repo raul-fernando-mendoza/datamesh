@@ -1,0 +1,47 @@
+<div class="bar">
+  <b>GroupBy Properties</b>
+  <span class="spacer"></span>
+  <button mat-button mat-dialog-close>Cancel</button> 
+  <button [disabled]="false" mat-button [mat-dialog-close]="data" cdkFocusInitial (click)="onSubmit()">Ok</button>
+</div>
+
+{{data.node.name}}
+
+      
+@for( j of groupBysFA.controls; track j ; let i = $index){
+  <form [formGroup]="j">
+    <mat-form-field>
+      <mat-select  formControlName="comparator" appearance="fill" placeholder="Pick operation">
+        @for( c of groupByOptions; track c; let i=$index ){
+          <mat-option [value]="c">{{ c }}</mat-option>   
+        }
+      </mat-select>
+    </mat-form-field>  
+    <mat-form-field appearance="fill" >
+      <input #input{{i}}
+      type="text"
+      placeholder="Pick column"
+      matInput
+      formControlName="columnName"
+      [matAutocomplete]="autoleft"
+      (input)="filter(i)"
+      (focus)="filter(i)">
+      <mat-autocomplete #autoleft="matAutocomplete">
+        @for (option of filteredOptions; track option) {
+          <mat-option [value]="option.name">{{option.name}}</mat-option>
+        }
+      </mat-autocomplete>              
+    </mat-form-field>
+    <mat-form-field appearance="fill">
+      <mat-label>alias</mat-label>
+      <input matInput placeholder="manual entry" formControlName="alias">
+    </mat-form-field> 
+  </form>  
+  <button mat-icon-button (click)="onDeleteGroupBy(i)"><mat-icon>delete</mat-icon></button>
+}
+  <button mat-button (click)="onAddGroupBy()">add</button>
+
+
+
+
+ 

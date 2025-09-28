@@ -211,22 +211,35 @@ export interface SelectedColumn {
   isSelected:boolean
 }
 
+export enum TransformationType{
+  initialRead = 'InitialRead',
+  filter = "filter",
+  groupBy = "groupBy"
+}
+
 export interface Transformation{
+  type: TransformationType
   id:string
+  sampleData?:SqlResultInFirebase
 }
 
 export class FilterTransformation implements Transformation{
+  type=TransformationType.filter
   id!:string
   leftValue!:string
   comparator!:ComparatorOption
   rightValue!:string
+  sampleData?:SqlResultInFirebase
 }
 
-export interface TransformationContainer{
-  id:string
-  type:'rawRead' | 'filter'
-  label:string
-  transformation:Transformation
+export class GroupByTransformation implements Transformation{
+  type=TransformationType.groupBy
+  id!:string
+  groupBys!:Array<{
+    columnName:string
+    groupBy:GroupByOption
+    expresion:string
+  }>
   sampleData?:SqlResultInFirebase
 }
 
@@ -235,8 +248,8 @@ export interface JoinNode{
   name?: string
   connectionId?:string
   tableName?:string
-  joinCriteria?:JoinCondition[]
-  transformations?:TransformationContainer[]
+  joinCriteria?:Array<JoinCondition>
+  transformations?:Array<Transformation>
 }
 
 
@@ -246,10 +259,10 @@ export class JoinNodeObj implements JoinNode{
   name!: string
   connectionId!:string
   tableName!:string
-  columns: SnowFlakeColumn[] = []
-  joinCriteria:JoinCondition[] = []
+  columns: Array<SnowFlakeColumn> = []
+  joinCriteria:Array<JoinCondition> = []
   sampleData:SqlResultInFirebase | null = null
-  transformations:TransformationContainer[] = []
+  transformations:Array<Transformation> = []
 }
 
 
@@ -259,12 +272,19 @@ export interface JoinData {
   rightCollectionPath:string
 }
 
+export enum ActionOption {
+  edit = "edit",
+  insertBefore = "insertBefore",
+  insertAfter = "insertAfter",
+  add = "add"
+}
+
 export interface JoinNodeActionData {
   node:JoinNodeObj
   collectionPath:string
   
   currentTransactionIndex:number
-  action:"edit" | "insertBefore" | "insertAfter" | "add"
+  action:ActionOption
 
 }
 
@@ -362,6 +382,13 @@ export interface SqlResultInFirebase{
       type_code:number 
     }
   ]
+}
+
+export enum GroupByOption {
+  sum = "sum",
+  max = "max",
+  min = "min",
+  avg = "avg"
 }
 
 

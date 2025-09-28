@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinCondition, JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, TransformationContainer, FilterTransformation, Transformation, JoinNodeActionData } from 'app/datatypes/datatypes.module';
+import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -31,6 +31,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import {MatTabsModule} from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
 import { FilterDialog } from './filter-dlg';
+import { GroupByDialog } from './groupby-dlg';
 
 @Component({
     selector: 'app-model-edit',
@@ -543,14 +544,12 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
               sqlResult.resultSet.push(data)
             }    
 
-            let transformationContainer:TransformationContainer = {
+            let transformation:Transformation= {
               id: uuid.v4(),
-              type: 'rawRead',
-              label: 'initial',
-              transformation: { id:uuid.v4() },
+              type: TransformationType.initialRead ,
               sampleData:sqlResult
             }
-            newJoin.transformations = [transformationContainer]
+            newJoin.transformations = [transformation]
                          
             this.firebaseService.setDoc( parentPath + "/"  + JoinNodeObj.className, newJoin.id, newJoin  )
             .then( () =>{
@@ -589,11 +588,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
           sqlResult.resultSet.push(data)
         }        
             
-        let transformationContainer:TransformationContainer = {
+        let transformationContainer:Transformation = {
           id: uuid.v4(),
-          type: 'rawRead',
-          label: 'initial',
-          transformation: { id:uuid.v4() },
+          type: TransformationType.initialRead,
           sampleData:sqlResult
         }
         newJoin.transformations = [transformationContainer]
@@ -723,8 +720,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     return false
   }
   formatDate(d:Date): string {
-    // Create a date object with the current time
- 
     // Create an array with the current month, day and time
     let date: Array<String> = [ String(d.getMonth() + 1).padStart(2 ,"0"), String(d.getDate()).padStart(2 ,"0"), String(d.getFullYear()) ];
     // Create an array with the current hour, minute and second
@@ -748,9 +743,24 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     
   }
 
-  getFilterTransformationText(t:TransformationContainer ){
-    let tf = t.transformation as FilterTransformation
-    return tf.leftValue + " " + tf.comparator + " " + tf.rightValue
+  getFilterTransformationText(t:Transformation ):string{
+    let str = ""
+    if( t.type == TransformationType.initialRead ){
+      let tf = t as FilterTransformation
+      str = "Initial Read"
+    }    
+    if( t.type == TransformationType.filter ){
+      let tf = t as FilterTransformation
+      str = tf.leftValue + " " + tf.comparator + " " + tf.rightValue
+    }
+    else if( t.type == TransformationType.groupBy ){
+      let g = t as GroupByTransformation
+      str += "GroupBy:"
+      g.groupBys.forEach(e =>{
+        str += e.columnName
+      })
+    }
+    return str
   }
 
   addFilter(){
@@ -763,7 +773,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         node: node,
         collectionPath: collectionPath,
         currentTransactionIndex: 0,
-        action: 'add'
+        action: ActionOption.add
       }
       const dialogRef = this.dialog.open(FilterDialog, {
         height: '95%',
@@ -785,4 +795,33 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       let selectedJoinNode = this.selectedJoinNode()!
       selectedJoinNode.transformations.splice( i, 1)
   }
+  addGroupBy(){
+    if( this.selectedJoinNode() ){
+      let n = this.selectedJoinNode()!
+      let collectionPath:string = this.getCollectionPath(n.id)!
+      let node = this.flatJoinNodeMap.get(n.id)!
+
+      let data: JoinNodeActionData = {
+        node: node,
+        collectionPath: collectionPath,
+        currentTransactionIndex: 0,
+        action: ActionOption.add
+      }
+      const dialogRef = this.dialog.open(GroupByDialog, {
+        height: '95%',
+        width: '95%',
+        data: data
+      });
+    
+      dialogRef.afterClosed().subscribe(data => {
+        console.log('The dialog was closed');
+        if( data ){
+          console.debug( data )
+          //this.firebaseService.updateDoc()
+          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+        }
+      })
+    }
+  }
+
 }

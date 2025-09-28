@@ -1,4 +1,4 @@
-import {  Component,  ElementRef,  Inject, OnInit, signal, SimpleChange, ViewChild } from '@angular/core';
+import {  Component,  ElementRef,  Inject, OnInit, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -7,24 +7,26 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType } from 'app/datatypes/datatypes.module';
-import { MatCheckboxModule} from '@angular/material/checkbox';
+import { JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj, GroupByOption, JoinNodeActionData, GroupByTransformation, ActionOption, TransformationType } from 'app/datatypes/datatypes.module';
+import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatTabsModule } from '@angular/material/tabs';
+import { DaoService } from 'app/dao.service';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import { MatExpansionModule} from '@angular/material/expansion';
+import {MatExpansionModule} from '@angular/material/expansion';
+import { UrlService } from 'app/url.service';
 import { DataGridComponent } from 'app/data-grid/data-grid.component';
 import { MatListModule } from '@angular/material/list';
 import * as uuid from 'uuid';
 import { FirebaseService } from 'app/firebase.service';
 
 @Component({
-    selector: 'filter-dlg',
-    templateUrl: 'filter-dlg.html',
-    styleUrl: 'filter-dlg.css',
+    selector: 'groupby-dlg',
+    templateUrl: 'groupBy-dlg.html',
+    styleUrl: 'groupBy-dlg.css',
     imports: [
         CommonModule,
         MatButtonModule,
@@ -47,50 +49,61 @@ import { FirebaseService } from 'app/firebase.service';
         MatListModule
     ]
 })
-  export class FilterDialog implements OnInit{ 
+  export class GroupByDialog implements OnInit{ 
     @ViewChild('input') input!: ElementRef<HTMLInputElement>;
     
-    comparisonOptions:Array<ComparatorOption> = [  
-      ComparatorOption.equal,
-      ComparatorOption.gt,
-      ComparatorOption.gte,
-      ComparatorOption.lt ,
-      ComparatorOption.lte,
-      ComparatorOption.ne
+    groupByOptions:Array<GroupByOption> = [  
+      GroupByOption.sum,
+      GroupByOption.max,
+      GroupByOption.min,
+      GroupByOption.avg      
     ]
- 
 
-
-
-    filterFA =
+    groupBysFA = this.fb.array([
       this.fb.group({
         columnName: [''],
-        comparator: [ComparatorOption.equal],
+        groupBy: [GroupByOption.sum],
         exp:['']
       })
-
+    ])   
 
     columns!:SnowFlakeNativeColumn[]
 
     filteredOptions: SnowFlakeNativeColumn[] = [];
 
     result:SqlResultInFirebase | null= null
-    
+
     constructor(
-      public dialogRef: MatDialogRef<FilterDialog>,
+      public dialogRef: MatDialogRef<GroupByDialog>,
       private fb:FormBuilder,
+      private dao:DaoService,
+      private urlSrv:UrlService,
       private firebaseService:FirebaseService,
       @Inject(MAT_DIALOG_DATA) public data:JoinNodeActionData) {}
 
     ngOnInit(): void {
-      let node = this.data.node
-      let idx = this.data.currentTransactionIndex
+
+      let leftNode = this.data.node
+
+      this.columns = leftNode.transformations[0].sampleData!.metadata
+
       
 
-      this.columns = node.transformations[idx].sampleData!.metadata
-
-      
-      
+      if( this.data.action == ActionOption.edit ){ 
+        this.groupBysFA.clear()    
+        let t = this.data.node.transformations[this.data.currentTransactionIndex] as GroupByTransformation    
+        t.groupBys.forEach( j =>{
+          let newFG = this.fb.group({
+            columnName: [j.columnName],
+            groupBy: [j.groupBy],
+            exp:[j.expresion]
+          })
+          this.groupBysFA.push( newFG)
+        })     
+      } 
+      else if( this.data.action == ActionOption.add ){
+        //don nothing
+      }     
       /*
       Promise.all( allPromises ).then( () =>{
         this.isLoading = false
@@ -107,7 +120,7 @@ import { FirebaseService } from 'app/firebase.service';
             this.joinsFA.push( newJoinFG)
           })     
         }
-
+/*
         this.data.rightNode.children?.forEach( child =>{
           let prefix = child.name
           child.selectedColumns.forEach( selectedColumn =>{
@@ -174,7 +187,17 @@ import { FirebaseService } from 'app/firebase.service';
 */      
     }
 
-  
+    onAddGroupBy(){
+      let newFG = this.fb.group({
+        columnName: [''],
+        groupBy: [GroupByOption.sum],
+        exp:['']
+      })
+      this.groupBysFA.push( newFG)
+    }
+    onDeleteGroupBy(i:number){
+      this.groupBysFA.controls.splice(i,1)
+    }    
 
     /*
     onDelete(i:number){
@@ -187,11 +210,12 @@ import { FirebaseService } from 'app/firebase.service';
       this.filteredOptions = this.data.rightNode.columns.filter(o => o.columnName.toLowerCase().includes(filterValue.toLowerCase()));
     }
 */
-    
-    filter(): void {
-      const filterValue = this.filterFA.controls.exp.value ? this.filterFA.controls.exp.value : ""
+    filter(i:number): void {
+      let formFG = this.groupBysFA.controls[i]
+      const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
       this.filteredOptions = this.columns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
     }   
+    
     /*  
 
     onAddFilter(){
@@ -283,123 +307,45 @@ import { FirebaseService } from 'app/firebase.service';
     }
 */
     onSubmit(){  
-      let columnName = this.filterFA.controls.columnName.value 
-      let comparator:ComparatorOption = this.filterFA.controls.comparator.value ? this.filterFA.controls.comparator.value : ComparatorOption.equal
-      let exp = this.filterFA.controls.exp.value
-      let f:FilterTransformation = {
-        type: TransformationType.filter,
+      let GroupByTransformation:GroupByTransformation[] = []
+
+      let groupBys: Array<{
+        columnName:string
+        groupBy:GroupByOption
+        expresion:string
+      }> = []
+      this.groupBysFA.controls.forEach( fg =>{
+        let columnName = fg.controls.columnName.value 
+        let groupByOption:GroupByOption = fg.controls.groupBy.value ? fg.controls.groupBy.value : GroupByOption.max
+        let exp = fg.controls.exp.value
+
+        let groupBy = {
+          columnName:columnName ? columnName : "",
+          groupBy:groupByOption,
+          expresion:exp ? exp:""
+        }
+        groupBys.push(groupBy)
+      })
+
+      let groupByTransformation:GroupByTransformation = {
+        type:TransformationType.groupBy,
         id:uuid.v4(),
-        leftValue: columnName ? columnName : "",
-        comparator: comparator ,
-        rightValue: exp ? exp : ""
+        groupBys: groupBys
       } 
 
-      let joinNodeUpdate:JoinNode = {
-        transformations:[ ...this.data.node.transformations , f]
+
+      let newJoinNode:JoinNode = {
+        transformations: [...this.data.node.transformations, groupByTransformation]
       }
- 
-      this.firebaseService.updateDoc( this.data.collectionPath + "/" + JoinNodeObj.className, this.data.node.id, joinNodeUpdate).then( ()=>{
-        console.log("editing filter done")
+      
+      this.firebaseService.updateDoc( this.data.collectionPath + "/" + JoinNodeObj.className, this.data.node.id , newJoinNode).then( ()=>{
+        console.log("update joinnode add groupBy")
       },
-      reason =>{
-        alert("Error: Editing filter:" + reason.error)
+      reason=>{
+        alert("error saving join" + reason.error)
       })
-      
-    }
-/*
-      this.data.rightNode.selectedColumns.length = 0
-      this.columnsFA.controls.forEach( columnFG =>{
-        let columnName = columnFG.controls.columnName.value! 
-        let selected = columnFG.controls.selected.value ? columnFG.controls.selected.value : false
-        let exp = columnFG.controls.alias.value || ""
-        if( selected ){
-          let selectedColumn:SelectedColumn = {
-            exp: columnName,
-            alias: exp,
-            isSelected:selected
-          }
-          this.data.rightNode.selectedColumns.push(selectedColumn)
-        }
-      }) 
-      
-      //save the selected child columns
-      this.data.rightNode.selectedChildColumns = {}
-      for(let i=0; i<this.childColumnsSelectedFA.length; i++){
-        let childColumnsSelectedFA = this.childColumnsSelectedFA[i]
-        this.data.rightNode.selectedChildColumns[i] = [] 
-        childColumnsSelectedFA.forEach( FG =>{
-          let exp:string = FG.controls.columnName.value || ""
-          let selected = FG.controls.selected.value ? FG.controls.selected.value : false  
-          let alias = FG.controls.alias.value || ""
-          let selectedColumn:SelectedColumn = {
-            exp: exp,
-            alias: alias,
-            isSelected: selected
-          }
-          this.data.rightNode.selectedChildColumns[i].push(selectedColumn)
-        })
-      }
-
-
-      this.data.rightNode.filters.length = 0
-      this.filtersFA.controls.forEach( filterFG =>{
-        let columnName = filterFG.controls.columnName.value 
-        let comparator:ComparatorOption = filterFG.controls.comparator.value ? filterFG.controls.comparator.value : ComparatorOption.equal
-        let exp = filterFG.controls.exp.value
-        let joinCondition:JoinCondition = {
-          leftValue: columnName ? columnName : "",
-          comparator: comparator ,
-          rightValue: exp ? exp : ""
-        } 
-        this.data.rightNode.filters.push(joinCondition)
-      })
-
     }
 
-    onAddPostTransformation(id:string){
-      if( 'new' == id ){
-        this.postTransformationForm.controls.label.setValue("")      
-      }
-      else{
-        let p = this.data.rightNode.postTransformations.find( e => e.id == id)
-        if( p ){
-          this.postTransformationForm.controls.label.setValue(p.label)
-        }
-      }
-      this.isEditinPostTransformation.set(id)
-    }
-    onCancelTransformation(){
-      this.isEditinPostTransformation.set("")
-    }    
-    onSubmitPostTransformation(id:string){
-      if( !this.data.rightNode.postTransformations ){
-        this.data.rightNode.postTransformations = []
-      }
-      let label = this.postTransformationForm.controls.label.value
-      if( this.isEditinPostTransformation() == "new" && label ){
-        let transformation: Transformation = {
-          id:uuidv4(),
-          type:"description",
-          label:label
-        }
-        this.data.rightNode.postTransformations.push(transformation)
-        this.isEditinPostTransformation.set("")
-      }
-      else{
-        let p = this.data.rightNode.postTransformations.find( e => e.id == id)
-        if( p ){
-          let newLabel = this.postTransformationForm.controls.label.value 
-          p.label = newLabel ? newLabel : ""
-        }
-      } 
-      this.isEditinPostTransformation.set("")     
-    }
-
-    onDeleteTransformation(id:string){
-      let idx = this.data.rightNode.postTransformations.findIndex( e => e.id == id)
-      this.data.rightNode.postTransformations.splice(idx,1)
-    }
-    */
   }
   
   

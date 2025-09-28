@@ -71,12 +71,7 @@
                                         <ul>
                                           @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
                                             <li>
-                                            @if( t.type == "rawRead"){
-                                              Raw Read
-                                            }
-                                            @else if( t.type == "filter"){
                                               {{ getFilterTransformationText(t) }}
-                                            }
                                             </li>
                                           }
                                           @empty{
@@ -101,26 +96,6 @@
                             </mat-menu>
                           }              
                         </mat-tree-node>
-            <!--
-                        <mat-tree-node *matTreeNodeDef="let node; when: isNew">
-                          <div [formGroup]="newJoinFG">
-                            <mat-form-field class="name" appearance="fill">
-                                <mat-label>Name</mat-label>
-                                <input matInput formControlName="table">
-                            </mat-form-field>
-                            <button mat-icon-button (click)="AddSubmit(node.item)"><mat-icon>check</mat-icon></button>
-                          </div>                      
-                        </mat-tree-node>  
-                        <mat-tree-node *matTreeNodeDef="let node; when: isEditing">
-                          <div [formGroup]="newJoinFG">
-                            <mat-form-field class="name" appearance="fill">
-                                <mat-label>Name</mat-label>
-                                <input matInput formControlName="table">
-                            </mat-form-field>
-                            <button mat-icon-button (click)="EditSubmit(node.item)"><mat-icon>check</mat-icon></button>
-                          </div>                      
-                        </mat-tree-node>  
-                        -->            
                         <!-- This is the tree node template for expandable nodes -->
                         <mat-nested-tree-node
                             *matTreeNodeDef="let node; when: hasChild"
@@ -157,12 +132,7 @@
                                             <ul>
                                               @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
                                                 <li>
-                                                @if( t.type == "rawRead"){
-                                                  Raw Read
-                                                }
-                                                @else if( t.type == "filter"){
                                                   {{ getFilterTransformationText(t) }}
-                                                }
                                                 </li>
                                               }
                                               @empty{
@@ -193,29 +163,22 @@
                           <div [class.example-tree-invisible]="!tree.isExpanded(node)"
                               role="group">
                             <ng-container matTreeNodeOutlet></ng-container>
-                          </div>
-                          @if( tree.isExpanded(node) && !isAdding ){
-                            <div role="group">
-            <!--                <button mat-icon-button   (click)="Add(node.item)"><mat-icon>create_new_folder</mat-icon></button> -->
-                            </div>
-                          }  
+                          </div> 
                         </mat-nested-tree-node>
                       </mat-tree>
-                      @if( !isAdding ){
-                        <div
-                        id="root"
-                        cdkDropList
-                        #doneList="cdkDropList"
-                        class="example-list"
-                        (cdkDropListDropped)="onDrop($event)"
-                        [cdkDropListEnterPredicate]="acceptPredicate"
-                        > 
-                        <!--          
-                          <button mat-icon-button (click)="Add(null)"><mat-icon>create_new_folder</mat-icon></button>
-                        -->
-                        <mat-icon>create_new_folder</mat-icon>
-                        </div>  
-                      }          
+                      <div
+                      id="root"
+                      cdkDropList
+                      #doneList="cdkDropList"
+                      class="example-list"
+                      (cdkDropListDropped)="onDrop($event)"
+                      [cdkDropListEnterPredicate]="acceptPredicate"
+                      > 
+                      <!--          
+                        <button mat-icon-button (click)="Add(null)"><mat-icon>create_new_folder</mat-icon></button>
+                      -->
+                      <mat-icon>create_new_folder</mat-icon>
+                      </div>  
                 
                 @if(!model()){
                     <button mat-raised-button (click)="onCancel()">Cancelar</button>     
@@ -233,17 +196,13 @@
                       <mat-icon>more_vert</mat-icon>
                     </button>
                     <mat-menu #menuActions="matMenu">
-                      <button mat-button (click)="addFilter()">Add new filter</button>
+                      <button mat-menu-item (click)="addFilter()">Add new filter</button>
+                      <button mat-menu-item (click)="addGroupBy()">Add new GroupBy</button>
                     </mat-menu>                     
                     <mat-list>
                     @for( t of selectedJoinNode()!.transformations!;track t.id;let i = $index){
                       <mat-list-item>
-                      @if( t.type == "rawRead"){
-                        initial Read
-                      }
-                      @else if( t.type == "filter"){
                         {{getFilterTransformationText(t)}} 
-                      }
                       <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
                         <mat-icon>more_vert</mat-icon>
                       </button>
