@@ -756,9 +756,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     else if( t.type == TransformationType.groupBy ){
       let g = t as GroupByTransformation
       str += "GroupBy:"
-      g.groupBys.forEach(e =>{
-        str += e.columnName
-      })
+      for(let i =0; i<g.groupBys.length; i++){
+        str += g.groupBys[i].columnName
+      }
     }
     return str
   }
