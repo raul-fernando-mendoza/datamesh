@@ -214,7 +214,8 @@ export interface SelectedColumn {
 export enum TransformationType{
   initialRead = 'InitialRead',
   filter = "filter",
-  groupBy = "groupBy"
+  groupBy = "groupBy",
+  selectColumns = "selectColumns"
 }
 
 export interface Transformation{
@@ -241,6 +242,12 @@ export class GroupByTransformation implements Transformation{
     expresion:string
   }>
   sampleData?:SqlResultInFirebase
+}
+
+export class SelectColumnsTransformation implements Transformation{
+  type=TransformationType.groupBy
+  id!:string
+  columnsNames!:Array<string>
 }
 
 export interface JoinNode{

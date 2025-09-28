@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnInit, signal, ViewChild } from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation } from 'app/datatypes/datatypes.module';
+import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -19,7 +19,6 @@ import { JoinDataSource, TreeNode } from './join-datasource';
 import { MatMenuModule } from '@angular/material/menu';
 import { CdkDrag, CdkDropList, CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { DaoService } from 'app/dao.service';
-import { JoinDialog } from 'app/join-dialog/join-dlg';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatExpansionModule} from '@angular/material/expansion';
@@ -32,6 +31,8 @@ import {MatTabsModule} from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
 import { FilterDialog } from './filter-dlg';
 import { GroupByDialog } from './groupby-dlg';
+import { JoinDialog } from './join-dlg';
+import { MatCheckbox, MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
     selector: 'app-model-edit',
@@ -57,7 +58,8 @@ import { GroupByDialog } from './groupby-dlg';
         TablesTreeComponent,
         MatSidenavModule,
         MatTabsModule,
-        MatListModule
+        MatListModule,
+        MatCheckboxModule
     ],
     providers: [JoinDataSource],
     templateUrl: './model-edit.component.html',
@@ -118,6 +120,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   selectedJoinNodePath = signal("")
   selectedJoinNode = signal<JoinNodeObj|null>(null)
   result = signal<any | null>(null)
+
+  selectedColumns:Array<FormGroup> = Array<FormGroup>()
   
   constructor( 
     private fb:FormBuilder 
@@ -348,56 +352,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   }
 
 
-  /*
-  Edit(node:JoinNode | null){
-    if( this.model  && node ){
-      console.log(node)
-      this.isAdding = true
-
-      this.newJoinFG.controls.table.setValue(node.name)
-      this.newInfoNodeAdding = node
-    } 
-    this.dataSource.setData(this.model!.data)
-  }
-*
-  AddSubmit(node:JoinNode){
-    if( this.model ){
-      console.log(node)
-      var name = this.newJoinFG.controls.table.value
-      
-      
-      if(this.isAdding && this.newInfoNodeAdding != null && name ) {
-        this.newInfoNodeAdding.name = name
-        
-        this.isAdding = false
-        this.newInfoNodeAdding = null
-        this.parentInfoNodeAdding = null
-        this.newJoinFG.controls.table.setValue("")
-      }
-      this.save()    
-    }
-  }  
-  
-  EditSubmit(node:JoinNode){
-    if( this.model ){
-      console.log(node)
-      var name = this.newJoinFG.controls.table.value
-      if( name ){
-        node.name = name
-      }
-      
-      if(this.isAdding && this.newInfoNodeAdding != null && name ) {
-        this.newInfoNodeAdding.name = name
-        this.isAdding = false
-        this.newInfoNodeAdding = null
-        this.parentInfoNodeAdding = null
-        this.newJoinFG.controls.table.setValue("")
-      }
-      this.save()    
-    }
-  }    
-
-*/
   onDeleteNode(parentNodeInfo:JoinNodeObj, nodeInfo:JoinNodeObj){
 
     if( parentNodeInfo ){
@@ -457,35 +411,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   acceptPredicate(drag: CdkDrag, drop: CdkDropList) {
     return true //drag.data.startsWith("G") ;
   }  
-  /*
-  AddTable(
-    connectionId:string,
-    schemaName:string,
-    tableName:string,
-    parentNode:JoinNode | null){
-    if( this.model ){
-      console.log(parentNode)
-      let id = uuid.v4()
-      var newJoin:JoinNodeObj = {
-        id: id,
-        name: tableName,
-        connectionId: connectionId,
-        tableName: tableName,
-        joinCriteria: [],
-        columns: [],
-        sampleData: null,
-        transformations: []
-      }
-      
-      if( !parentNode ){
-        this.model.rootJoinNode = newJoin  
-      }
-      else{
-      }
-      this.save()   
-    } 
-  }
-*/  
+    
   onDrop(e:any){
     var data  = e.item.data as SnowFlakeTable 
     console.log(data)
@@ -728,6 +654,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     return date.join("/") + " "  + time.join(":")
   }
 
+
+  
+
   onJoinNodeSelected(node:InfoNode){
     
     let fullPath = this.getCollectionPath( node.id )
@@ -737,13 +666,28 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       if( joinNodeObj ){
         this.selectedJoinNode.set(joinNodeObj)
         let result = joinNodeObj.transformations[0].sampleData
+
+        //no create the form before loading the sample
+       
+        if( result ){
+
+          this.selectedColumns.length = 0
+          for( let i =0; i<result.metadata.length; i++){
+            let t = this.fb.group({
+              selected:[false]
+            })
+
+            this.selectedColumns.push(t)
+          }
+        }
+        
         this.result.set(result)
       }
     }
     
   }
 
-  getFilterTransformationText(t:Transformation ):string{
+  getTransformationText(t:Transformation ):string{
     let str = ""
     if( t.type == TransformationType.initialRead ){
       let tf = t as FilterTransformation
@@ -760,7 +704,17 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         str += g.groupBys[i].columnName
       }
     }
-    return str
+    else if( t.type == TransformationType.selectColumns){
+      let sc = t as SelectColumnsTransformation
+      str = ""
+      sc.columnsNames.forEach( e =>{
+        if( str ){
+          str +=','
+        }
+        str += e
+      })
+    }
+    return "select :" + str
   }
 
   addFilter(){
@@ -823,5 +777,44 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       })
     }
   }
+
+  
+
+  addSelectedColumns(){
+    if( this.selectedJoinNode() ){
+      let node:JoinNodeObj = this.selectedJoinNode()!
+
+      let columnsNames:Array<string> = Array<string>()
+
+      for(let i=0; i<this.selectedColumns.length; i++){
+        if(this.selectedColumns[i].controls["selected"].value ){
+          let name = this.result().metadata[i]['name']
+          columnsNames.push( name )
+        } 
+      }
+
+      let selectedColumnsTransformation:SelectColumnsTransformation = {
+        type: TransformationType.selectColumns,
+        id: uuid.v4(),
+        columnsNames: columnsNames
+      }
+      
+      let nodeUpdate:JoinNode = {
+        transformations:[ ...node.transformations , selectedColumnsTransformation]
+      }
+
+      let collectionName = this.getCollectionPath( node.id )
+
+      this.firebaseService.updateDoc( collectionName + "/" + JoinNodeObj.className, node.id, nodeUpdate).then( ()=>{
+        console.log("save the join")
+      })
+      .then( () =>{
+        this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+      })
+
+    }
+  }
+  
+
 
 }

@@ -71,7 +71,7 @@
                                         <ul>
                                           @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
                                             <li>
-                                              {{ getFilterTransformationText(t) }}
+                                              {{ getTransformationText(t) }}
                                             </li>
                                           }
                                           @empty{
@@ -132,7 +132,7 @@
                                             <ul>
                                               @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
                                                 <li>
-                                                  {{ getFilterTransformationText(t) }}
+                                                  {{ getTransformationText(t) }}
                                                 </li>
                                               }
                                               @empty{
@@ -198,11 +198,12 @@
                     <mat-menu #menuActions="matMenu">
                       <button mat-menu-item (click)="addFilter()">Add new filter</button>
                       <button mat-menu-item (click)="addGroupBy()">Add new GroupBy</button>
+                      <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
                     </mat-menu>                     
                     <mat-list>
                     @for( t of selectedJoinNode()!.transformations!;track t.id;let i = $index){
                       <mat-list-item>
-                        {{getFilterTransformationText(t)}} 
+                        {{getTransformationText(t)}} 
                       <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
                         <mat-icon>more_vert</mat-icon>
                       </button>
@@ -243,12 +244,16 @@
                   <div class="view">
                       <div class="wrapper">
                           <table *ngIf="result().metadata && result().resultSet">
-                              <thead>
-                                  <tr>
-                                      <td class="sticky-col first-col"> idx </td>
-                                      <th *ngFor="let h of result().metadata">{{ h["name"] + "-" +  h["type_code"] }}</th>
-                                  </tr>
-                              </thead>
+                            <thead >
+                              <tr>
+                                <th class="sticky-col first-col"> idx </th>
+                                @for( h of result().metadata ; track h; let i = $index ){
+                                <th [formGroup]="selectedColumns[i]"> 
+                                    <mat-checkbox formControlName="selected">{{ result().metadata[i]["name"] + "-" +  result().metadata[i]["type_code"] }}</mat-checkbox>   <!---->
+                                </th>
+                                }
+                              </tr>
+                            </thead>
                               <tbody>                
                                   <tr *ngFor="let row of result().resultSet; index as i">
                                       <td class="sticky-col first-col">{{ i + 1 }}</td>
