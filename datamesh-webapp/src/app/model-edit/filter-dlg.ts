@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType } from 'app/datatypes/datatypes.module';
+import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType, SqlColumnGeneric } from 'app/datatypes/datatypes.module';
 import { MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -43,7 +43,6 @@ import { FirebaseService } from 'app/firebase.service';
         MatProgressSpinnerModule,
         MatAutocompleteModule,
         MatExpansionModule,
-        DataGridComponent,
         MatListModule
     ]
 })
@@ -66,9 +65,9 @@ import { FirebaseService } from 'app/firebase.service';
         exp:['']
       })
 
-    columns!:SnowFlakeNativeColumn[]
+    columns!:SqlColumnGeneric[]
 
-    filteredOptions: SnowFlakeNativeColumn[] = [];
+    filteredOptions: SqlColumnGeneric[] = [];
 
     result:SqlResultInFirebase | null= null
     
@@ -82,12 +81,12 @@ import { FirebaseService } from 'app/firebase.service';
       let node = this.data.node
       let idx = this.data.currentTransactionIndex
 
-      this.columns = node.transformations[idx].sampleData!.metadata
+      this.columns = node.transformations[idx].sampleData!.columns
     }
 
     filter(): void {
       const filterValue = this.filterFA.controls.exp.value ? this.filterFA.controls.exp.value : ""
-      this.filteredOptions = this.columns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
+      this.filteredOptions = this.columns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
     }   
 
     onSubmit(){  

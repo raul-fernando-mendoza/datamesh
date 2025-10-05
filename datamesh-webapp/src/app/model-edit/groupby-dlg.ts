@@ -1,4 +1,4 @@
-import {  Component,  ElementRef,  Inject, OnInit, ViewChild } from '@angular/core';
+import {  Component,  ElementRef,  Inject, OnInit, signal, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
 import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj, GroupByOption, JoinNodeActionData, GroupByTransformation, ActionOption, TransformationType } from 'app/datatypes/datatypes.module';
+import { JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj, FunctionOption, JoinNodeActionData, GroupByTransformation, ActionOption, TransformationType, SqlColumnGeneric } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -45,33 +45,40 @@ import { FirebaseService } from 'app/firebase.service';
         MatProgressSpinnerModule,
         MatAutocompleteModule,
         MatExpansionModule,
-        DataGridComponent,
         MatListModule
     ]
 })
   export class GroupByDialog implements OnInit{ 
     @ViewChild('input') input!: ElementRef<HTMLInputElement>;
     
-    groupByOptions:Array<GroupByOption> = [  
-      GroupByOption.sum,
-      GroupByOption.max,
-      GroupByOption.min,
-      GroupByOption.avg      
+    groupByOptions:Array<FunctionOption> = [  
+      FunctionOption.sum,
+      FunctionOption.max,
+      FunctionOption.min,
+      FunctionOption.avg      
     ]
 
     groupBysFA = this.fb.array([
       this.fb.group({
         columnName: [''],
-        groupBy: [GroupByOption.sum],
-        exp:['']
+        groupBy: [FunctionOption.sum],
+        alias:['']
       })
     ])   
 
-    columns!:SnowFlakeNativeColumn[]
+    grpFA = this.fb.group({
+        columnName: ['']
+    })
 
-    filteredOptions: SnowFlakeNativeColumn[] = [];
+
+    columns!:SqlColumnGeneric[]
+
+    filteredOptions: SqlColumnGeneric[] = [];
+    filteredGrpOptions: SqlColumnGeneric[] = [];
 
     result:SqlResultInFirebase | null= null
+
+    groupByColumns = signal<Array<string>>([])
 
     constructor(
       public dialogRef: MatDialogRef<GroupByDialog>,
@@ -85,16 +92,16 @@ import { FirebaseService } from 'app/firebase.service';
 
       let leftNode = this.data.node
 
-      this.columns = leftNode.transformations[0].sampleData!.metadata
+      this.columns = leftNode.transformations[leftNode.transformations.length-1].sampleData!.columns
 
       if( this.data.action == ActionOption.edit ){ 
         this.groupBysFA.clear()    
         let t = this.data.node.transformations[this.data.currentTransactionIndex] as GroupByTransformation    
-        t.groupBys.forEach( j =>{
+        t.functions.forEach( j =>{
           let newFG = this.fb.group({
             columnName: [j.columnName],
-            groupBy: [j.groupBy],
-            exp:[j.expresion]
+            groupBy: [j.functionOption],
+            alias:[j.alias]
           })
           this.groupBysFA.push( newFG)
         })     
@@ -104,11 +111,11 @@ import { FirebaseService } from 'app/firebase.service';
       }     
     }
 
-    onAddGroupBy(){
+    onAddFunction(){
       let newFG = this.fb.group({
         columnName: [''],
-        groupBy: [GroupByOption.sum],
-        exp:['']
+        groupBy: [FunctionOption.sum],
+        alias:['']
       })
       this.groupBysFA.push( newFG)
     }
@@ -119,34 +126,41 @@ import { FirebaseService } from 'app/firebase.service';
     filter(i:number): void {
       let formFG = this.groupBysFA.controls[i]
       const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
-      this.filteredOptions = this.columns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
+      this.filteredOptions = this.columns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
     }   
+
+    filterGrp(): void {
+      let formFG = this.grpFA
+      const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
+      this.filteredGrpOptions = this.columns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
+    }     
     
     onSubmit(){  
       let GroupByTransformation:GroupByTransformation[] = []
 
-      let groupBys: Array<{
+      let funcs: Array<{
         columnName:string
-        groupBy:GroupByOption
-        expresion:string
+        functionOption:FunctionOption
+        alias:string
       }> = []
       this.groupBysFA.controls.forEach( fg =>{
         let columnName = fg.controls.columnName.value 
-        let groupByOption:GroupByOption = fg.controls.groupBy.value ? fg.controls.groupBy.value : GroupByOption.max
-        let exp = fg.controls.exp.value
+        let functionOption:FunctionOption = fg.controls.groupBy.value ? fg.controls.groupBy.value : FunctionOption.max
+        let alias = fg.controls.alias.value
 
-        let groupBy = {
+        let fun = {
           columnName:columnName ? columnName : "",
-          groupBy:groupByOption,
-          expresion:exp ? exp:""
+          functionOption:functionOption,
+          alias:alias ? alias:""
         }
-        groupBys.push(groupBy)
+        funcs.push(fun)
       })
 
       let groupByTransformation:GroupByTransformation = {
-        type:TransformationType.groupBy,
-        id:uuid.v4(),
-        groupBys: groupBys
+        type: TransformationType.groupBy,
+        id: uuid.v4(),
+        functions: funcs,
+        groupByColumns: this.groupByColumns()
       } 
 
 
@@ -162,6 +176,16 @@ import { FirebaseService } from 'app/firebase.service';
       })
     }
 
+    onAddGroupBy(){
+      let columnName = this.grpFA.controls.columnName.value!
+      let currentSelection = this.groupByColumns()
+      this.groupByColumns.set( [ ...currentSelection , columnName])
+    }
+    onRemoveGroupBy(i:number){
+      let currentSelection = this.groupByColumns()
+      currentSelection.splice(i,1)
+      this.groupByColumns.set( [ ...currentSelection ])
+    }
   }
   
   

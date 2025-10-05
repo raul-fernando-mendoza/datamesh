@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnInit, signal, ViewChild } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {  FormBuilder,  FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj, Model, getCurrentTimeStamp, SqlResultInFirebase, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation } from 'app/datatypes/datatypes.module';
+import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, SqlResultInFirebase, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
-import { doc, DocumentSnapshot, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { doc, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { db } from '../../environments/environment'
 import * as uuid from 'uuid';
 import { MatInputModule } from '@angular/material/input';
@@ -27,12 +27,12 @@ import { AuthService } from 'app/auth.service';
 import { AngularSplitModule, SplitAreaComponent, SplitComponent } from 'angular-split';
 import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import {MatTabsModule} from '@angular/material/tabs';
+import { MatTabsModule} from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
 import { FilterDialog } from './filter-dlg';
 import { GroupByDialog } from './groupby-dlg';
 import { JoinDialog } from './join-dlg';
-import { MatCheckbox, MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 @Component({
     selector: 'app-model-edit',
@@ -117,8 +117,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   flatJoinNodeMap = new Map<string,JoinNodeObj>()
   flatInfoNodes = new Map<string, InfoNode>()  
 
-  selectedJoinNodePath = signal("")
-  selectedJoinNode = signal<JoinNodeObj|null>(null)
+  selectedInfoNodePath = signal("")
+  selectedJoinNodeObj = signal<JoinNodeObj|null>(null)
   result = signal<any | null>(null)
 
   selectedColumns:Array<FormGroup> = Array<FormGroup>()
@@ -174,7 +174,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
                   this.loadRawModel().then( () =>{
                     this.dataSource.setData(this.infoNodes) 
                     this.tree.expandAll()
-                    this.selectedJoinNode.set(null)
+                    this.selectedJoinNodeObj.set(null)
                   },
                   reason=>{
                     alert("Error reloading JoinNodes:" + reason.error)
@@ -189,35 +189,33 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       )
     }
   }
-  getPath( id:string, parentInfoNodes:InfoNode[] ):InfoNode[]|null{
+  getPath( infoNode:InfoNode ):InfoNode[]{
+    return this.getPathRecursive( infoNode.id, this.infoNodes )
+  }
+
+  getPathRecursive(id:string, parentInfoNodes:InfoNode[]):InfoNode[]{
     for(let i = 0; i<parentInfoNodes.length; i++){
       if( parentInfoNodes[i].id == id ){
         return [ parentInfoNodes[i] ]
       }
       else{
         if( parentInfoNodes[i].children ){
-          let infonode = parentInfoNodes[i]
-          if( infonode.children ){
-            for( let j=0 ; j<infonode.children.length; j++ ){
-              let result = this.getPath( id, infonode.children)
-              if( result ){
-                return [parentInfoNodes[i], ... result]
-              }
-            }
+          let result = this.getPathRecursive( id, parentInfoNodes[i].children! )
+          if( result ){
+            return [parentInfoNodes[i], ... result]
           }
         }
       }
     }
-    return null
+    return []    
   }
 
-  getCollectionPath( id:string ){
-    var path = this.getPath( id , this.infoNodes)
+  getCollectionPath( infoNode:InfoNode ){
+    var path = this.getPath( infoNode )
 
     
     var model = this.model()!
     if( path ){
-      path.splice(path.length - 1, 1)
       var pathWithNodes = ""
       for(let i =0; i< path.length; i++){
         pathWithNodes = pathWithNodes + "/" + JoinNodeObj.className + "/" + path[i].id
@@ -225,7 +223,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       var fullPath = ModelObj.collectionName + "/" + model.id + pathWithNodes
       return fullPath
     }
-    return null
+    return ModelObj.collectionName 
   }
   
   
@@ -355,7 +353,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   onDeleteNode(parentNodeInfo:JoinNodeObj, nodeInfo:JoinNodeObj){
 
     if( parentNodeInfo ){
-      let path = this.getPath(parentNodeInfo.id!,this.infoNodes)
+      let path = this.getPath(parentNodeInfo)
       if( path ){
         let pathWithNodes = ""
         path.forEach( e =>{
@@ -383,17 +381,19 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
   }
 
-  getSampleData(tableName:string, connectionId:string):Promise<any>{
+  updateSampleData(infoNode:InfoNode):Promise<any>{
     return new Promise(( resolve, reject ) => {
-      
-      let sql = "select * from " + tableName + " limit 10"
+
+
+      let collectionPath = this.getCollectionPath(infoNode)
+      let parentCollection = collectionPath.split("/").splice(0,-1).join("/")
 
       var req = {
-        connectionId:connectionId,
-        sql:sql
+        collection:parentCollection,
+        id:infoNode.id    
       }
       this.isLoading = true
-      this.urlService.post("executeSql",req).subscribe({ 
+      this.urlService.post("updateModelSamples",req).subscribe({ 
         'next':(result:any)=>{
           this.isLoading = false
           console.log( result )
@@ -407,6 +407,16 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     })  
   }
 
+  updateAll(infoNode:InfoNode):Promise<void>{
+    return this.updateSampleData( infoNode ).then( ()=>{
+      this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
+        console.log("node onEditJoinNode updated")
+      },
+      reason=>{
+        alert("Error onEditJoinNode: " + reason.error)
+      })
+    })     
+  }
   
   acceptPredicate(drag: CdkDrag, drop: CdkDropList) {
     return true //drag.data.startsWith("G") ;
@@ -436,7 +446,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       console.log( e.container )
       let infoNode = this.flatInfoNodes.get(parentNode.id)
       if( infoNode != null){
-        let path = this.getPath( infoNode.id , this.infoNodes)
+        let path = this.getPath( infoNode )
         if( path ){
           let pathWithNodes = ""
           path.forEach( e =>{
@@ -454,33 +464,16 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
             sampleData: null,
             transformations: []
           }
-
-          this.getSampleData( tableName, connectionId).then( result =>{
-            
-            let sqlResult:SqlResultInFirebase = {
-              metadata:result.metadata,
-              resultSet:Array<{ [key: string]: any }>()
-            }
-            for(let i=0; i<result.resultSet.length; i++){ 
-              let row = result.resultSet[i]             
-              let data:{[key: string]:any}={}
-              for( let c=0; c<row.length; c++){
-                data["k_" + c] = row[c]
-              }
-              sqlResult.resultSet.push(data)
-            }    
-
-            let transformation:Transformation= {
-              id: uuid.v4(),
-              type: TransformationType.initialRead ,
-              sampleData:sqlResult
-            }
-            newJoin.transformations = [transformation]
-                         
-            this.firebaseService.setDoc( parentPath + "/"  + JoinNodeObj.className, newJoin.id, newJoin  )
-            .then( () =>{
-              this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
-            })
+  
+          let transformation:Transformation= {
+            id: uuid.v4(),
+            type: TransformationType.initialRead 
+          }
+          newJoin.transformations = [transformation]
+                        
+          this.firebaseService.setDoc( parentPath + "/"  + JoinNodeObj.className, newJoin.id, newJoin  )
+          .then( ()=>{
+            this.updateAll( newJoin )
           })
         }
       }
@@ -498,40 +491,19 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         sampleData: null,
         transformations: []
       }
+      
+        
+      let transformationContainer:Transformation = {
+        id: uuid.v4(),
+        type: TransformationType.initialRead
+      }
+      newJoin.transformations = [transformationContainer]
 
-      this.getSampleData( tableName, connectionId).then( result =>{
-
-        let sqlResult:SqlResultInFirebase = {
-          metadata:result.metadata,
-          resultSet:Array<{ [key: string]: any }>()
-        }
-        for(let i=0; i<result.resultSet.length; i++){ 
-          let row = result.resultSet[i]             
-          let data:{[key: string]:any}={}
-          for( let c=0; c<row.length; c++){
-            data["k_" + c] = row[c]
-          }
-          sqlResult.resultSet.push(data)
-        }        
-            
-        let transformationContainer:Transformation = {
-          id: uuid.v4(),
-          type: TransformationType.initialRead,
-          sampleData:sqlResult
-        }
-        newJoin.transformations = [transformationContainer]
-
-        this.firebaseService.setDoc( [ ModelObj.collectionName , this.model()!.id , JoinNodeObj.className].join("/"), newJoin.id, newJoin  )
-        .then( () =>{
-          let model:Model = {
-            updateon:getCurrentTimeStamp()
-          }
-          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, model)
-        },
-        reason =>{
-          alert("Error saving results:" + reason.error)
-        })
+      this.firebaseService.setDoc( [ ModelObj.collectionName , this.model()!.id , JoinNodeObj.className].join("/"), newJoin.id, newJoin  )
+      .then( ()=>{
+        this.updateAll(newJoin)
       })
+
     }
   } 
 
@@ -551,7 +523,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   onEditJoinNode(parentNode:InfoNode, node:InfoNode){
     console.log(node)
     if( parentNode && node ){
-      let collectionPath:string = this.getCollectionPath(node.id)!
+      let collectionPath:string = this.getCollectionPath(node)!
       let leftNode = this.flatJoinNodeMap.get(parentNode.id)!
       let rightNode = this.flatJoinNodeMap.get(node.id)
 
@@ -570,12 +542,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         console.log('The dialog was closed');
         if( data ){
           console.debug( data )
-          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
-            console.log("node updated")
-          },
-          reason=>{
-            alert("Error onEditJoinNode: " + reason.error)
-          })
+          this.updateAll(node)         
         }
       })
     }
@@ -608,7 +575,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   format( datatype:any, val:any){
     let result = val
-    if( datatype == 8 && val){
+    if( datatype.startsWith("date") && val){
       let date = new Date(val)
       let pstOffset = 480; // this is the offset for the Pacific Standard Time timezone     
       let str = new Date(date.getTime() + (pstOffset) * 60 * 1000).toLocaleString("en-US", { timeZone: "America/Los_Angeles" });
@@ -623,10 +590,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         result = ts
       }
     }
-    if( 3 == datatype && val){
-        result = val
-    } 
-    if( val == 0 || datatype==0
+    else if(datatype.startsWith("decimal") || datatype==0
     ){
       if( val - Math.floor(val) ){
         result = Number(val).toFixed(2)
@@ -634,13 +598,16 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       else{
         result = Math.floor(Number(val)) + ".__"
       }      
-    }              
+    }  
+    else{
+      result = val
+    }            
 
     return result
   }
   isNumber(datatype:any){
     
-    if(datatype == 3){
+    if(datatype.startsWith("decimal") ){
       return true
     }
     return false
@@ -659,20 +626,21 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   onJoinNodeSelected(node:InfoNode){
     
-    let fullPath = this.getCollectionPath( node.id )
+    let fullPath = this.getCollectionPath( node )
     if( fullPath ){
-      this.selectedJoinNodePath.set(fullPath)
+      this.selectedInfoNodePath.set(fullPath)
       let joinNodeObj = this.flatJoinNodeMap.get( node.id )
       if( joinNodeObj ){
-        this.selectedJoinNode.set(joinNodeObj)
-        let result = joinNodeObj.transformations[0].sampleData
+        this.selectedJoinNodeObj.set(joinNodeObj)
+        let lastIdx = joinNodeObj.transformations.length - 1
+        let result = joinNodeObj.transformations[lastIdx].sampleData
 
         //no create the form before loading the sample
        
         if( result ){
 
           this.selectedColumns.length = 0
-          for( let i =0; i<result.metadata.length; i++){
+          for( let i =0; i<result.columns.length; i++){
             let t = this.fb.group({
               selected:[false]
             })
@@ -699,9 +667,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
     else if( t.type == TransformationType.groupBy ){
       let g = t as GroupByTransformation
-      str += "GroupBy:"
-      for(let i =0; i<g.groupBys.length; i++){
-        str += g.groupBys[i].columnName
+      str += "GroupBy:" + g.groupByColumns + " " 
+      for(let i =0; i<g.functions.length; i++){
+        str += g.functions[i].functionOption + " " + g.functions[i].columnName
       }
     }
     else if( t.type == TransformationType.selectColumns){
@@ -714,19 +682,20 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         str += e
       })
     }
-    return "select :" + str
+    return str
   }
 
   addFilter(){
-    if( this.selectedJoinNode() ){
-      let n = this.selectedJoinNode()!
-      let collectionPath:string = this.getCollectionPath(n.id)!
-      let node = this.flatJoinNodeMap.get(n.id)!
-
-      let data: JoinNodeActionData = {
-        node: node,
+    if( this.selectedJoinNodeObj() ){
+      let joinNodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
+      let infoNode = this.flatInfoNodes.get( joinNodeObj.id )!
+      let collectionPath:string = this.getCollectionPath(infoNode)
+      
+      
+     let data: JoinNodeActionData = {
+        node: joinNodeObj,
         collectionPath: collectionPath,
-        currentTransactionIndex: 0,
+        currentTransactionIndex: joinNodeObj.transformations.length-1,
         action: ActionOption.add
       }
       const dialogRef = this.dialog.open(FilterDialog, {
@@ -739,26 +708,40 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         console.log('The dialog was closed');
         if( data ){
           console.debug( data )
-          //this.firebaseService.updateDoc()
-          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+          this.updateAll(infoNode)
         }
       })
     }
   }
   removeFilter(i:number){
-      let selectedJoinNode = this.selectedJoinNode()!
-      selectedJoinNode.transformations.splice( i, 1)
+      let infoNode = this.selectedJoinNodeObj()!
+      let joinNodeObj = this.flatJoinNodeMap.get( infoNode.id )!
+      joinNodeObj.transformations.splice( i, 1)
+
+      let nodeUpdate:JoinNode = {
+        transformations:[ ...joinNodeObj.transformations ]
+      }      
+
+      let collectionName = this.getCollectionPath( infoNode )
+
+      this.firebaseService.updateDoc( collectionName + "/" + JoinNodeObj.className, infoNode.id, nodeUpdate).then( ()=>{
+        console.log("save the join")
+      })
+      .then( () =>{
+        this.updateAll(infoNode)
+      })
+
   }
   addGroupBy(){
-    if( this.selectedJoinNode() ){
-      let n = this.selectedJoinNode()!
-      let collectionPath:string = this.getCollectionPath(n.id)!
+    if( this.selectedJoinNodeObj() ){
+      let n = this.selectedJoinNodeObj()!
+      let collectionPath:string = this.getCollectionPath(n)!
       let node = this.flatJoinNodeMap.get(n.id)!
 
       let data: JoinNodeActionData = {
         node: node,
         collectionPath: collectionPath,
-        currentTransactionIndex: 0,
+        currentTransactionIndex: node.transformations.length-1,
         action: ActionOption.add
       }
       const dialogRef = this.dialog.open(GroupByDialog, {
@@ -772,7 +755,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         if( data ){
           console.debug( data )
           //this.firebaseService.updateDoc()
-          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
+            console.log("update groupby")
+          })
+          
         }
       })
     }
@@ -781,8 +767,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   
 
   addSelectedColumns(){
-    if( this.selectedJoinNode() ){
-      let node:JoinNodeObj = this.selectedJoinNode()!
+    if( this.selectedJoinNodeObj() ){
+      let infoNode:InfoNode = this.selectedJoinNodeObj()!
+
+      let joinNode:JoinNodeObj = this.flatJoinNodeMap.get(infoNode.id)!
 
       let columnsNames:Array<string> = Array<string>()
 
@@ -800,12 +788,12 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       }
       
       let nodeUpdate:JoinNode = {
-        transformations:[ ...node.transformations , selectedColumnsTransformation]
+        transformations:[ ...joinNode.transformations , selectedColumnsTransformation]
       }
 
-      let collectionName = this.getCollectionPath( node.id )
+      let collectionName = this.getCollectionPath( infoNode )
 
-      this.firebaseService.updateDoc( collectionName + "/" + JoinNodeObj.className, node.id, nodeUpdate).then( ()=>{
+      this.firebaseService.updateDoc( collectionName + "/" + JoinNodeObj.className, infoNode.id, nodeUpdate).then( ()=>{
         console.log("save the join")
       })
       .then( () =>{
@@ -815,6 +803,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
   }
   
-
+  padNumberWithZeros(num: number, totalLength: number): string {
+    return num.toString().padStart(totalLength, '0');
+  }
 
 }

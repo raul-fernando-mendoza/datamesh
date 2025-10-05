@@ -187,11 +187,12 @@
             </div>
           </as-split-area>
           <as-split-area [size]="40">
-            @if( selectedJoinNode() ){
+            @if( selectedJoinNodeObj() ){
             <mat-drawer-container class="example-container">
               <mat-drawer mode="side" opened position="end">
                 <mat-tab-group>
                   <mat-tab label="transformations">
+                    here transformations
                     <button mat-icon-button [matMenuTriggerFor]="menuActions" aria-label="menu">
                       <mat-icon>more_vert</mat-icon>
                     </button>
@@ -201,7 +202,7 @@
                       <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
                     </mat-menu>                     
                     <mat-list>
-                    @for( t of selectedJoinNode()!.transformations!;track t.id;let i = $index){
+                    @for( t of selectedJoinNodeObj()!.transformations!;track t.id;let i = $index){
                       <mat-list-item>
                         {{getTransformationText(t)}} 
                       <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
@@ -221,10 +222,8 @@
                   </mat-tab>
                   <mat-tab label="Joins"> 
                     List of joins:
-                    
                     <mat-list>
-
-                    @for( j of selectedJoinNode()!.joinCriteria; track j.id){
+                    @for( j of selectedJoinNodeObj()!.joinCriteria; track j.id){
                       <mat-list-item>
                         {{ j.leftValue }} {{ j.comparator }} {{ j.rightValue }}
                       </mat-list-item>
@@ -238,18 +237,18 @@
                 </mat-tab-group>
               </mat-drawer>
               <mat-drawer-content>
-                {{ selectedJoinNodePath() }}
+                
                 @if( result() ){
                   result().records: {{ result() }}
                   <div class="view">
                       <div class="wrapper">
-                          <table *ngIf="result().metadata && result().resultSet">
+                          <table *ngIf="result().columns && result().resultSet">
                             <thead >
                               <tr>
                                 <th class="sticky-col first-col"> idx </th>
-                                @for( h of result().metadata ; track h; let i = $index ){
+                                @for( h of result().columns ; track h; let i = $index ){
                                 <th [formGroup]="selectedColumns[i]"> 
-                                    <mat-checkbox formControlName="selected">{{ result().metadata[i]["name"] + "-" +  result().metadata[i]["type_code"] }}</mat-checkbox>   <!---->
+                                    <mat-checkbox formControlName="selected">{{ result().columns[i]["columnName"] + "-" +  result().columns[i]["columnType"] }}</mat-checkbox>   <!---->
                                 </th>
                                 }
                               </tr>
@@ -257,15 +256,21 @@
                               <tbody>                
                                   <tr *ngFor="let row of result().resultSet; index as i">
                                       <td class="sticky-col first-col">{{ i + 1 }}</td>
-                                      <td *ngFor="let column of result().metadata; index as c" [ngClass]="{'number': isNumber(column['type_code']) }">{{ format(column['type_code'], row["k_" + c]) }} </td> 
+                                      <td *ngFor="let column of result().columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
                                   </tr>
                               </tbody>                
                           </table>  
                       </div>
                   </div>
                 }
+                @else{
+                  No result found for {{selectedInfoNodePath()}}
+                }
               </mat-drawer-content>
             </mat-drawer-container>
+            }
+            @else{
+              please select a join node
             }            
           </as-split-area>
         </as-split>

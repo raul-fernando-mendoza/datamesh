@@ -109,3 +109,7 @@ table tr th {
   height: 700px;
   border: solid 3px red;
 }
+
+mat-drawer-content{
+  min-height: 100%;
+}

@@ -259,6 +259,27 @@ def executeModelId():
         return ({"error":str(e)}, 400, headers)
     return (data, 200, headers)     
 
+#UpdateModelSamples
+@app.route('/UpdateModelSamples', methods=['POST','OPTIONS'])
+@as_json
+def UpdateModelSamples():
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
+    log.debug("*** UpdateModelSamples Start data:"+ str(request.data))
+    try:
+        req = request.get_json(force=True)
+        log.debug( str(req) )
+        data = bsnrules.updateModelSamples(req)
+        log.debug("*** End UpdateModelSamples:" + str(data))
+        
+    except Exception as e:
+        log.error("**** processRequest Exception:" + str(e))
+        return ({"error":str(e)}, 400, headers)
+    return (data, 200, headers)     
+
 
 if __name__ == '__main__':
     app.run()

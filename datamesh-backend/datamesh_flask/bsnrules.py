@@ -4,6 +4,7 @@ import datamesh_flask.datamesh_base as datamesh_base
 import datamesh_flask.snowflake_odbc as snowflake_odbc
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 import pandas as pd
+from snowflake.snowpark.functions import col, sql_expr, lit, Column, sum
 
 from firebase_admin import firestore
 
@@ -214,6 +215,126 @@ def executeModelById(req):
         return obj 
                 
         return qry
+
+def getInitialRead( joinNode ):
+    connectionId = joinNode["connectionId"]
+    tableName = joinNode["tableName"]
+    session = datamesh_base.getSnowparkSession( connectionId )
+    df = session.table(tableName) 
+    result = df.select("*") 
+    return result 
+
+def toSqlGeneric( df ):
+    sqlGeneric = {
+        "columns":[],
+        "resultSet":[]
+    }
+    
+    for col in df.dtypes:
+        colGeneric = {
+            "columnName":col[0],
+            "columnType":col[1]
+        }
+        sqlGeneric["columns"].append( colGeneric )
+                
+    collected = df.limit(10).collect()
+    for row in collected:
+        rowGeneric = {}
+        for i in range(len(row)):
+            property = f"{i:0>3}"
+            if row[i] != None:
+                columType = sqlGeneric["columns"][i]['columnType'] 
+                if (columType.startswith('string')) \
+                    or (columType == 'bigint'):
+                    rowGeneric[property] = row[i]
+                elif columType == 'date':
+                    t = row[i]
+                    rowGeneric[property] = f'{t.year}/{t.month:02}/{t.day:02}'
+                elif columType.startswith('timestamp'): 
+                    t = row[i]
+                    rowGeneric[property] = f'{t.year}/{t.month:02}/{t.day:02} {t.hour:02}:{t.minute:02}:{t.second:02}' 
+                elif columType == 'boolean':
+                    if row[i]:
+                       rowGeneric[property] = 'Y'
+                    else:         
+                       rowGeneric[property] = 'N' 
+                elif columType.startswith('Decimal') or \
+                    columType.startswith('decimal') :
+                    rowGeneric[property] = float(f"{row[i]}")       
+                else:    
+                    rowGeneric[property] = f"{row[i]}"
+            else:
+               rowGeneric[property] = None         
+                
+        sqlGeneric["resultSet"].append( rowGeneric )
+    return sqlGeneric
+
+def applyTransformation( df, t):
+    if t["type"] == 'filter':
+        leftValue = t["leftValue"]
+        comparator = t["comparator"]
+        rightValue = t["rightValue"]
+        result = df.filter( leftValue + comparator + rightValue )
+        return result 
+    elif t["type"] == 'selectColumns':
+        colsSelected = []
+        columnsNames = t["columnsNames"]
+        for n in columnsNames:
+            colsSelected.append( col(n).alias(n) )
+        result = df.select( colsSelected )    
+        return result
+    elif t["type"] == 'groupBy':
+        aggs = []
+        functions = t["functions"]
+        groupByColumns = t["groupByColumns"]
+        for f in functions:
+            columnName = f["columnName"]
+            functionOption = f["functionOption"]
+            alias = f["alias"]
+            if functionOption == "sum":
+                aggs.append( sum(columnName).alias(alias) )
+            
+        cols = []    
+        for c in groupByColumns:
+             cols.append( col(c) )  
+        result = df.group_by(cols).agg( aggs )   
+        return result    
+        
+
+def updateModelSamples(req):
+    collection = req['collection']
+    modelId = req["id"]        
+    print("collection:" + collection)
+    print("modelId" + modelId)
+    doc_ref = db.collection(collection).document(modelId)
+    doc = doc_ref.get()
+    joinNode = doc.to_dict() 
+    #print( json.dumps(jsonFilter(model,("columns")), indent=1, default=custom_json) )
+    df = getInitialRead( joinNode )
+    sqlResultGeneric = toSqlGeneric( df )
+    joinNode['transformations'][0]['sampleData'] = sqlResultGeneric
+    
+    
+    for i in range(1, len(joinNode["transformations"])):
+        t = joinNode["transformations"][i]
+        df = applyTransformation( df , t)
+        sqlResultGeneric = toSqlGeneric( df )
+        joinNode['transformations'][i]['sampleData'] = sqlResultGeneric
+        
+    
+    updateObj = {
+        "transformations":joinNode['transformations']
+    }
+    doc_ref.update( updateObj ) 
+    
+    
+    obj ={
+        "result":"success",
+    } 
+    
+    print("executeModelById END")
+    return obj 
+
     
 if __name__ == '__main__':
     print("datamesh_base compiled")    

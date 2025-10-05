@@ -218,10 +218,18 @@ export enum TransformationType{
   selectColumns = "selectColumns"
 }
 
+export class SqlColumnGeneric{
+  columnName!:string
+  columnType!:string
+}
+export class SqlResultGeneric{
+  columns!:Array<SqlColumnGeneric>
+  resultSet?:Array<{ [key:string]:any} >
+}
 export interface Transformation{
   type: TransformationType
   id:string
-  sampleData?:SqlResultInFirebase
+  sampleData?:SqlResultGeneric
 }
 
 export class FilterTransformation implements Transformation{
@@ -230,24 +238,33 @@ export class FilterTransformation implements Transformation{
   leftValue!:string
   comparator!:ComparatorOption
   rightValue!:string
-  sampleData?:SqlResultInFirebase
+  sampleData?:SqlResultGeneric
+}
+
+export enum FunctionOption {
+  sum = "sum",
+  max = "max",
+  min = "min",
+  avg = "avg"
 }
 
 export class GroupByTransformation implements Transformation{
   type=TransformationType.groupBy
   id!:string
-  groupBys!:Array<{
+  groupByColumns!:Array<string>
+  functions!:Array<{
     columnName:string
-    groupBy:GroupByOption
-    expresion:string
+    functionOption:FunctionOption
+    alias:string
   }>
-  sampleData?:SqlResultInFirebase
+  sampleData?:SqlResultGeneric
 }
 
 export class SelectColumnsTransformation implements Transformation{
   type=TransformationType.groupBy
   id!:string
   columnsNames!:Array<string>
+  sampleData?:SqlResultGeneric
 }
 
 export interface JoinNode{
@@ -378,24 +395,11 @@ export interface SnowFlakeNativeColumn{
 
 export interface SqlResultInFirebase{
   resultSet:Array<{ [key: string]: any }>
-  metadata:[
-    { 
-      display_size:number | null
-      internal_size:number
-      is_nullable:boolean
-      name:string
-      precision:number
-      scale:number
-      type_code:number 
-    }
-  ]
+  metadata:Array<SnowFlakeNativeColumn>
 }
 
-export enum GroupByOption {
-  sum = "sum",
-  max = "max",
-  min = "min",
-  avg = "avg"
-}
+
+
+
 
 

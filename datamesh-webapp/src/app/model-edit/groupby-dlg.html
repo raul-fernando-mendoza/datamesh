@@ -28,7 +28,7 @@
       (focus)="filter(i)">
       <mat-autocomplete #autoleft="matAutocomplete">
         @for (option of filteredOptions; track option) {
-          <mat-option [value]="option.name">{{option.name}}</mat-option>
+          <mat-option [value]="option.columnName">{{option.columnName}}</mat-option>
         }
       </mat-autocomplete>              
     </mat-form-field>
@@ -36,10 +36,38 @@
       <mat-label>alias</mat-label>
       <input matInput placeholder="manual entry" formControlName="alias">
     </mat-form-field> 
-  </form>  
+  </form> 
+
   <button mat-icon-button (click)="onDeleteGroupBy(i)"><mat-icon>delete</mat-icon></button>
 }
-  <button mat-button (click)="onAddGroupBy()">add</button>
+<button mat-button (click)="onAddFunction()">add</button>
+
+<form [formGroup]="grpFA">
+  <div>
+    <ul>
+    @for( columnName of groupByColumns(); track columnName;  let i = $index){
+      <li>{{ columnName }}<button mat-icon-button (click)="onRemoveGroupBy(i)"><mat-icon>delete</mat-icon></button> </li>
+    }
+    </ul>
+    <mat-form-field appearance="fill" >
+      <input #input{{i}}
+      type="text"
+      placeholder="Pick column"
+      matInput
+      formControlName="columnName"
+      [matAutocomplete]="autoleft"
+      (input)="filterGrp()"
+      (focus)="filterGrp()">
+      <mat-autocomplete #autoleft="matAutocomplete">
+        @for (option of filteredGrpOptions; track option) {
+          <mat-option [value]="option.columnName">{{option.columnName}}</mat-option>
+        }
+      </mat-autocomplete>              
+    </mat-form-field> 
+  </div> 
+</form>
+<button mat-button (click)="onAddGroupBy()">add</button>
+  
 
 
 

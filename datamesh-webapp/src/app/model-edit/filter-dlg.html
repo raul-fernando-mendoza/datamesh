@@ -22,7 +22,7 @@
                 (focus)="filter()">
                 <mat-autocomplete #autoleft="matAutocomplete">
                   @for (option of filteredOptions; track option) {
-                    <mat-option [value]="option.name">{{option.name}}</mat-option>
+                    <mat-option [value]="option.columnName">{{option.columnName}}</mat-option>
                   }
                 </mat-autocomplete>              
               </mat-form-field>

@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { ComparatorOption, JoinCondition, JoinNode, JoinData, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj } from 'app/datatypes/datatypes.module';
+import { ComparatorOption, JoinCondition, JoinNode, JoinData, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj, SqlColumnGeneric } from 'app/datatypes/datatypes.module';
 import { MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -45,7 +45,6 @@ import { FirebaseService } from 'app/firebase.service';
         MatProgressSpinnerModule,
         MatAutocompleteModule,
         MatExpansionModule,
-        DataGridComponent,
         MatListModule
     ]
 })
@@ -98,11 +97,11 @@ import { FirebaseService } from 'app/firebase.service';
       })
     ])   
 
-    leftColumns!:SnowFlakeNativeColumn[]
-    rightColumns!:SnowFlakeNativeColumn[]
+    leftColumns!:SqlColumnGeneric[]
+    rightColumns!:SqlColumnGeneric[]
 
-    filteredOptions: SnowFlakeNativeColumn[] = [];
-    filteredLeftOptions: SnowFlakeNativeColumn[] = [];
+    filteredOptions: SqlColumnGeneric[] = [];
+    filteredLeftOptions: SqlColumnGeneric[] = [];
 
     childColumnsSelectedFA = [
       [
@@ -148,8 +147,8 @@ import { FirebaseService } from 'app/firebase.service';
       let leftNode = this.data.leftNode
       let rightNode = this.data.rightNode
 
-      this.leftColumns = leftNode.transformations[0].sampleData!.metadata
-      this.rightColumns = rightNode.transformations[0].sampleData!.metadata
+      this.leftColumns = leftNode.transformations[leftNode.transformations.length-1].sampleData!.columns
+      this.rightColumns = rightNode.transformations[leftNode.transformations.length-1].sampleData!.columns
 
       this.joinsFA.clear()
 
@@ -182,13 +181,13 @@ import { FirebaseService } from 'app/firebase.service';
     filterLeft(i:number): void {
       let formFG = this.joinsFA.controls[i]
       const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
-      this.filteredLeftOptions = this.leftColumns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
+      this.filteredLeftOptions = this.leftColumns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
     }   
     
     filterJoinExp(i:number): void {
       let formFG = this.joinsFA.controls[i]
       const filterValue = formFG.controls.exp.value ? formFG.controls.exp.value : ""
-      this.filteredOptions = this.rightColumns.filter((o => o.name.toLowerCase().includes(filterValue.toLowerCase())))
+      this.filteredOptions = this.rightColumns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
     }   
     onSubmit(){  
       let joinCriteria:JoinCondition[] = []
