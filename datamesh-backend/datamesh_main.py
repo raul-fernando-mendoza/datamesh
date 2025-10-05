@@ -260,7 +260,7 @@ def executeModelId():
     return (data, 200, headers)     
 
 #UpdateModelSamples
-@app.route('/UpdateModelSamples', methods=['POST','OPTIONS'])
+@app.route('/updateModelSamples', methods=['POST','OPTIONS'])
 @as_json
 def UpdateModelSamples():
     headers = handleCors(request)

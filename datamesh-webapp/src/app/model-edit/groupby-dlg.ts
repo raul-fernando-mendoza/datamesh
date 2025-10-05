@@ -168,7 +168,7 @@ import { FirebaseService } from 'app/firebase.service';
         transformations: [...this.data.node.transformations, groupByTransformation]
       }
       
-      this.firebaseService.updateDoc( this.data.collectionPath + "/" + JoinNodeObj.className, this.data.node.id , newJoinNode).then( ()=>{
+      this.firebaseService.updateDoc( this.data.collectionPath , this.data.node.id , newJoinNode).then( ()=>{
         console.log("update joinnode add groupBy")
       },
       reason=>{

@@ -105,7 +105,7 @@ import { FirebaseService } from 'app/firebase.service';
         transformations:[ ...this.data.node.transformations , f]
       }
  
-      this.firebaseService.updateDoc( this.data.collectionPath + "/" + JoinNodeObj.className, this.data.node.id, joinNodeUpdate).then( ()=>{
+      this.firebaseService.updateDoc( this.data.collectionPath, this.data.node.id, joinNodeUpdate).then( ()=>{
         console.log("editing filter done")
       },
       reason =>{

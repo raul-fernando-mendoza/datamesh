@@ -188,9 +188,40 @@
           </as-split-area>
           <as-split-area [size]="40">
             @if( selectedJoinNodeObj() ){
-            <mat-drawer-container class="example-container">
-              <mat-drawer mode="side" opened position="end">
-                <mat-tab-group>
+              <as-split direction="horizontal">
+                <as-split-area [size]="70">                
+                  @if( result() ){
+                    result().records: {{ result() }}
+                    <div class="view">
+                        <div class="wrapper">
+                            <table *ngIf="result().columns && result().resultSet">
+                              <thead >
+                                <tr>
+                                  <th class="sticky-col first-col"> idx </th>
+                                  @for( h of result().columns ; track h; let i = $index ){
+                                  <th [formGroup]="selectedColumns[i]"> 
+                                      <mat-checkbox formControlName="selected">{{ result().columns[i]["columnName"] + "-" +  result().columns[i]["columnType"] }}</mat-checkbox>   <!---->
+                                  </th>
+                                  }
+                                </tr>
+                              </thead>
+                                <tbody>                
+                                    <tr *ngFor="let row of result().resultSet; index as i">
+                                        <td class="sticky-col first-col">{{ i + 1 }}</td>
+                                        <td *ngFor="let column of result().columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
+                                    </tr>
+                                </tbody>                
+                            </table>  
+                        </div>
+                    </div>
+                  }
+                  @else{
+                    No result found for {{selectedInfoNodePath()}}
+                  }
+                </as-split-area>                
+                <as-split-area [size]="30">
+                  <mat-tab-group>
+
                   <mat-tab label="transformations">
                     here transformations
                     <button mat-icon-button [matMenuTriggerFor]="menuActions" aria-label="menu">
@@ -200,11 +231,13 @@
                       <button mat-menu-item (click)="addFilter()">Add new filter</button>
                       <button mat-menu-item (click)="addGroupBy()">Add new GroupBy</button>
                       <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
-                    </mat-menu>                     
+                      <button mat-menu-item (click)="onUpdateSampleData()">Update Sample Data</button>
+                    </mat-menu> 
+                    selectedJoinNodeObj()!.transformations: {{selectedJoinNodeObj()!.transformations.length }}                    
                     <mat-list>
                     @for( t of selectedJoinNodeObj()!.transformations!;track t.id;let i = $index){
                       <mat-list-item>
-                        {{getTransformationText(t)}} 
+                        {{i}} : {{getTransformationText(t)}} 
                       <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
                         <mat-icon>more_vert</mat-icon>
                       </button>
@@ -229,45 +262,15 @@
                       </mat-list-item>
                     }
                     @empty{
-                      you need to add a join!
+                      no joins found
                     }
                     </mat-list>
 
                   </mat-tab>
-                </mat-tab-group>
-              </mat-drawer>
-              <mat-drawer-content>
+                  </mat-tab-group>
+                </as-split-area>
                 
-                @if( result() ){
-                  result().records: {{ result() }}
-                  <div class="view">
-                      <div class="wrapper">
-                          <table *ngIf="result().columns && result().resultSet">
-                            <thead >
-                              <tr>
-                                <th class="sticky-col first-col"> idx </th>
-                                @for( h of result().columns ; track h; let i = $index ){
-                                <th [formGroup]="selectedColumns[i]"> 
-                                    <mat-checkbox formControlName="selected">{{ result().columns[i]["columnName"] + "-" +  result().columns[i]["columnType"] }}</mat-checkbox>   <!---->
-                                </th>
-                                }
-                              </tr>
-                            </thead>
-                              <tbody>                
-                                  <tr *ngFor="let row of result().resultSet; index as i">
-                                      <td class="sticky-col first-col">{{ i + 1 }}</td>
-                                      <td *ngFor="let column of result().columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
-                                  </tr>
-                              </tbody>                
-                          </table>  
-                      </div>
-                  </div>
-                }
-                @else{
-                  No result found for {{selectedInfoNodePath()}}
-                }
-              </mat-drawer-content>
-            </mat-drawer-container>
+              </as-split>
             }
             @else{
               please select a join node

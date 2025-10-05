@@ -386,7 +386,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
 
       let collectionPath = this.getCollectionPath(infoNode)
-      let parentCollection = collectionPath.split("/").splice(0,-1).join("/")
+      let parentCollection = collectionPath.split("/").slice(0,-1).join("/")
 
       var req = {
         collection:parentCollection,
@@ -401,6 +401,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         },
         'error':(reason)=>{   
           this.isLoading = false     
+          alert("Error updateModelSamples:" + reason.error.error)
           reject( reason.error.error )
         }
       })         
@@ -690,11 +691,12 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       let joinNodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
       let infoNode = this.flatInfoNodes.get( joinNodeObj.id )!
       let collectionPath:string = this.getCollectionPath(infoNode)
+      let parentCollectionName = collectionPath.split("/").slice(0,-1).join("/")
       
       
      let data: JoinNodeActionData = {
         node: joinNodeObj,
-        collectionPath: collectionPath,
+        collectionPath: parentCollectionName,
         currentTransactionIndex: joinNodeObj.transformations.length-1,
         action: ActionOption.add
       }
@@ -714,20 +716,19 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
   }
   removeFilter(i:number){
-      let infoNode = this.selectedJoinNodeObj()!
-      let joinNodeObj = this.flatJoinNodeMap.get( infoNode.id )!
+      let joinNodeObj = this.selectedJoinNodeObj()!
       joinNodeObj.transformations.splice( i, 1)
 
       let nodeUpdate:JoinNode = {
         transformations:[ ...joinNodeObj.transformations ]
       }      
 
+      let infoNode = this.flatInfoNodes.get( joinNodeObj.id )!
       let collectionName = this.getCollectionPath( infoNode )
+      let parentCollectionName = collectionName.split("/").slice(0,-1).join("/")
 
-      this.firebaseService.updateDoc( collectionName + "/" + JoinNodeObj.className, infoNode.id, nodeUpdate).then( ()=>{
+      this.firebaseService.updateDoc( parentCollectionName , infoNode.id, nodeUpdate).then( ()=>{
         console.log("save the join")
-      })
-      .then( () =>{
         this.updateAll(infoNode)
       })
 
@@ -736,11 +737,12 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     if( this.selectedJoinNodeObj() ){
       let n = this.selectedJoinNodeObj()!
       let collectionPath:string = this.getCollectionPath(n)!
+      let parentCollection = collectionPath.split("/").slice(0,-1).join("/")
       let node = this.flatJoinNodeMap.get(n.id)!
 
       let data: JoinNodeActionData = {
         node: node,
-        collectionPath: collectionPath,
+        collectionPath: parentCollection,
         currentTransactionIndex: node.transformations.length-1,
         action: ActionOption.add
       }
@@ -754,10 +756,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         console.log('The dialog was closed');
         if( data ){
           console.debug( data )
-          //this.firebaseService.updateDoc()
-          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
-            console.log("update groupby")
-          })
+          this.updateAll( node )
           
         }
       })
@@ -776,7 +775,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
       for(let i=0; i<this.selectedColumns.length; i++){
         if(this.selectedColumns[i].controls["selected"].value ){
-          let name = this.result().metadata[i]['name']
+          let name = this.result().columns[i]['columnName']
           columnsNames.push( name )
         } 
       }
@@ -792,12 +791,11 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       }
 
       let collectionName = this.getCollectionPath( infoNode )
+      let parentCollection = collectionName.split("/").slice(0,-1).join("/")
 
-      this.firebaseService.updateDoc( collectionName + "/" + JoinNodeObj.className, infoNode.id, nodeUpdate).then( ()=>{
+      this.firebaseService.updateDoc( parentCollection, infoNode.id, nodeUpdate).then( ()=>{
         console.log("save the join")
-      })
-      .then( () =>{
-        this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+        this.updateAll(infoNode)
       })
 
     }
@@ -805,6 +803,13 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   
   padNumberWithZeros(num: number, totalLength: number): string {
     return num.toString().padStart(totalLength, '0');
+  }
+
+  onUpdateSampleData(){
+    let joinNodeObj:JoinNodeObj= this.selectedJoinNodeObj()!
+    let infoNode:InfoNode=this.flatInfoNodes.get( joinNodeObj.id )!
+
+    this.updateAll( infoNode )
   }
 
 }

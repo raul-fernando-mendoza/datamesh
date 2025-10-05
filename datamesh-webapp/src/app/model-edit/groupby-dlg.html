@@ -11,7 +11,7 @@
 @for( j of groupBysFA.controls; track j ; let i = $index){
   <form [formGroup]="j">
     <mat-form-field>
-      <mat-select  formControlName="comparator" appearance="fill" placeholder="Pick operation">
+      <mat-select  formControlName="groupBy" appearance="fill" placeholder="Pick operation">
         @for( c of groupByOptions; track c; let i=$index ){
           <mat-option [value]="c">{{ c }}</mat-option>   
         }
@@ -41,6 +41,8 @@
   <button mat-icon-button (click)="onDeleteGroupBy(i)"><mat-icon>delete</mat-icon></button>
 }
 <button mat-button (click)="onAddFunction()">add</button>
+
+<h2>Group Bys</h2>
 
 <form [formGroup]="grpFA">
   <div>
