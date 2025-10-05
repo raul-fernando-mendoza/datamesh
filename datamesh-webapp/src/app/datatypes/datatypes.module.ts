@@ -215,7 +215,8 @@ export enum TransformationType{
   initialRead = 'InitialRead',
   filter = "filter",
   groupBy = "groupBy",
-  selectColumns = "selectColumns"
+  selectColumns = "selectColumns",
+  renameColumn = "renameColumn"
 }
 
 export class SqlColumnGeneric{
@@ -267,6 +268,13 @@ export class SelectColumnsTransformation implements Transformation{
   sampleData?:SqlResultGeneric
 }
 
+export class RenameColumnTransformation implements Transformation{
+  type=TransformationType.renameColumn
+  id!:string
+  columnName!:string
+  newColumnName!:string
+}
+
 export interface JoinNode{
   id?:string
   name?: string
@@ -274,6 +282,7 @@ export interface JoinNode{
   tableName?:string
   joinCriteria?:Array<JoinCondition>
   transformations?:Array<Transformation>
+  sampleData?:SqlResultGeneric | null 
 }
 
 
@@ -285,7 +294,7 @@ export class JoinNodeObj implements JoinNode{
   tableName!:string
   columns: Array<SnowFlakeColumn> = []
   joinCriteria:Array<JoinCondition> = []
-  sampleData:SqlResultInFirebase | null = null
+  sampleData:SqlResultGeneric | null = null
   transformations:Array<Transformation> = []
 }
 

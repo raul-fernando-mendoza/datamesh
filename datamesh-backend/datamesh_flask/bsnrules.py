@@ -298,14 +298,27 @@ def applyTransformation( df, t):
         for c in groupByColumns:
              cols.append( col(c) )  
         result = df.group_by(cols).agg( aggs )   
-        return result    
+        return result 
+    elif t["type"] == 'renameColumn':
+        columnName = t["columnName"]
+        newColumnName = t["newColumnName"] 
         
-
-def updateModelSamples(req):
-    collection = req['collection']
-    modelId = req["id"]        
-    print("collection:" + collection)
-    print("modelId" + modelId)
+        colsSelected = []
+        for field in df.schema.fields:  
+            if field.name == columnName: 
+                colsSelected.append( col(field.name).alias(newColumnName) )
+            else:
+                colsSelected.append( col(field.name) )    
+        result = df.select( colsSelected )
+        return result         
+       
+def findColumnInColumnList(col, columns):
+    for c in columns:
+        if col.getName() == c.getName():
+            return True
+    return False
+    
+def updateModelSamplesRecursive(collection, modelId):
     doc_ref = db.collection(collection).document(modelId)
     doc = doc_ref.get()
     joinNode = doc.to_dict() 
@@ -325,8 +338,63 @@ def updateModelSamples(req):
     updateObj = {
         "transformations":joinNode['transformations']
     }
-    doc_ref.update( updateObj ) 
+    #doc_ref.update( updateObj ) 
     
+    #now make the join with all their childs
+    childCollection = collection+"/"+modelId+"/JoinNode"
+    query = firestore.client().collection(childCollection)
+    docs = query.get()
+
+    joinNodeChilds = []
+    for doc in docs:
+        data =  doc.to_dict() 
+        joinNodeChilds.append(data)
+    
+    for joinNode in joinNodeChilds:  
+        childdf = updateModelSamplesRecursive(childCollection , joinNode["id"]) 
+        
+        #add all the columns from the parent
+        colsSelected = []
+        for field in df.schema.fields:  
+            colsSelected.append( df.col(field.name).alias(field.name) )
+        #for each column check in the child check if it exist in the left then remove it from the selection
+        for field in childdf.schema.fields: 
+            if findColumnInColumnList(childdf.col(field.name), colsSelected): 
+                #no not add
+                None         
+            else:
+                colsSelected.append( childdf.col(field.name) )    
+        
+        joinCriterias = joinNode["joinCriteria"]
+        for join in joinCriterias:
+            leftValue = join["leftValue"]
+            comparator = join["comparator"]
+            rightValue = join["rightValue"]
+            df = df.join(childdf, df.col(leftValue) == childdf.col(rightValue)).select( colsSelected )
+    
+    #now update the result of the join
+    
+    sqlResultGeneric = toSqlGeneric( df )
+    updateObj["sampleData"] = sqlResultGeneric
+    doc_ref.update( updateObj )       
+    
+    return df    
+    
+#expecting the collection "Model" and the id of the model
+#will retrieve the first child and update all from there
+def updateModelSamples(req):
+    collection = req['collection']
+    modelId = req["id"]        
+    print("collection:" + collection)
+    print("modelId" + modelId)
+    
+    childCollection = collection+"/"+modelId+"/JoinNode"
+    query = firestore.client().collection(childCollection)
+    docs = query.get()
+
+    if len(docs) > 0:
+        data =  docs[0].to_dict() 
+        df = updateModelSamplesRecursive(childCollection, data["id"])
     
     obj ={
         "result":"success",
@@ -338,10 +406,4 @@ def updateModelSamples(req):
     
 if __name__ == '__main__':
     print("datamesh_base compiled")    
-            
-        
-        
-        
-         
-    
-    
+ 

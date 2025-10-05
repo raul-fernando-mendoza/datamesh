@@ -194,21 +194,32 @@
                     result().records: {{ result() }}
                     <div class="view">
                         <div class="wrapper">
-                            <table *ngIf="result().columns && result().resultSet">
+                            <table *ngIf="result() && result()!.columns && result()!.resultSet">
                               <thead >
                                 <tr>
                                   <th class="sticky-col first-col"> idx </th>
-                                  @for( h of result().columns ; track h; let i = $index ){
+                                  @for( h of result()!.columns ; track h; let i = $index ){
                                   <th [formGroup]="selectedColumns[i]"> 
-                                      <mat-checkbox formControlName="selected">{{ result().columns[i]["columnName"] + "-" +  result().columns[i]["columnType"] }}</mat-checkbox>   <!---->
+                                      <mat-checkbox formControlName="selected">
+                                        @if( selectedColumns[i].controls["selected"].value ){
+                                          <mat-form-field class="name" appearance="fill">
+                                            <mat-label>Name</mat-label>
+                                            <input matInput formControlName="rename">
+                                          </mat-form-field> 
+                                          <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
+                                        }
+                                        @else{
+                                          {{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}
+                                        }
+                                      </mat-checkbox>   <!---->
                                   </th>
                                   }
                                 </tr>
                               </thead>
                                 <tbody>                
-                                    <tr *ngFor="let row of result().resultSet; index as i">
+                                    <tr *ngFor="let row of result()!.resultSet; index as i">
                                         <td class="sticky-col first-col">{{ i + 1 }}</td>
-                                        <td *ngFor="let column of result().columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
+                                        <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
                                     </tr>
                                 </tbody>                
                             </table>  

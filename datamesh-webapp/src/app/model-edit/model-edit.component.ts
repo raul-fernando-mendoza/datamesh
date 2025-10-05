@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, SqlResultInFirebase, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric } from 'app/datatypes/datatypes.module';
+import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric, RenameColumnTransformation } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -119,7 +119,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   selectedInfoNodePath = signal("")
   selectedJoinNodeObj = signal<JoinNodeObj|null>(null)
-  result = signal<any | null>(null)
+  result = signal<SqlResultGeneric | undefined>(undefined)
 
   selectedColumns:Array<FormGroup> = Array<FormGroup>()
   
@@ -381,16 +381,15 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
   }
 
-  updateSampleData(infoNode:InfoNode):Promise<any>{
+  updateSampleData():Promise<any>{
     return new Promise(( resolve, reject ) => {
 
-
-      let collectionPath = this.getCollectionPath(infoNode)
-      let parentCollection = collectionPath.split("/").slice(0,-1).join("/")
+      
+      
 
       var req = {
-        collection:parentCollection,
-        id:infoNode.id    
+        collection:ModelObj.collectionName,
+        id: this.model()!.id  
       }
       this.isLoading = true
       this.urlService.post("updateModelSamples",req).subscribe({ 
@@ -409,7 +408,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   }
 
   updateAll(infoNode:InfoNode):Promise<void>{
-    return this.updateSampleData( infoNode ).then( ()=>{
+    return this.updateSampleData().then( ()=>{
       this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
         console.log("node onEditJoinNode updated")
       },
@@ -634,7 +633,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       if( joinNodeObj ){
         this.selectedJoinNodeObj.set(joinNodeObj)
         let lastIdx = joinNodeObj.transformations.length - 1
-        let result = joinNodeObj.transformations[lastIdx].sampleData
+        //let result:SqlResultGeneric|undefined = joinNodeObj.transformations[lastIdx].sampleData
+        let result:SqlResultGeneric = joinNodeObj.sampleData!
 
         //no create the form before loading the sample
        
@@ -643,7 +643,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
           this.selectedColumns.length = 0
           for( let i =0; i<result.columns.length; i++){
             let t = this.fb.group({
-              selected:[false]
+              selected:[false],
+              rename:[result.columns[i].columnName]
             })
 
             this.selectedColumns.push(t)
@@ -682,6 +683,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         }
         str += e
       })
+    }
+    else if( t.type == TransformationType.renameColumn){
+      let rt = t as RenameColumnTransformation
+      str = "rename:" + rt.columnName + "-" + rt.newColumnName
     }
     return str
   }
@@ -775,7 +780,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
       for(let i=0; i<this.selectedColumns.length; i++){
         if(this.selectedColumns[i].controls["selected"].value ){
-          let name = this.result().columns[i]['columnName']
+          let name = this.result()!.columns[i]['columnName']
           columnsNames.push( name )
         } 
       }
@@ -810,6 +815,29 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     let infoNode:InfoNode=this.flatInfoNodes.get( joinNodeObj.id )!
 
     this.updateAll( infoNode )
+  }
+
+  onRenameColumn(i:number){
+    let columnName:string = this.result()!.columns[i].columnName
+    let newColumnName:string = this.selectedColumns[i].controls["rename"].value!
+    let node:JoinNodeObj = this.selectedJoinNodeObj()!
+    let infoNode:InfoNode =  this.flatInfoNodes.get(node.id)!
+    
+    let renameColumnTransformation:RenameColumnTransformation = {
+      type: TransformationType.renameColumn,
+      id: uuid.v4(),
+      columnName: columnName,
+      newColumnName: newColumnName
+    }
+
+    let transformationUpdate: JoinNode = {
+      transformations: [...node!.transformations!, renameColumnTransformation]
+    }
+    let collection = this.getCollectionPath( infoNode )
+    let parentCollection = collection.split("/").slice(0,-1).join("/")
+    this.firebaseService.updateDoc( parentCollection, node.id, transformationUpdate).then( ()=>{
+      this.updateAll(infoNode)
+    })
   }
 
 }
