@@ -248,7 +248,9 @@
                     <mat-list>
                     @for( t of selectedJoinNodeObj()!.transformations!;track t.id;let i = $index){
                       <mat-list-item>
-                        {{i}} : {{getTransformationText(t)}} 
+                        <span (click)="onTranformation(i)">
+                        {{i}} : {{getTransformationText(t)}}
+                        </span> 
                       <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
                         <mat-icon>more_vert</mat-icon>
                       </button>

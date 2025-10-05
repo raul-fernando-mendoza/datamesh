@@ -840,4 +840,24 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     })
   }
 
+  onTranformation(i:number){
+    let node:JoinNodeObj = this.selectedJoinNodeObj()!
+    let transformation = node.transformations[i]
+
+    let result = transformation.sampleData
+    if( result ){
+
+      this.selectedColumns.length = 0
+      for( let i =0; i<result.columns.length; i++){
+        let t = this.fb.group({
+          selected:[false],
+          rename:[result.columns[i].columnName]
+        })
+
+        this.selectedColumns.push(t)
+      }
+    }    
+    this.result.set(result)    
+  }
+
 }
