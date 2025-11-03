@@ -148,7 +148,7 @@ import { FirebaseService } from 'app/firebase.service';
       let rightNode = this.data.rightNode
 
       this.leftColumns = leftNode.transformations[leftNode.transformations.length-1].sampleData!.columns
-      this.rightColumns = rightNode.transformations[leftNode.transformations.length-1].sampleData!.columns
+      this.rightColumns = rightNode.transformations[rightNode.transformations.length-1].sampleData!.columns
 
       this.joinsFA.clear()
 
@@ -207,8 +207,9 @@ import { FirebaseService } from 'app/firebase.service';
       let newJoinNode:JoinNode = {
         joinCriteria: joinCriteria
       }
+      let parentCollection = this.data.rightCollectionPath.split("/").slice(0,-1).join("/")
       
-      this.firebaseService.updateDoc( this.data.rightCollectionPath + "/" + JoinNodeObj.className, this.data.rightNode.id , newJoinNode).then( ()=>{
+      this.firebaseService.updateDoc( parentCollection, this.data.rightNode.id , newJoinNode).then( ()=>{
         console.log("update join")
       },
       reason=>{
