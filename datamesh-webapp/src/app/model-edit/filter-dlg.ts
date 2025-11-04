@@ -81,7 +81,7 @@ import { FirebaseService } from 'app/firebase.service';
       let node = this.data.node
       let idx = this.data.currentTransactionIndex
 
-      this.columns = node.transformations[idx].sampleData!.columns
+      this.columns = node.sampleData[node.sampleData.length-1].columns     
     }
 
     filter(): void {

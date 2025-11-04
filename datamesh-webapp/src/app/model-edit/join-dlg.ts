@@ -147,8 +147,8 @@ import { FirebaseService } from 'app/firebase.service';
       let leftNode = this.data.leftNode
       let rightNode = this.data.rightNode
 
-      this.leftColumns = leftNode.transformations[leftNode.transformations.length-1].sampleData!.columns
-      this.rightColumns = rightNode.transformations[rightNode.transformations.length-1].sampleData!.columns
+      this.leftColumns = leftNode.sampleData[leftNode.sampleData.length-1].columns
+      this.rightColumns = rightNode.sampleData[rightNode.sampleData.length-1].columns
 
       this.joinsFA.clear()
 

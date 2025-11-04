@@ -213,6 +213,7 @@ export interface SelectedColumn {
 
 export enum TransformationType{
   initialRead = 'InitialRead',
+  joinResult = "joinResult",
   filter = "filter",
   groupBy = "groupBy",
   selectColumns = "selectColumns",
@@ -243,6 +244,7 @@ export class FilterTransformation implements Transformation{
 }
 
 export enum FunctionOption {
+  count = "count",
   sum = "sum",
   max = "max",
   min = "min",
@@ -282,7 +284,7 @@ export interface JoinNode{
   tableName?:string
   joinCriteria?:Array<JoinCondition>
   transformations?:Array<Transformation>
-  sampleData?:SqlResultGeneric | null 
+  sampleData?:Array<SqlResultGeneric> 
 }
 
 
@@ -294,7 +296,7 @@ export class JoinNodeObj implements JoinNode{
   tableName!:string
   columns: Array<SnowFlakeColumn> = []
   joinCriteria:Array<JoinCondition> = []
-  sampleData:SqlResultGeneric | null = null
+  sampleData:Array<SqlResultGeneric>  = []
   transformations:Array<Transformation> = []
 }
 

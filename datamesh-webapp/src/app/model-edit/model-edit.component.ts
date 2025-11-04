@@ -68,7 +68,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 export class ModelEditComponent implements OnInit, AfterViewInit{
   @ViewChild("tree") tree!: MatTree<TreeNode> ; 
 
-  model = signal<ModelObj|null>(null)
+  
+  isLoading = false
+
+  model = signal<ModelObj>(new ModelObj())
   id:string | null = null
   groupId:string|null = 'default'
 
@@ -109,7 +112,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   parentInfoNodeAdding:JoinNode | null = null
   newInfoNodeAdding:JoinNode | null = null
 
-  isLoading = false
+  
 
   
 
@@ -233,7 +236,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       this.flatJoinNodeMap.clear()
       this.flatInfoNodes.clear()
 
-      let model:ModelObj = this.model()!
+
+      //add the root
+      let model = this.model()
+
       let currentPath = [ModelObj.collectionName, model.id, JoinNodeObj.className].join("/")
       this.firebaseService.getDocs( currentPath ).then( 
         docs =>{
@@ -384,9 +390,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   updateSampleData():Promise<any>{
     return new Promise(( resolve, reject ) => {
 
-      
-      
-
       var req = {
         collection:ModelObj.collectionName,
         id: this.model()!.id  
@@ -438,7 +441,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       tableName: data.tableName,
       joinCriteria: [],
       columns: [],
-      sampleData: null,
+      sampleData: [],
       transformations: []
     }    
 
@@ -461,15 +464,19 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
             tableName: tableName,
             joinCriteria: [],
             columns: [],
-            sampleData: null,
+            sampleData: [],
             transformations: []
           }
   
-          let transformation:Transformation= {
+          let InitialTransformation:Transformation= {
             id: uuid.v4(),
             type: TransformationType.initialRead 
           }
-          newJoin.transformations = [transformation]
+          let joinResultTransformation:Transformation= {
+            id: uuid.v4(),
+            type: TransformationType.joinResult 
+          }
+          newJoin.transformations = [InitialTransformation,joinResultTransformation]
                         
           this.firebaseService.setDoc( parentPath + "/"  + JoinNodeObj.className, newJoin.id, newJoin  )
           .then( ()=>{
@@ -488,16 +495,20 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         tableName: tableName,
         joinCriteria: [],
         columns: [],
-        sampleData: null,
+        sampleData: [],
         transformations: []
       }
       
         
-      let transformationContainer:Transformation = {
+      let InitialTransformation:Transformation= {
         id: uuid.v4(),
-        type: TransformationType.initialRead
+        type: TransformationType.initialRead 
       }
-      newJoin.transformations = [transformationContainer]
+      let joinResultTransformation:Transformation= {
+        id: uuid.v4(),
+        type: TransformationType.joinResult 
+      }
+      newJoin.transformations = [InitialTransformation,joinResultTransformation]
 
       this.firebaseService.setDoc( [ ModelObj.collectionName , this.model()!.id , JoinNodeObj.className].join("/"), newJoin.id, newJoin  )
       .then( ()=>{
@@ -634,7 +645,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         this.selectedJoinNodeObj.set(joinNodeObj)
         let lastIdx = joinNodeObj.transformations.length - 1
         //let result:SqlResultGeneric|undefined = joinNodeObj.transformations[lastIdx].sampleData
-        let result:SqlResultGeneric = joinNodeObj.sampleData!
+        let result:SqlResultGeneric = joinNodeObj.sampleData[0]
 
         //no create the form before loading the sample
        
@@ -662,7 +673,11 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     if( t.type == TransformationType.initialRead ){
       let tf = t as FilterTransformation
       str = "Initial Read"
-    }    
+    }  
+    if( t.type == TransformationType.joinResult ){
+      let tf = t as FilterTransformation
+      str = "Join Result"
+    }       
     if( t.type == TransformationType.filter ){
       let tf = t as FilterTransformation
       str = tf.leftValue + " " + tf.comparator + " " + tf.rightValue
@@ -761,8 +776,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         console.log('The dialog was closed');
         if( data ){
           console.debug( data )
-          this.updateAll( node )
-          
+          this.updateAll( n )
         }
       })
     }
@@ -842,9 +856,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   onTranformation(i:number){
     let node:JoinNodeObj = this.selectedJoinNodeObj()!
-    let transformation = node.transformations[i]
 
-    let result = transformation.sampleData
+
+    let result = node.sampleData[i]
     if( result ){
 
       this.selectedColumns.length = 0

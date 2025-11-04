@@ -51,7 +51,8 @@ import { FirebaseService } from 'app/firebase.service';
   export class GroupByDialog implements OnInit{ 
     @ViewChild('input') input!: ElementRef<HTMLInputElement>;
     
-    groupByOptions:Array<FunctionOption> = [  
+    groupByOptions:Array<FunctionOption> = [ 
+      FunctionOption.count,  
       FunctionOption.sum,
       FunctionOption.max,
       FunctionOption.min,
@@ -90,9 +91,9 @@ import { FirebaseService } from 'app/firebase.service';
 
     ngOnInit(): void {
 
-      let leftNode = this.data.node
+      let node = this.data.node
 
-      this.columns = leftNode.transformations[leftNode.transformations.length-1].sampleData!.columns
+      this.columns = node.sampleData[node.sampleData.length-1].columns 
 
       if( this.data.action == ActionOption.edit ){ 
         this.groupBysFA.clear()    
@@ -144,14 +145,14 @@ import { FirebaseService } from 'app/firebase.service';
         alias:string
       }> = []
       this.groupBysFA.controls.forEach( fg =>{
-        let columnName = fg.controls.columnName.value 
+        let columnName:string = fg.controls.columnName.value ? fg.controls.columnName.value : ""
         let functionOption:FunctionOption = fg.controls.groupBy.value ? fg.controls.groupBy.value : FunctionOption.max
-        let alias = fg.controls.alias.value
+        let alias = fg.controls.alias.value ? fg.controls.alias.value : ""
 
         let fun = {
-          columnName:columnName ? columnName : "",
+          columnName:columnName ,
           functionOption:functionOption,
-          alias:alias ? alias:""
+          alias:alias ? alias : columnName 
         }
         funcs.push(fun)
       })
