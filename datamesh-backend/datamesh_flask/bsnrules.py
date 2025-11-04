@@ -4,7 +4,8 @@ import datamesh_flask.datamesh_base as datamesh_base
 import datamesh_flask.snowflake_odbc as snowflake_odbc
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 import pandas as pd
-from snowflake.snowpark.functions import col, sql_expr, lit, Column, sum
+from snowflake.snowpark.functions import col, sql_expr, lit, Column, sum, max, min, count  
+import uuid
 
 from firebase_admin import firestore
 
@@ -237,7 +238,7 @@ def toSqlGeneric( df ):
         }
         sqlGeneric["columns"].append( colGeneric )
                 
-    collected = df.limit(10).collect()
+    collected = df.limit(50).collect()
     for row in collected:
         rowGeneric = {}
         for i in range(len(row)):
@@ -290,9 +291,15 @@ def applyTransformation( df, t):
         for f in functions:
             columnName = f["columnName"]
             functionOption = f["functionOption"]
-            alias = f["alias"]
+            alias = f["alias"] if f["alias"] else f["columnName"] + "_" + functionOption
             if functionOption == "sum":
                 aggs.append( sum(columnName).alias(alias) )
+            elif functionOption == "count":
+                aggs.append( count(columnName).alias(alias) )                
+            elif functionOption == "max":
+                aggs.append( max(columnName).alias(alias) ) 
+            elif functionOption == "min":
+                aggs.append( min(columnName).alias(alias) )                   
             
         cols = []    
         for c in groupByColumns:
@@ -319,28 +326,20 @@ def findColumnInColumnList(col, columns):
     return False
     
 def updateModelSamplesRecursive(collection, modelId):
+
+    sampleData = []
+    
     doc_ref = db.collection(collection).document(modelId)
     doc = doc_ref.get()
     joinNode = doc.to_dict() 
-    #print( json.dumps(jsonFilter(model,("columns")), indent=1, default=custom_json) )
+    
+    #get the initial read of the table and write its results
     df = getInitialRead( joinNode )
     sqlResultGeneric = toSqlGeneric( df )
-    joinNode['transformations'][0]['sampleData'] = sqlResultGeneric
+   
+    sampleData.append(  sqlResultGeneric )
     
-    
-    for i in range(1, len(joinNode["transformations"])):
-        t = joinNode["transformations"][i]
-        df = applyTransformation( df , t)
-        sqlResultGeneric = toSqlGeneric( df )
-        joinNode['transformations'][i]['sampleData'] = sqlResultGeneric
-        
-    
-    updateObj = {
-        "transformations":joinNode['transformations']
-    }
-    #doc_ref.update( updateObj ) 
-    
-    #now make the join with all their childs
+    #now make the join with all their childs and write as a second transaformation
     childCollection = collection+"/"+modelId+"/JoinNode"
     query = firestore.client().collection(childCollection)
     docs = query.get()
@@ -350,8 +349,8 @@ def updateModelSamplesRecursive(collection, modelId):
         data =  doc.to_dict() 
         joinNodeChilds.append(data)
     
-    for joinNode in joinNodeChilds:  
-        childdf = updateModelSamplesRecursive(childCollection , joinNode["id"]) 
+    for childJoinNode in joinNodeChilds:  
+        childdf = updateModelSamplesRecursive(childCollection , childJoinNode["id"]) 
         
         #add all the columns from the parent
         colsSelected = []
@@ -365,7 +364,7 @@ def updateModelSamplesRecursive(collection, modelId):
             else:
                 colsSelected.append( childdf.col(field.name) )    
         
-        joinCriterias = joinNode["joinCriteria"]
+        joinCriterias = childJoinNode["joinCriteria"]
         joinConditions = None 
         for join in joinCriterias:
             leftValue = join["leftValue"]
@@ -379,10 +378,27 @@ def updateModelSamplesRecursive(collection, modelId):
         df = df.join(childdf, joinConditions).select( colsSelected )
     
     #now update the result of the join
+    if len(joinNodeChilds) == 0:
+       #if there was no joins just send the previus result 
+       sampleData.append(  sqlResultGeneric  )   
+    else:     
+        sqlResultGeneric = toSqlGeneric( df )
+        sampleData.append(  sqlResultGeneric )
+        
+    #now apply all other transformations     
     
-    sqlResultGeneric = toSqlGeneric( df )
-    updateObj["sampleData"] = sqlResultGeneric
-    doc_ref.update( updateObj )       
+    for i in range(2, len(joinNode["transformations"])):
+        t = joinNode["transformations"][i]
+        df = applyTransformation( df , t)
+        sqlResultGeneric = toSqlGeneric( df )
+        sampleData.append( sqlResultGeneric )
+        
+    #finnaly update all the sample datatas
+    updateObj = {
+        'sampleData': sampleData
+    }
+    
+    doc_ref.update( updateObj ) 
     
     return df    
     
