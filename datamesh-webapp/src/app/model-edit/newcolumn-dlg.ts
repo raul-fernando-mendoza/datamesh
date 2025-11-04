@@ -1,13 +1,13 @@
 import {  Component,  ElementRef,  Inject, OnInit, signal, SimpleChange, ViewChild } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType, SqlColumnGeneric } from 'app/datatypes/datatypes.module';
+import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType, SqlColumnGeneric, NewColumnTransformation } from 'app/datatypes/datatypes.module';
 import { MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -22,9 +22,9 @@ import * as uuid from 'uuid';
 import { FirebaseService } from 'app/firebase.service';
 
 @Component({
-    selector: 'filter-dlg',
-    templateUrl: 'filter-dlg.html',
-    styleUrl: 'filter-dlg.css',
+    selector: 'newcolumn-dlg',
+    templateUrl: 'newcolumn-dlg.html',
+    styleUrl: 'newcolumn-dlg.css',
     imports: [
         CommonModule,
         MatButtonModule,
@@ -46,34 +46,16 @@ import { FirebaseService } from 'app/firebase.service';
         MatListModule
     ]
 })
-  export class FilterDialog implements OnInit{ 
-    @ViewChild('input') input!: ElementRef<HTMLInputElement>;
-    
-    comparisonOptions:Array<ComparatorOption> = [  
-      ComparatorOption.equal,
-      ComparatorOption.gt,
-      ComparatorOption.gte,
-      ComparatorOption.lt ,
-      ComparatorOption.lte,
-      ComparatorOption.ne,
-      ComparatorOption.in
-    ]
- 
-    filterFA =
+  export class NewColumnDialog implements OnInit{ 
+
+    FG =
       this.fb.group({
-        columnName: [''],
-        comparator: [ComparatorOption.equal],
-        exp:['']
+        columnName: ['', Validators.required],
+        expression: ["", Validators.required]
       })
 
-    columns!:SqlColumnGeneric[]
-
-    filteredOptions: SqlColumnGeneric[] = [];
-
-    result:SqlResultInFirebase | null= null
-    
     constructor(
-      public dialogRef: MatDialogRef<FilterDialog>,
+      public dialogRef: MatDialogRef<NewColumnDialog>,
       private fb:FormBuilder,
       private firebaseService:FirebaseService,
       @Inject(MAT_DIALOG_DATA) public data:JoinNodeActionData) {}
@@ -81,25 +63,17 @@ import { FirebaseService } from 'app/firebase.service';
     ngOnInit(): void {
       let node = this.data.node
       let idx = this.data.currentTransactionIndex
-
-      this.columns = node.sampleData[node.sampleData.length-1].columns     
+      
     }
 
-    filter(): void {
-      const filterValue = this.filterFA.controls.exp.value ? this.filterFA.controls.exp.value : ""
-      this.filteredOptions = this.columns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
-    }   
-
     onSubmit(){  
-      let columnName = this.filterFA.controls.columnName.value 
-      let comparator:ComparatorOption = this.filterFA.controls.comparator.value ? this.filterFA.controls.comparator.value : ComparatorOption.equal
-      let exp = this.filterFA.controls.exp.value
-      let f:FilterTransformation = {
-        type: TransformationType.filter,
+      let columnName:string = this.FG.controls.columnName.value! 
+      let expression:string = this.FG.controls.expression.value!
+      let f:NewColumnTransformation = {
+        type: TransformationType.newColumn,
         id:uuid.v4(),
-        leftValue: columnName ? columnName : "",
-        comparator: comparator ,
-        rightValue: exp ? exp : ""
+        columnName: columnName,
+        expression: expression
       } 
 
       let joinNodeUpdate:JoinNode = {
@@ -107,10 +81,10 @@ import { FirebaseService } from 'app/firebase.service';
       }
  
       this.firebaseService.updateDoc( this.data.collectionPath, this.data.node.id, joinNodeUpdate).then( ()=>{
-        console.log("editing filter done")
+        console.log("adding new column done")
       },
       reason =>{
-        alert("Error: Editing filter:" + reason.error)
+        alert("Error: adding new column :" + reason.error)
       })
       
     }

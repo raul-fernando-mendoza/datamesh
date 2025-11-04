@@ -217,7 +217,8 @@ export enum TransformationType{
   filter = "filter",
   groupBy = "groupBy",
   selectColumns = "selectColumns",
-  renameColumn = "renameColumn"
+  renameColumn = "renameColumn",
+  newColumn = "newColumn"
 }
 
 export class SqlColumnGeneric{
@@ -241,6 +242,13 @@ export class FilterTransformation implements Transformation{
   comparator!:ComparatorOption
   rightValue!:string
   sampleData?:SqlResultGeneric
+}
+
+export class NewColumnTransformation implements Transformation{
+  type=TransformationType.newColumn
+  id!:string  
+  columnName!:string
+  expression!:string
 }
 
 export enum FunctionOption {
@@ -376,7 +384,8 @@ export enum ComparatorOption {
   gte = ">=",
   lt = "<",
   lte = "<=",
-  ne = "<>"
+  ne = "<>",
+  in = "in"
 }
 
 export interface JoinCondition{

@@ -1,0 +1,17 @@
+<div class="bar">
+  <b>Adding expression</b>
+  <span class="spacer"></span>
+  <button mat-button mat-dialog-close>Cancel</button> 
+  <button [disabled]="!FG.valid" mat-button [mat-dialog-close]="data" cdkFocusInitial (click)="onSubmit()">Ok</button>
+</div>
+<div [formGroup]="FG">
+  <mat-form-field>
+      <mat-label>Column Name</mat-label>
+      <input matInput formControlName="columnName">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>expression</mat-label>
+    <input matInput formControlName="expression">
+</mat-form-field>  
+<div>
+

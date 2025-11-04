@@ -275,7 +275,7 @@ def applyTransformation( df, t):
         leftValue = t["leftValue"]
         comparator = t["comparator"]
         rightValue = t["rightValue"]
-        result = df.filter( leftValue + comparator + rightValue )
+        result = df.filter( leftValue + " " + comparator +  " " + rightValue )
         return result 
     elif t["type"] == 'selectColumns':
         colsSelected = []
@@ -317,7 +317,18 @@ def applyTransformation( df, t):
             else:
                 colsSelected.append( col(field.name) )    
         result = df.select( colsSelected )
-        return result         
+        return result    
+    elif t["type"] == 'newColumn':
+        columnName = t["columnName"]
+        expression = t["expression"] 
+        
+        colsSelected = []
+
+        for field in df.schema.fields:  
+            colsSelected.append( field.name )         
+  
+        result =  df.select_expr(*colsSelected, expression + " as " + columnName)
+        return result           
        
 def findColumnInColumnList(col, columns):
     for c in columns:

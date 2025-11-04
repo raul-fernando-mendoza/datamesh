@@ -9,10 +9,6 @@
   </div>      
 }
 @else{
-  @if(isLoading == true){
-    Loading....
-  }
-  @else{
   <div class="flexcontainer">
     <as-split direction="horizontal" cdkDropListGroup>
       <as-split-area [size]="30">
@@ -32,7 +28,10 @@
                     <button  mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
                 }
               </div>
-              
+              @if(isLoading == true){
+                Loading....
+              }
+              @else{
               <div [formGroup]="FG">
                   <p>
                       <mat-form-field class="name" appearance="fill">
@@ -189,6 +188,7 @@
                       <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
                   }
               </div>
+              }
             </as-split-area>
             <as-split-area [size]="40">
               @if( selectedJoinNodeObj() ){
@@ -204,7 +204,7 @@
                                     <th class="sticky-col first-col"> idx </th>
                                     @for( h of result()!.columns ; track h; let i = $index ){
                                     <th [formGroup]="selectedColumns[i]"> 
-                                        <mat-checkbox formControlName="selected">
+                                        <mat-checkbox formControlName="selected" (click)="selectColumn(h)">
                                           @if( selectedColumns[i].controls["selected"].value ){
                                             <mat-form-field class="name" appearance="fill">
                                               <mat-label>Name</mat-label>
@@ -247,6 +247,7 @@
                         <button mat-menu-item (click)="addGroupBy()">Add new GroupBy</button>
                         <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
                         <button mat-menu-item (click)="onUpdateSampleData()">Update Sample Data</button>
+                        <button mat-menu-item (click)="addNewColumn()">Add New Column</button>
                       </mat-menu> 
                       selectedJoinNodeObj()!.transformations: {{selectedJoinNodeObj()!.transformations.length }}                    
                       <mat-list>
@@ -298,5 +299,4 @@
       </as-split-area>
     </as-split>
   </div>
-  }
 }
