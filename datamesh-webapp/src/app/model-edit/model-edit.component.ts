@@ -690,7 +690,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }       
     if( t.type == TransformationType.filter ){
       let tf = t as FilterTransformation
-      str = tf.leftValue + " " + tf.comparator + " " + tf.rightValue
+      str = "Filter:" + tf.leftValue + " " + tf.comparator + " " + tf.rightValue
     }
     else if( t.type == TransformationType.groupBy ){
       let g = t as GroupByTransformation
@@ -701,7 +701,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
     else if( t.type == TransformationType.selectColumns){
       let sc = t as SelectColumnsTransformation
-      str = ""
+      str = "Select "
       sc.columnsNames.forEach( e =>{
         if( str ){
           str +=','
@@ -715,7 +715,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
     else if( t.type == TransformationType.newColumn){
       let nct = t as NewColumnTransformation
-      str = "rename:" + nct.columnName + "-" + nct.expression
+      str = "newColumn:" + nct.columnName + "-" + nct.expression
     }    
     return str
   }
@@ -885,7 +885,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         this.selectedColumns.push(t)
       }
     }    
-    this.result.set(result)    
+    this.result.set(result)
+    this.selectColumns()    
   }
 
   addNewColumn(){
@@ -918,7 +919,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
   }
 
-  selectColumn(column:SqlColumnGeneric){
+  onSelectColumn(column:SqlColumnGeneric){
     let idx:number = this.selectedTransactionIdx()!
     let nodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
     if( (idx + 1) < nodeObj.transformations.length ){
@@ -953,6 +954,26 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         })
   
         
+      }
+    }
+  }
+
+  selectColumns(){
+    let idx:number = this.selectedTransactionIdx()!
+    let nodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
+    if( (idx + 1) < nodeObj.transformations.length ){
+      let nextTransaction = nodeObj.transformations[idx+1]
+      
+      if( nextTransaction.type == TransformationType.selectColumns ){
+        let selectionTransaction:SelectColumnsTransformation = nextTransaction as  SelectColumnsTransformation
+        selectionTransaction.columnsNames.forEach( st =>{
+          let i = this.selectedColumns.findIndex( e => 
+            st == e.controls["id"].value 
+          )
+          if( i >= 0){
+            this.selectedColumns[i].controls["selected"].setValue(true)
+          }
+        })
       }
     }
   }

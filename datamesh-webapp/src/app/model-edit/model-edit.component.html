@@ -204,7 +204,7 @@
                                     <th class="sticky-col first-col"> idx </th>
                                     @for( h of result()!.columns ; track h; let i = $index ){
                                     <th [formGroup]="selectedColumns[i]"> 
-                                        <mat-checkbox formControlName="selected" (click)="selectColumn(h)">
+                                        <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)">
                                           @if( selectedColumns[i].controls["selected"].value ){
                                             <mat-form-field class="name" appearance="fill">
                                               <mat-label>Name</mat-label>
@@ -253,18 +253,19 @@
                       <mat-list>
                       @for( t of selectedJoinNodeObj()!.transformations!;track t.id;let i = $index){
                         <mat-list-item>
+                          <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
+                              <mat-icon>more_vert</mat-icon>
+                          </button>
+                          <mat-menu #filterActions="matMenu">
+                              @if( i > 1){
+                              <button mat-icon-button (click)="removeFilter(i)"><mat-icon>delete</mat-icon></button>
+                              }
+                              
+                          </mat-menu> 
                           <span (click)="onTranformation(i)">
-                          {{i}} : {{getTransformationText(t)}}
-                          </span> 
-                        <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
-                          <mat-icon>more_vert</mat-icon>
-                        </button>
-                        <mat-menu #filterActions="matMenu">
-                          @if( i > 0){
-                          <button mat-icon-button (click)="removeFilter(i)"><mat-icon>delete</mat-icon></button>
-                          }
-                        </mat-menu> 
-                      </mat-list-item>
+                            {{i}} : {{getTransformationText(t)}}
+                          </span>                         
+                        </mat-list-item>
                       }
                       @empty{
                         no transformations found
