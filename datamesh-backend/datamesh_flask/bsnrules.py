@@ -225,7 +225,7 @@ def getInitialRead( joinNode ):
     result = df.select("*") 
     return result 
 
-def toSqlGeneric( df ):
+def toSqlGeneric( df , max = 100):
     sqlGeneric = {
         "columns":[],
         "resultSet":[]
@@ -238,7 +238,7 @@ def toSqlGeneric( df ):
         }
         sqlGeneric["columns"].append( colGeneric )
                 
-    collected = df.limit(50).collect()
+    collected = df.limit(max).collect()
     for row in collected:
         rowGeneric = {}
         for i in range(len(row)):
@@ -338,8 +338,6 @@ def findColumnInColumnList(col, columns):
     
 def updateModelSamplesRecursive(collection, modelId):
 
-    sampleData = []
-    
     doc_ref = db.collection(collection).document(modelId)
     doc = doc_ref.get()
     joinNode = doc.to_dict() 
@@ -347,8 +345,8 @@ def updateModelSamplesRecursive(collection, modelId):
     #get the initial read of the table and write its results
     df = getInitialRead( joinNode )
     sqlResultGeneric = toSqlGeneric( df )
-   
-    sampleData.append(  sqlResultGeneric )
+    doc_ref = firestore.client().collection(collection + "/" + modelId + "/sampledata").document(joinNode["transformations"][0]["id"])
+    doc_ref.set(sqlResultGeneric)
     
     #now make the join with all their childs and write as a second transaformation
     childCollection = collection+"/"+modelId+"/JoinNode"
@@ -389,28 +387,20 @@ def updateModelSamplesRecursive(collection, modelId):
         df = df.join(childdf, joinConditions).select( colsSelected )
     
     #now update the result of the join
-    if len(joinNodeChilds) == 0:
-       #if there was no joins just send the previus result 
-       sampleData.append(  sqlResultGeneric  )   
-    else:     
+    if len(joinNodeChilds) > 0:
         sqlResultGeneric = toSqlGeneric( df )
-        sampleData.append(  sqlResultGeneric )
+    doc_ref = firestore.client().collection(collection + "/" + modelId + "/sampledata").document(joinNode["transformations"][1]["id"])
+    doc_ref.set(sqlResultGeneric)
+        
         
     #now apply all other transformations     
-    
     for i in range(2, len(joinNode["transformations"])):
         t = joinNode["transformations"][i]
         df = applyTransformation( df , t)
-        sqlResultGeneric = toSqlGeneric( df )
-        sampleData.append( sqlResultGeneric )
-        
-    #finnaly update all the sample datatas
-    updateObj = {
-        'sampleData': sampleData
-    }
-    
-    doc_ref.update( updateObj ) 
-    
+        sqlResultGeneric = toSqlGeneric( df, 100 )
+        doc_ref = firestore.client().collection(collection + "/" + modelId + "/sampledata").document(joinNode["transformations"][i]["id"])
+        doc_ref.set(sqlResultGeneric)
+
     return df    
     
 #expecting the collection "Model" and the id of the model
@@ -419,7 +409,7 @@ def updateModelSamples(req):
     collection = req['collection']
     modelId = req["id"]        
     print("collection:" + collection)
-    print("modelId" + modelId)
+    print("modelId:" + modelId)
     
     childCollection = collection+"/"+modelId+"/JoinNode"
     query = firestore.client().collection(childCollection)

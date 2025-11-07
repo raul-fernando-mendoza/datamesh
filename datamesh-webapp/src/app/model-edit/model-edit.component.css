@@ -1,5 +1,3 @@
-
-
 .example-tree-invisible {
   display: none;
 }
@@ -11,28 +9,13 @@
   list-style-type: none;
 }
 
-/*
- * This padding sets alignment of the nested nodes.
- */
+
 .example-tree .mat-nested-tree-node div[role=group] {
   padding-left: 40px;
 }
 
-/*
- * Padding for leaf nodes.
- * Leaf nodes need to have padding so as to align with other non-leaf nodes
- * under the same parent.
- */
 .example-tree div[role=group] > .mat-tree-node {
   padding-left: 40px;
-}
-
-.table_temp {
-  text-transform:uppercase;
-  margin-left:20px;
-}
-.criteria {
-  text-transform:lowercase 
 }
 
 .example-list {
@@ -44,7 +27,23 @@
   display: block;
 }
 
+mat-drawer-content{
+  height: 100%;
+}
+.tables-container{
+  height:40em;
+  overflow: scroll;
+  padding: 1em;
+  background-color: coral;
+}
 
+table .tree{
+  border:none;
+  border-collapse: collapse;
+  background-color: yellow;
+}
+
+/*
 .view {
   margin: auto;
   width: 100%;
@@ -58,11 +57,6 @@
   white-space: nowrap;   
 }
 
-table .tree{
-  border:none;
-  border-collapse: collapse;
-  background-color: yellow;
-}
 
 table, th, td {
   border: 1px solid black;
@@ -82,24 +76,53 @@ table tr th {
   z-index: 9;
   background: #fff;
 }
+*/
+
+.transformationGrp{
+  height: 20em;
+  overflow: scroll;
+  background-color: yellowgreen;
+}
+
+.gridbody{
+  height: 20em;
+  overflow: scroll;
+  background-color: yellowgreen;
+}
+
+.gridheather{
+  position: sticky;
+  top: 0;
+  background-color: bisque;
+}
 
 .sticky-col {
   position: -webkit-sticky;
   position: sticky;
   background-color: white;
+  left:0;
 }
 
-.first-col {
+.index_heather{  
   width: 4em;
   min-width: 3em;
   max-width: 4em;
-  left: 0px;
+  z-index:0;
+  background-color: red;
+}
+
+.index-col {
+  width: 4em;
+  min-width: 3em;
+  max-width: 4em;
+  z-index: 1;
+  background-color: lightblue;
 }
 
 .number{
   text-align: right;
 }
-
+/*
 .flexcontainer{
   display:flex;
   flex-wrap: nowrap;
@@ -110,6 +133,5 @@ table tr th {
   border: solid 3px red;
 }
 
-mat-drawer-content{
-  min-height: 100%;
-}
+*/
+

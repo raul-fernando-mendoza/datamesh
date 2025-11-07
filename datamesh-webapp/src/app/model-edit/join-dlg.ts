@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { ComparatorOption, JoinCondition, JoinNode, JoinData, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj, SqlColumnGeneric } from 'app/datatypes/datatypes.module';
+import { ComparatorOption, JoinCondition, JoinNode, JoinData, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj, SqlColumnGeneric, SqlResultGeneric } from 'app/datatypes/datatypes.module';
 import { MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -60,18 +60,7 @@ import { FirebaseService } from 'app/firebase.service';
       ComparatorOption.ne
     ]
  
-    selectedColumnsFA = this.fb.array([
-      {
-        columnName: [''],
-        selected: [true],
-        alias:['']
-      }
-    ])  
-
-    filteredFA = this.fb.array([]) 
-
     isLoading = false
-
 
     joinsFA = this.fb.array([
       this.fb.group({
@@ -79,23 +68,8 @@ import { FirebaseService } from 'app/firebase.service';
         comparator: [ComparatorOption.equal],
         exp:['']
       })
-    ])  
+    ])    
 
-    columnsFA = this.fb.array([
-      this.fb.group({
-        columnName: [''],
-        selected: [true],
-        alias:['']
-      })
-    ])     
-
-    filtersFA = this.fb.array([
-      this.fb.group({
-        columnName: [''],
-        comparator: [ComparatorOption.equal],
-        exp:['']
-      })
-    ])   
 
     leftColumns!:SqlColumnGeneric[]
     rightColumns!:SqlColumnGeneric[]
@@ -103,28 +77,7 @@ import { FirebaseService } from 'app/firebase.service';
     filteredOptions: SqlColumnGeneric[] = [];
     filteredLeftOptions: SqlColumnGeneric[] = [];
 
-    childColumnsSelectedFA = [
-      [
-        this.fb.group({
-          columnName: [''],
-          selected: [true],
-          alias:['']
-        }),        
-      ]
-      ,
-      [
-        this.fb.group({
-          columnName: [''],
-          selected: [true],
-          alias:['']
-        }),        
-      ]
-    ]
-
     result:SqlResultInFirebase | null= null
-
-    
-    isEditinPostTransformation = signal("")
 
     postTransformationForm = this.fb.group({
       label: ['']
@@ -139,29 +92,49 @@ import { FirebaseService } from 'app/firebase.service';
       @Inject(MAT_DIALOG_DATA) public data:JoinData) {}
 
     ngOnInit(): void {
-     
-   
-
-      let allPromises:Array<Promise<void>> = []
-
-      let leftNode = this.data.leftNode
+       let leftNode = this.data.leftNode
       let rightNode = this.data.rightNode
 
-      this.leftColumns = leftNode.sampleData[leftNode.sampleData.length-1].columns
-      this.rightColumns = rightNode.sampleData[rightNode.sampleData.length-1].columns
+      let ltIdx = leftNode.transformations[0].id
+      let lId = leftNode.transformations[0].id
+      let rtIdx = rightNode.transformations.length-1
+      let rId = rightNode.transformations[rtIdx].id
 
-      this.joinsFA.clear()
+      let allPromises:Array<Promise<void>> = []
+      allPromises.push(
+        this.firebaseService.getdoc( this.data.leftCollectionPath + "/" + leftNode.id + "/sampledata" , lId).then( doc =>{
+          if(doc.exists()){
+            let result = doc.data() as SqlResultGeneric
+            this.leftColumns = result.columns
+          }
+        })
+      )
+      
+      allPromises.push(
+        this.firebaseService.getdoc( this.data.rightCollectionPath + "/" + rightNode.id + "/sampledata" , rId).then( doc =>{
+          if(doc.exists()){
+            let result = doc.data() as SqlResultGeneric
+            this.rightColumns = result.columns
+          }
+        })
+      )
+      
+      Promise.all( allPromises ).then( ()=>{
+        this.joinsFA.clear()
 
-      if( this.data.leftNode ){          
-        this.data.rightNode.joinCriteria.forEach( j =>{
-          let newJoinFG = this.fb.group({
-            columnName: [j.leftValue],
-            comparator: [j.comparator],
-            exp:[j.rightValue]
-          })
-          this.joinsFA.push( newJoinFG)
-        })     
-      }      
+        if( this.data.leftNode ){          
+          this.data.rightNode.joinCriteria.forEach( j =>{
+            let newJoinFG = this.fb.group({
+              columnName: [j.leftValue],
+              comparator: [j.comparator],
+              exp:[j.rightValue]
+            })
+            this.joinsFA.push( newJoinFG)
+          })     
+        } 
+      })
+      
+
       
     }
 
@@ -173,6 +146,7 @@ import { FirebaseService } from 'app/firebase.service';
       })
       this.joinsFA.push( newJoinFG)
     }
+
     onDeleteJoin(i:number){
       this.joinsFA.controls.splice(i,1)
     }    
@@ -207,7 +181,7 @@ import { FirebaseService } from 'app/firebase.service';
       let newJoinNode:JoinNode = {
         joinCriteria: joinCriteria
       }
-      let parentCollection = this.data.rightCollectionPath.split("/").slice(0,-1).join("/")
+      let parentCollection = this.data.rightCollectionPath
       
       this.firebaseService.updateDoc( parentCollection, this.data.rightNode.id , newJoinNode).then( ()=>{
         console.log("update join")

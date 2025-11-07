@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType, SqlColumnGeneric } from 'app/datatypes/datatypes.module';
+import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType, SqlColumnGeneric, SqlResultGeneric, ActionOption } from 'app/datatypes/datatypes.module';
 import { MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -81,12 +81,30 @@ import { FirebaseService } from 'app/firebase.service';
     ngOnInit(): void {
       let node = this.data.node
       let idx = this.data.currentTransactionIndex
+      let tId = node.transformations[idx].id
 
-      this.columns = node.sampleData[node.sampleData.length-1].columns     
+      if( this.data.action == ActionOption.add){
+        idx = node.transformations.length-1
+        tId = node.transformations[idx].id
+      }
+      else{
+        let t = node.transformations[idx] as FilterTransformation
+        this.filterFA.controls.columnName.setValue(t.leftValue)
+        this.filterFA.controls.comparator.setValue(t.comparator)
+        this.filterFA.controls.exp.setValue(t.rightValue)
+      }
+
+      this.firebaseService.getdoc( this.data.collectionPath + "/" + node.id + "/sampledata" , tId).then( doc =>{
+        if(doc.exists()){
+          let result = doc.data() as SqlResultGeneric
+          this.columns = result.columns
+        }
+      })
+  
     }
 
     filter(): void {
-      const filterValue = this.filterFA.controls.exp.value ? this.filterFA.controls.exp.value : ""
+      const filterValue = this.filterFA.controls.columnName.value ? this.filterFA.controls.columnName.value : ""
       this.filteredOptions = this.columns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
     }   
 
@@ -103,7 +121,14 @@ import { FirebaseService } from 'app/firebase.service';
       } 
 
       let joinNodeUpdate:JoinNode = {
-        transformations:[ ...this.data.node.transformations , f]
+        transformations:[ ...this.data.node.transformations ]
+      }      
+
+      if( this.data.action == ActionOption.add){
+        joinNodeUpdate.transformations!.push( f )
+      }
+      else if( this.data.action == ActionOption.edit){
+        joinNodeUpdate.transformations?.splice(this.data.currentTransactionIndex,1, f)
       }
  
       this.firebaseService.updateDoc( this.data.collectionPath, this.data.node.id, joinNodeUpdate).then( ()=>{

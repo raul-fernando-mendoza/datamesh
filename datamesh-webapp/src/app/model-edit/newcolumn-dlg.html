@@ -9,9 +9,11 @@
       <mat-label>Column Name</mat-label>
       <input matInput formControlName="columnName">
   </mat-form-field>
-  <mat-form-field>
-    <mat-label>expression</mat-label>
-    <input matInput formControlName="expression">
-</mat-form-field>  
+  <p>
+  <mat-form-field appearance="fill">
+    <mat-label>expression</mat-label> 
+    <textarea matInput maxlength="10000" rows="10" formControlName="expression"></textarea>
+  </mat-form-field> 
+  </p>
 <div>
 

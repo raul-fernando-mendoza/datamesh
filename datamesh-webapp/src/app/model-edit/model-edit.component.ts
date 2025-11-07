@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric, RenameColumnTransformation, NewColumnTransformation, SqlColumnGeneric } from 'app/datatypes/datatypes.module';
+import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric, RenameColumnTransformation, NewColumnTransformation, SqlColumnGeneric, SnowFlakeDataset } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -34,6 +34,7 @@ import { GroupByDialog } from './groupby-dlg';
 import { JoinDialog } from './join-dlg';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NewColumnDialog } from './newcolumn-dlg';
+import { toggleFold } from '@codemirror/language';
 
 @Component({
     selector: 'app-model-edit',
@@ -121,7 +122,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   flatJoinNodeMap = new Map<string,JoinNodeObj>()
   flatInfoNodes = new Map<string, InfoNode>()  
 
-  selectedInfoNodePath = signal("")
   selectedJoinNodeObj = signal<JoinNodeObj|null>(null)
   selectedTransactionIdx = signal<number|null>(null)
   result = signal<SqlResultGeneric | undefined>(undefined)
@@ -222,20 +222,20 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     return []    
   }
 
-  getCollectionPath( infoNode:InfoNode ){
+  getCollection( infoNode:InfoNode ){
     var path = this.getPath( infoNode )
 
     
-    var model = this.model()!
+    var model = this.model()! 
+
+    var fullPath = ModelObj.collectionName + "/" + model.id + "/" + JoinNodeObj.className 
+
     if( path ){
-      var pathWithNodes = ""
-      for(let i =0; i< path.length; i++){
-        pathWithNodes = pathWithNodes + "/" + JoinNodeObj.className + "/" + path[i].id
+      for(let i =0; i< path.length-1; i++){
+        fullPath = fullPath + "/" + path[i].id + "/" + JoinNodeObj.className
       }
-      var fullPath = ModelObj.collectionName + "/" + model.id + pathWithNodes
-      return fullPath
     }
-    return ModelObj.collectionName 
+    return fullPath 
   }
   
   
@@ -450,7 +450,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       tableName: data.tableName,
       joinCriteria: [],
       columns: [],
-      sampleData: [],
       transformations: []
     }    
 
@@ -473,7 +472,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
             tableName: tableName,
             joinCriteria: [],
             columns: [],
-            sampleData: [],
             transformations: []
           }
   
@@ -504,7 +502,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         tableName: tableName,
         joinCriteria: [],
         columns: [],
-        sampleData: [],
         transformations: []
       }
       
@@ -543,14 +540,18 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   onEditJoinNode(parentNode:InfoNode, node:InfoNode){
     console.log(node)
     if( parentNode && node ){
-      let collectionPath:string = this.getCollectionPath(node)!
+      
       let leftNode = this.flatJoinNodeMap.get(parentNode.id)!
+      let leftCollectionPath:string = this.getCollection(parentNode)!
       let rightNode = this.flatJoinNodeMap.get(node.id)
+      let rightCollectionPath:string = this.getCollection(node)!
 
       let data: JoinData = {
         leftNode: leftNode,
+        leftCollectionPath: leftCollectionPath,
         rightNode: rightNode!,
-        rightCollectionPath:collectionPath
+        rightCollectionPath: rightCollectionPath,
+        
       }
       const dialogRef = this.dialog.open(JoinDialog, {
         height: '95%',
@@ -645,37 +646,15 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   
 
   onJoinNodeSelected(node:InfoNode){
-    
-    let fullPath = this.getCollectionPath( node )
-    if( fullPath ){
-      this.selectedInfoNodePath.set(fullPath)
+
+    //if( !this.selectedJoinNodeObj() || this.selectedJoinNodeObj()!.id != node.id ){
       let joinNodeObj = this.flatJoinNodeMap.get( node.id )
       if( joinNodeObj ){
         this.selectedJoinNodeObj.set(joinNodeObj)
         let lastIdx = joinNodeObj.transformations.length - 1
-        //let result:SqlResultGeneric|undefined = joinNodeObj.transformations[lastIdx].sampleData
-        let result:SqlResultGeneric = joinNodeObj.sampleData[joinNodeObj.sampleData.length-1]
-
-        //no create the form before loading the sample
-       
-        if( result ){
-
-          this.selectedColumns.length = 0
-          for( let i =0; i<result.columns.length; i++){
-            let t = this.fb.group({
-              id:[result.columns[i].columnName],
-              selected:[false],
-              rename:[result.columns[i].columnName]
-            })
-
-            this.selectedColumns.push(t)
-          }
-        }
-        
-        this.result.set(result)
+        this.onTranformation(lastIdx)    
       }
-    }
-    
+    //}
   }
 
   getTransformationText(t:Transformation ):string{
@@ -715,24 +694,29 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
     else if( t.type == TransformationType.newColumn){
       let nct = t as NewColumnTransformation
-      str = "newColumn:" + nct.columnName + "-" + nct.expression
+      str = nct.columnName + "=" + nct.expression
     }    
     return str
   }
 
-  addFilter(){
+  onAddFilter(){
+    this.filter(ActionOption.add)
+  }
+
+  filter(action:ActionOption){
     if( this.selectedJoinNodeObj() ){
       let joinNodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
       let infoNode:InfoNode = this.flatInfoNodes.get( joinNodeObj.id )!
-      let collectionPath:string = this.getCollectionPath(infoNode)
-      let parentCollectionName = collectionPath.split("/").slice(0,-1).join("/")
+      let collectionPath:string = this.getCollection(infoNode)
+      let idx = this.selectedTransactionIdx()!
+      
       
       
      let data: JoinNodeActionData = {
         node: joinNodeObj,
-        collectionPath: parentCollectionName,
-        currentTransactionIndex: joinNodeObj.transformations.length-1,
-        action: ActionOption.add
+        collectionPath: collectionPath,
+        currentTransactionIndex: idx,
+        action: action
       }
       const dialogRef = this.dialog.open(FilterDialog, {
         height: '95%',
@@ -758,27 +742,30 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       }      
 
       let infoNode = this.flatInfoNodes.get( joinNodeObj.id )!
-      let collectionName = this.getCollectionPath( infoNode )
-      let parentCollectionName = collectionName.split("/").slice(0,-1).join("/")
+      let collectionPath = this.getCollection( infoNode )
+      
 
-      this.firebaseService.updateDoc( parentCollectionName , infoNode.id, nodeUpdate).then( ()=>{
+      this.firebaseService.updateDoc( collectionPath , infoNode.id, nodeUpdate).then( ()=>{
         console.log("save the join")
         this.updateAll()
       })
 
   }
-  addGroupBy(){
+  onAddGroupBy(){
+    this.groupBy(ActionOption.add)
+  }
+  groupBy(action:ActionOption){
     if( this.selectedJoinNodeObj() ){
       let n = this.selectedJoinNodeObj()!
-      let collectionPath:string = this.getCollectionPath(n)!
-      let parentCollection = collectionPath.split("/").slice(0,-1).join("/")
+      let collection:string = this.getCollection(n)!
+      
       let node = this.flatJoinNodeMap.get(n.id)!
 
       let data: JoinNodeActionData = {
         node: node,
-        collectionPath: parentCollection,
+        collectionPath: collection,
         currentTransactionIndex: node.transformations.length-1,
-        action: ActionOption.add
+        action: action
       }
       const dialogRef = this.dialog.open(GroupByDialog, {
         height: '95%',
@@ -823,10 +810,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         transformations:[ ...joinNode.transformations , selectedColumnsTransformation]
       }
 
-      let collectionName = this.getCollectionPath( infoNode )
-      let parentCollection = collectionName.split("/").slice(0,-1).join("/")
+      let collection = this.getCollection( infoNode )
+      
 
-      this.firebaseService.updateDoc( parentCollection, infoNode.id, nodeUpdate).then( ()=>{
+      this.firebaseService.updateDoc( collection, infoNode.id, nodeUpdate).then( ()=>{
         console.log("save the join")
         this.updateAll()
       })
@@ -858,50 +845,60 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     let transformationUpdate: JoinNode = {
       transformations: [...node!.transformations!, renameColumnTransformation]
     }
-    let collection = this.getCollectionPath( infoNode )
-    let parentCollection = collection.split("/").slice(0,-1).join("/")
-    this.firebaseService.updateDoc( parentCollection, node.id, transformationUpdate).then( ()=>{
+    let collection = this.getCollection( infoNode )
+    
+    this.firebaseService.updateDoc( collection, node.id, transformationUpdate).then( ()=>{
       this.updateAll()
     })
   }
 
   onTranformation(i:number){
 
-    this.selectedTransactionIdx.set( i )
-    let node:JoinNodeObj = this.selectedJoinNodeObj()!
+    //if( this.selectedTransactionIdx() != i ){
 
+      this.selectedTransactionIdx.set( i )
+      let joinNodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
+      let collection = this.getCollection( joinNodeObj )
 
-    let result = node.sampleData[i]
-    if( result ){
-
-      this.selectedColumns.length = 0
-      for( let i =0; i<result.columns.length; i++){
-        let t = this.fb.group({
-          id:[result.columns[i].columnName],
-          selected:[false],
-          rename:[result.columns[i].columnName]
-        })
-
-        this.selectedColumns.push(t)
-      }
-    }    
-    this.result.set(result)
-    this.selectColumns()    
+      let transformationId = joinNodeObj.transformations[i].id
+      this.firebaseService.getdoc(collection + "/" + joinNodeObj.id + "/sampledata", transformationId).then( doc =>{
+        if( doc.exists() ){
+          let result = doc.data() as SqlResultGeneric
+          this.selectedColumns.length = 0
+          for( let i =0; i<result.columns.length; i++){
+            let t = this.fb.group({
+              id:[result.columns[i].columnName],
+              selected:[false],
+              rename:[result.columns[i].columnName]
+            })
+            
+            this.selectedColumns.push(t)
+          }
+          this.result.set(result)
+          this.selectColumns()    
+        }
+        else{
+          this.result.set(undefined)
+        }
+      })
+    //}  
   }
 
-  addNewColumn(){
+  onNewColumn(){
+    this.newColumn(ActionOption.add)
+  }
+
+  newColumn(action:ActionOption){
     if( this.selectedJoinNodeObj() ){
       let joinNodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
       let infoNode:InfoNode = this.flatInfoNodes.get( joinNodeObj.id )!
-      let collectionPath:string = this.getCollectionPath(infoNode)
-      let parentCollectionName = collectionPath.split("/").slice(0,-1).join("/")
-      
+      let collection:string = this.getCollection(infoNode)
       
      let data: JoinNodeActionData = {
         node: joinNodeObj,
-        collectionPath: parentCollectionName,
+        collectionPath: collection,
         currentTransactionIndex: joinNodeObj.transformations.length-1,
-        action: ActionOption.add
+        action: action
       }
       const dialogRef = this.dialog.open(NewColumnDialog, {
         height: '95%',
@@ -943,10 +940,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         
 
         let infoNode:InfoNode = this.flatInfoNodes.get( nodeObj.id )!
-        let collectionPath:string = this.getCollectionPath(infoNode)
-        let parentCollectionName = collectionPath.split("/").slice(0,-1).join("/")        
+        let collection:string = this.getCollection(infoNode)
+                
    
-        this.firebaseService.updateDoc( parentCollectionName, nodeObj.id, joinNodeUpdate).then( ()=>{
+        this.firebaseService.updateDoc( collection, nodeObj.id, joinNodeUpdate).then( ()=>{
           this.updateAll()
         },
         reason =>{
@@ -978,5 +975,22 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
   }
 
+  onEditTransformation(i:number){
+    
+    let node:JoinNodeObj = this.selectedJoinNodeObj()!    
+    switch( node.transformations[i].type ){
+      case TransformationType.newColumn:
+        this.newColumn(ActionOption.edit)
+        break
+      case TransformationType.filter:
+        this.filter(ActionOption.edit)
+        break;
+      case TransformationType.groupBy:
+        this.groupBy(ActionOption.edit)
+        break;  
+      
+    }
+
+  }
 
 }

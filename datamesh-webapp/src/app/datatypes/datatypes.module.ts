@@ -304,13 +304,13 @@ export class JoinNodeObj implements JoinNode{
   tableName!:string
   columns: Array<SnowFlakeColumn> = []
   joinCriteria:Array<JoinCondition> = []
-  sampleData:Array<SqlResultGeneric>  = []
   transformations:Array<Transformation> = []
 }
 
 
 export interface JoinData {
   leftNode:JoinNodeObj
+  leftCollectionPath:string
   rightNode:JoinNodeObj
   rightCollectionPath:string
 }

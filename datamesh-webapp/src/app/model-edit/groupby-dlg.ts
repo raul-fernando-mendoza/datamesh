@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj, FunctionOption, JoinNodeActionData, GroupByTransformation, ActionOption, TransformationType, SqlColumnGeneric } from 'app/datatypes/datatypes.module';
+import { JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeObj, FunctionOption, JoinNodeActionData, GroupByTransformation, ActionOption, TransformationType, SqlColumnGeneric, SqlResultGeneric } from 'app/datatypes/datatypes.module';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -93,7 +93,15 @@ import { FirebaseService } from 'app/firebase.service';
 
       let node = this.data.node
 
-      this.columns = node.sampleData[node.sampleData.length-1].columns 
+      let i = node.transformations.length-1
+      let tId = node.transformations[i].id
+
+      this.firebaseService.getdoc( this.data.collectionPath + "/" + node.id + "/sampledata" , tId).then( doc =>{
+        if(doc.exists()){
+          let result = doc.data() as SqlResultGeneric
+          this.columns = result.columns
+        }
+      })      
 
       if( this.data.action == ActionOption.edit ){ 
         this.groupBysFA.clear()    

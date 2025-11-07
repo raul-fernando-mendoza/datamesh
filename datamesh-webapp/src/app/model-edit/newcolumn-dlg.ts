@@ -7,7 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType, SqlColumnGeneric, NewColumnTransformation } from 'app/datatypes/datatypes.module';
+import { ComparatorOption, JoinNode, SqlResultInFirebase, SnowFlakeNativeColumn, JoinNodeActionData, FilterTransformation, JoinNodeObj, TransformationType, SqlColumnGeneric, NewColumnTransformation, ActionOption } from 'app/datatypes/datatypes.module';
 import { MatCheckboxModule} from '@angular/material/checkbox';
 import { MatRadioModule} from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -63,6 +63,11 @@ import { FirebaseService } from 'app/firebase.service';
     ngOnInit(): void {
       let node = this.data.node
       let idx = this.data.currentTransactionIndex
+      if( this.data.action == ActionOption.edit){
+        let t = this.data.node.transformations[idx] as NewColumnTransformation
+        this.FG.controls.columnName.setValue( t.columnName )
+        this.FG.controls.expression.setValue( t.expression )
+      }
       
     }
 
@@ -77,17 +82,25 @@ import { FirebaseService } from 'app/firebase.service';
       } 
 
       let joinNodeUpdate:JoinNode = {
-        transformations:[ ...this.data.node.transformations , f]
+        transformations:[ ...this.data.node.transformations]
+      }      
+
+      if( this.data.action == ActionOption.add){
+
+        joinNodeUpdate.transformations = [ ...this.data.node.transformations , f]
+
       }
- 
+      else if( this.data.action == ActionOption.edit){
+        joinNodeUpdate.transformations!.splice(this.data.currentTransactionIndex,1,f)
+      }
       this.firebaseService.updateDoc( this.data.collectionPath, this.data.node.id, joinNodeUpdate).then( ()=>{
         console.log("adding new column done")
       },
       reason =>{
         alert("Error: adding new column :" + reason.error)
-      })
-      
+      })      
     }
+
 }
   
   
