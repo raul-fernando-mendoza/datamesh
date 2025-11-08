@@ -374,17 +374,18 @@ def updateModelSamplesRecursive(collection, modelId):
                 colsSelected.append( childdf.col(field.name) )    
         
         joinCriterias = childJoinNode["joinCriteria"]
-        joinConditions = None 
-        for join in joinCriterias:
-            leftValue = join["leftValue"]
-            comparator = join["comparator"]
-            rightValue = join["rightValue"]
-            condition = df.col(leftValue) == childdf.col(rightValue)
-            if joinConditions:
-                joinConditions = joinConditions and condition
-            else:
-                joinConditions = condition
-        df = df.join(childdf, joinConditions).select( colsSelected )
+        if len(joinCriterias) > 0: #only make join if there is at leas a rule
+            joinConditions = None 
+            for join in joinCriterias:
+                leftValue = join["leftValue"]
+                comparator = join["comparator"]
+                rightValue = join["rightValue"]
+                condition = df.col(leftValue) == childdf.col(rightValue)
+                if joinConditions:
+                    joinConditions = joinConditions and condition
+                else:
+                    joinConditions = condition
+            df = df.join(childdf, joinConditions).select( colsSelected )
     
     #now update the result of the join
     if len(joinNodeChilds) > 0:

@@ -81,7 +81,7 @@ import { FirebaseService } from 'app/firebase.service';
     ngOnInit(): void {
       let node = this.data.node
       let idx = this.data.currentTransactionIndex
-      let tId = node.transformations[idx].id
+      let tId = node.transformations[idx-1].id
 
       if( this.data.action == ActionOption.add){
         idx = node.transformations.length-1

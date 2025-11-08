@@ -59,17 +59,19 @@ import { FirebaseService } from 'app/firebase.service';
       FunctionOption.avg      
     ]
 
-    groupBysFA = this.fb.array([
+    groupByFunctions = this.fb.array([
       this.fb.group({
-        columnName: [''],
         groupBy: [FunctionOption.sum],
+        columnName: [''],
         alias:['']
       })
     ])   
 
-    grpFA = this.fb.group({
+    groupByColumns = this.fb.array([
+      this.fb.group({
         columnName: ['']
-    })
+      })
+    ])
 
 
     columns!:SqlColumnGeneric[]
@@ -78,8 +80,6 @@ import { FirebaseService } from 'app/firebase.service';
     filteredGrpOptions: SqlColumnGeneric[] = [];
 
     result:SqlResultInFirebase | null= null
-
-    groupByColumns = signal<Array<string>>([])
 
     constructor(
       public dialogRef: MatDialogRef<GroupByDialog>,
@@ -104,7 +104,8 @@ import { FirebaseService } from 'app/firebase.service';
       })      
 
       if( this.data.action == ActionOption.edit ){ 
-        this.groupBysFA.clear()    
+        
+        this.groupByFunctions.clear()
         let t = this.data.node.transformations[this.data.currentTransactionIndex] as GroupByTransformation    
         t.functions.forEach( j =>{
           let newFG = this.fb.group({
@@ -112,11 +113,19 @@ import { FirebaseService } from 'app/firebase.service';
             groupBy: [j.functionOption],
             alias:[j.alias]
           })
-          this.groupBysFA.push( newFG)
-        })     
+          this.groupByFunctions.push( newFG)
+        }) 
+
+        this.groupByColumns.clear()
+        t.groupByColumns.forEach( c =>{
+          let newFG = this.fb.group({
+            columnName: [c]
+          })
+          this.groupByColumns.push( newFG)
+        })    
       } 
       else if( this.data.action == ActionOption.add ){
-        //don nothing
+        //do nothing
       }     
     }
 
@@ -126,33 +135,33 @@ import { FirebaseService } from 'app/firebase.service';
         groupBy: [FunctionOption.sum],
         alias:['']
       })
-      this.groupBysFA.push( newFG)
+      this.groupByFunctions.push( newFG)
     }
     onDeleteGroupBy(i:number){
-      this.groupBysFA.controls.splice(i,1)
+      this.groupByFunctions.controls.splice(i,1)
     }    
 
     filter(i:number): void {
-      let formFG = this.groupBysFA.controls[i]
+      let formFG = this.groupByFunctions.controls[i]
       const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
       this.filteredOptions = this.columns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
     }   
 
-    filterGrp(): void {
-      let formFG = this.grpFA
+    filterGrp(i:number): void {
+      let formFG = this.groupByColumns.controls[i]
       const filterValue = formFG.controls.columnName.value ? formFG.controls.columnName.value : ""
       this.filteredGrpOptions = this.columns.filter((o => o.columnName.toLowerCase().includes(filterValue.toLowerCase())))
     }     
     
     onSubmit(){  
-      let GroupByTransformation:GroupByTransformation[] = []
+      
 
       let funcs: Array<{
         columnName:string
         functionOption:FunctionOption
         alias:string
       }> = []
-      this.groupBysFA.controls.forEach( fg =>{
+      this.groupByFunctions.controls.forEach( fg =>{
         let columnName:string = fg.controls.columnName.value ? fg.controls.columnName.value : ""
         let functionOption:FunctionOption = fg.controls.groupBy.value ? fg.controls.groupBy.value : FunctionOption.max
         let alias = fg.controls.alias.value ? fg.controls.alias.value : ""
@@ -165,17 +174,29 @@ import { FirebaseService } from 'app/firebase.service';
         funcs.push(fun)
       })
 
+      let columns = Array<string>()
+      this.groupByColumns.controls.forEach( fg =>{
+        let columnName:string = fg.controls.columnName.value ? fg.controls.columnName.value : ""
+        columns.push(columnName)
+      })      
+
       let groupByTransformation:GroupByTransformation = {
         type: TransformationType.groupBy,
         id: uuid.v4(),
         functions: funcs,
-        groupByColumns: this.groupByColumns()
+        groupByColumns: columns
       } 
 
-
       let newJoinNode:JoinNode = {
-        transformations: [...this.data.node.transformations, groupByTransformation]
+        transformations: [...this.data.node.transformations]
+      }      
+      if( this.data.action == ActionOption.edit ){     
+        newJoinNode.transformations!.splice(this.data.currentTransactionIndex,1,groupByTransformation) 
       }
+      else{
+        newJoinNode.transformations = [...this.data.node.transformations, groupByTransformation]
+      }
+
       
       this.firebaseService.updateDoc( this.data.collectionPath , this.data.node.id , newJoinNode).then( ()=>{
         console.log("update joinnode add groupBy")
@@ -186,14 +207,13 @@ import { FirebaseService } from 'app/firebase.service';
     }
 
     onAddGroupBy(){
-      let columnName = this.grpFA.controls.columnName.value!
-      let currentSelection = this.groupByColumns()
-      this.groupByColumns.set( [ ...currentSelection , columnName])
+      let newFG = this.fb.group({
+        columnName: [""],
+      })
+      this.groupByColumns.push( newFG)
     }
     onRemoveGroupBy(i:number){
-      let currentSelection = this.groupByColumns()
-      currentSelection.splice(i,1)
-      this.groupByColumns.set( [ ...currentSelection ])
+      this.groupByColumns.controls.splice(i,1)
     }
   }
   

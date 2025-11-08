@@ -897,7 +897,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
      let data: JoinNodeActionData = {
         node: joinNodeObj,
         collectionPath: collection,
-        currentTransactionIndex: joinNodeObj.transformations.length-1,
+        currentTransactionIndex: this.selectedTransactionIdx()!,
         action: action
       }
       const dialogRef = this.dialog.open(NewColumnDialog, {
