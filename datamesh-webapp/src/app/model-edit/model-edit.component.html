@@ -1,9 +1,10 @@
 @if( id == 'new'){
-  <div [formGroup]="FG">
+  <div [formGroup]="FG" class="header">
     <mat-form-field class="name" appearance="fill">
         <mat-label>Name</mat-label>
         <input matInput formControlName="label" >
     </mat-form-field>  
+    <div class="spacer"></div>
     <button mat-icon-button (click)="onCreate()"><mat-icon>done</mat-icon></button>
     <button mat-icon-button routerLink="/model/list"><mat-icon>cancel</mat-icon></button>
   </div>      
@@ -13,7 +14,6 @@
     <as-split direction="horizontal" cdkDropListGroup>
       <as-split-area [size]="30">
         <div class="tables-container">
-          HELLO
           <app-tables-tree></app-tables-tree>
         </div>
       </as-split-area>
@@ -26,7 +26,15 @@
               @if( model() ){
                   <span class="spacer"></span>
                   <span >{{id}}</span>
-                  <button  mat-button (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+
+                  <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
+                    <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #filterActions="matMenu">
+                    <button mat-menu-item (click)="onDuplicate()"><mat-icon>control_point_duplicate</mat-icon></button>
+                    <button mat-menu-item (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+                </mat-menu>                   
+                  
               }
             </div>
             @if(isLoading == true){
@@ -91,10 +99,10 @@
                           </div>
             
                           @if( !isAdding ){
-                            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
+                            <button mat-icon-button [matMenuTriggerFor]="modelMenu" aria-label="menu">
                               <mat-icon>more_vert</mat-icon>
                             </button>
-                            <mat-menu #menu="matMenu">
+                            <mat-menu #modelMenu="matMenu">
                               <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>join_inner</mat-icon></button>
                               <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
                             </mat-menu>

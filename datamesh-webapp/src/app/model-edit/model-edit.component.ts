@@ -34,7 +34,7 @@ import { GroupByDialog } from './groupby-dlg';
 import { JoinDialog } from './join-dlg';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NewColumnDialog } from './newcolumn-dlg';
-import { toggleFold } from '@codemirror/language';
+
 
 @Component({
     selector: 'app-model-edit',
@@ -991,6 +991,27 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       
     }
 
+  }
+
+  onDuplicate(){
+    let req = {
+      id:this.id,
+      overwrites:{
+        label:this.model().label + "_copy"
+      }
+    }
+    this.urlService.post("ModelDuplicate",req).subscribe({ 
+      'next':(result:any)=>{
+        this.isLoading = false
+        console.log( result )        
+        this.router.navigate(["/model/" + result["id"]])
+
+      },
+      'error':(reason)=>{   
+        this.isLoading = false     
+        alert("Error ModelDuplicate:" + reason.error.error)
+      }
+    }) 
   }
 
 }

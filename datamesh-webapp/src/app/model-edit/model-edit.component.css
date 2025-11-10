@@ -1,3 +1,7 @@
+.name{
+  width:60%;
+}
+
 .example-tree-invisible {
   display: none;
 }

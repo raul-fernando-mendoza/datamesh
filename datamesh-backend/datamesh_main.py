@@ -280,6 +280,25 @@ def UpdateModelSamples():
         return ({"error":str(e)}, 400, headers)
     return (data, 200, headers)     
 
+@app.route('/ModelDuplicate', methods=['POST','OPTIONS'])
+@as_json
+def ModelDuplicate():
+    headers = handleCors(request)
+    if headers:
+        return headers
+        # Set CORS headers for the main request
+    headers = ALLOW_ORIGIN_HEADERS
+    log.debug("*** ModelDuplicate Start data:"+ str(request.data))
+    try:
+        req = request.get_json(force=True)
+        log.debug( str(req) )
+        data = bsnrules.ModelDuplicate(req)
+        log.debug("*** End ModelDuplicate:" + str(data))
+        
+    except Exception as e:
+        log.error("**** processRequest Exception:" + str(e))
+        return ({"error":str(e)}, 400, headers)
+    return (data, 200, headers)     
 
 if __name__ == '__main__':
     app.run()

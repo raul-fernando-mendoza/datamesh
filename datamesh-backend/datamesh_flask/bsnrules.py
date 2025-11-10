@@ -427,6 +427,30 @@ def updateModelSamples(req):
     print("executeModelById END")
     return obj 
 
+
+#Duplicate model overwritting the properties in overwrites obj
+# {
+#  id:/
+#  overwrites:{ label:"newName" , "otherproperty":"overwrittenValue"} 
+# }
+def ModelDuplicate(req):
+    id = req["id"]        
+    overwrites = req["overwrites"]
+    print("collection:" + id)
+    print("modelId:" + json.dumps(overwrites))
+    
+    collection = "Model"
+    
+    new_obj = firestore_db.dupDocument(collection, id, overwrites, exeptions=[])
+    
+    obj ={
+        "result":"success",
+        "id":new_obj["id"]
+    } 
+    
+    print("ModelDuplicate END")
+    return obj 
+
     
 if __name__ == '__main__':
     print("datamesh_base compiled")    
