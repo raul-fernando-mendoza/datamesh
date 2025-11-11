@@ -93,10 +93,10 @@ import { FirebaseService } from 'app/firebase.service';
 
       let node = this.data.node
 
-      let i = node.transformations.length-1
-      let tId = node.transformations[i].id
+    
+      let previousTransactionId = node.transformations[this.data.currentTransactionIndex-1].id
 
-      this.firebaseService.getdoc( this.data.collectionPath + "/" + node.id + "/sampledata" , tId).then( doc =>{
+      this.firebaseService.getdoc( this.data.collectionPath + "/" + node.id + "/sampledata" , previousTransactionId).then( doc =>{
         if(doc.exists()){
           let result = doc.data() as SqlResultGeneric
           this.columns = result.columns

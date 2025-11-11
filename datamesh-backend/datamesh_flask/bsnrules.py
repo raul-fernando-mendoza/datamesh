@@ -441,7 +441,7 @@ def ModelDuplicate(req):
     
     collection = "Model"
     
-    new_obj = firestore_db.dupDocument(collection, id, overwrites, exeptions=[])
+    new_obj = firestore_db.dupDocument(collection, id, overwrites, exceptions=[])
     
     obj ={
         "result":"success",

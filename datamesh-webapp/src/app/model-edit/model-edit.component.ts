@@ -733,7 +733,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       })
     }
   }
-  removeFilter(i:number){
+  onTransactionRemove(i:number){
       let joinNodeObj = this.selectedJoinNodeObj()!
       joinNodeObj.transformations.splice( i, 1)
 
@@ -764,7 +764,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       let data: JoinNodeActionData = {
         node: node,
         collectionPath: collection,
-        currentTransactionIndex: node.transformations.length-1,
+        currentTransactionIndex: this.selectedTransactionIdx()!,
         action: action
       }
       const dialogRef = this.dialog.open(GroupByDialog, {
@@ -1000,6 +1000,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         label:this.model().label + "_copy"
       }
     }
+    this.isLoading = true
     this.urlService.post("ModelDuplicate",req).subscribe({ 
       'next':(result:any)=>{
         this.isLoading = false

@@ -133,13 +133,14 @@ def copySubCollection(transaction, parentDocRef, collectionId, sourceDoc, except
     values = None
     try:
         log.debug( "copy:" + collectionId )
+        documentJSON = sourceDoc.to_dict()
         
-        newDocRef = parentDocRef.collection(collectionId).document()
+        newDocRef = parentDocRef.collection(collectionId).document(sourceDoc.id)
         
         parent_id_key = parentDocRef.parent.id + "_id"
 
         values = {"id":newDocRef.id , parent_id_key: parentDocRef.id}    
-        documentJSON = sourceDoc.to_dict()
+        
         for key in documentJSON:
             if key != "id" and isInExceptions(key, exceptions)==False:
                 keyValue = documentJSON[key]
@@ -185,7 +186,7 @@ def isInExceptions( str:str, options):
 # name:"newNameOfObject" 
 #}
 # exceptions = ["Path", "secretInfo"] 
-def dupDocument(collection, id, overwrites, exeptions):
+def dupDocument(collection, id, overwrites, exceptions):
     logging.debug( "firestore dupObject called")
     #logging.debug( "obj:%s",json.dumps(id,  indent=4, sort_keys=True) )
     values = None
@@ -205,7 +206,7 @@ def dupDocument(collection, id, overwrites, exeptions):
         #now copy all the fields 
         documentJSON = sourceDoc.to_dict()
         for key in documentJSON:
-            if key != "id" and isInExceptions(key, exeptions)==False:
+            if key != "id" and isInExceptions(key, exceptions)==False:
                 keyValue = documentJSON[key]
                 if key in overwrites: #the value can be overwritten from the source object
                     values[key] = overwrites[key]
@@ -215,10 +216,10 @@ def dupDocument(collection, id, overwrites, exeptions):
 
         transaction.create( newDocRef,values)
         for collection in sourceDoc.reference.collections():
-            if( isInExceptions(collection.id,exeptions) == False):
+            if( isInExceptions(collection.id,exceptions) == False):
                 values[collection.id] = []
                 for subDoc in sourceDoc.reference.collection(collection.id).get():
-                    subCollection = copySubCollection(transaction, newDocRef, collection.id, subDoc, exeptions)
+                    subCollection = copySubCollection(transaction, newDocRef, collection.id, subDoc, exceptions)
                     values[collection.id].append(subCollection)
         transaction.commit()
         
