@@ -93,8 +93,10 @@ import { FirebaseService } from 'app/firebase.service';
 
       let node = this.data.node
 
-    
-      let previousTransactionId = node.transformations[this.data.currentTransactionIndex-1].id
+      let previousTransactionId = node.transformations[node.transformations.length-1].id
+      if( this.data.action == ActionOption.edit ){
+        previousTransactionId = node.transformations[this.data.currentTransactionIndex-1].id
+      }
 
       this.firebaseService.getdoc( this.data.collectionPath + "/" + node.id + "/sampledata" , previousTransactionId).then( doc =>{
         if(doc.exists()){
