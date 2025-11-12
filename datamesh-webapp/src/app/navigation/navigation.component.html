@@ -9,70 +9,13 @@
   @else{
     <button [routerLink]="['/loginForm']" mat-button><mat-icon>login</mat-icon>login</button>        
   }
-  <button *ngIf="!(isHandset$ | async)">
-    <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
-    <mat-menu #menu="matMenu">
-      <a href='/loginForm' mat-menu-item>Item 1</a>
-    </mat-menu>        
-  </button>
+  <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item [routerLink]="['/connection']" >Connections</button>
+    <button mat-menu-item [routerLink]="['/model']" >Models</button>
+  </mat-menu>        
 </mat-toolbar>
 
 <router-outlet class="outlet"></router-outlet>
 
 </div>
-
-<!--
-
-
-<div class="container">
-  <mat-toolbar class="header" color="primary">
-    <button mat-button (click)="sidenav.toggle()">
-      <mat-icon *ngIf="sidenav.opened">menu_open</mat-icon>
-      <mat-icon *ngIf="!sidenav.opened">menu_close</mat-icon>
-    </button>  
-    <button [routerLink]="['/']" mat-icon-button><mat-icon>home</mat-icon></button>
-    <span class="spacer"></span>
-    @if( isLoggedIn() ){
-      <button (click)="onLogOut()" mat-button><mat-icon>logout</mat-icon>logout</button>        
-    }
-    @else{
-      <button [routerLink]="['/loginForm']" mat-button><mat-icon>login</mat-icon>login</button>        
-    }
-    <button *ngIf="!(isHandset$ | async)">
-      <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
-      <mat-menu #menu="matMenu">
-        <a href='/loginForm' mat-menu-item>Item 1</a>
-      </mat-menu>        
-    </button>
-  </mat-toolbar>
-  <mat-drawer-container>
-    <mat-drawer  #sidenav mode="over" close >
-      @if(isLoggedIn()){
-        <mat-list>
-          <mat-list-item>
-            <button [routerLink]="['/connection/list']" mat-button><mat-icon>cloud</mat-icon>Connections</button>
-          </mat-list-item>
-          <mat-list-item>
-            <button [routerLink]="['/model/list']" mat-button><mat-icon>design_services</mat-icon>Models</button>
-          </mat-list-item>
-        </mat-list>
-        <mat-accordion>
-          <mat-expansion-panel>
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                Connection
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <app-dataset-tree title="sql-jupiter" groupCollection="ConnectionGroup" dataCollection="Connection">
-            </app-dataset-tree>
-          </mat-expansion-panel>      
-        </mat-accordion> 
-        }     
-      </mat-drawer>
-      <mat-drawer-content>      
-      <router-outlet></router-outlet>
-    </mat-drawer-content>
-  </mat-drawer-container>    
-    
-</div>
--->

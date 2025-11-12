@@ -63,13 +63,13 @@ const routes: Routes = [
   { path:"loginForm/:intendedPath",pathMatch:'full',component:LoginFormComponent},
   { path:"loginForm",pathMatch:'full',component:LoginFormComponent},
 
-  { path: 'connection/list', component:ConnectionList, canActivate: [loginGuard('/loginForm/connection-list')] },
+  { path: 'connection', component:ConnectionList, canActivate: [loginGuard('/loginForm/connection-list')] },
 
   { path: 'connection/new', component:ConnectionEditComponent },
   { path: 'connection/edit/:id', component:ConnectionEditComponent },
   
   
-  { path: 'model/list', component:ModelList, canActivate: [loginGuard('/loginForm/connection-list')] },
+  { path: 'model', component:ModelList, canActivate: [loginGuard('/loginForm/connection-list')] },
   { path: 'model/:id', pathMatch:'full', component:ModelEditComponent },
   
 
