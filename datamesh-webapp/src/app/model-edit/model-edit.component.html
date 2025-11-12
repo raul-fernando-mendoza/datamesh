@@ -10,9 +10,8 @@
   </div>      
 }
 @else{
-  <div class="flexcontainer1">
-    <as-split direction="horizontal" cdkDropListGroup>
-      <as-split-area [size]="30">
+    <as-split class="top" direction="horizontal" cdkDropListGroup>
+      <as-split-area class="top" [size]="30">
         <div class="tables-container">
           <app-tables-tree></app-tables-tree>
         </div>
@@ -43,7 +42,7 @@
             @else{
             <div [formGroup]="FG">
                 <p>
-                    <mat-form-field class="name" appearance="fill">
+                    <mat-form-field class="name-form" appearance="fill">
                         <mat-label>Name</mat-label>
                         <input matInput formControlName="label" (change)="firebaseService.onChange($event,'Model',id,'label')">
                     </mat-form-field>
@@ -52,9 +51,6 @@
                       <mat-progress-bar mode="determinate" value="40"></mat-progress-bar>
                     }
                     <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" class="example-tree">
-                        <!-- This is the tree node template for leaf nodes -->
-                        <!-- There is inline padding applied to this node using styles.
-                          This padding value depends on the mat-icon-button width. -->
                         <mat-tree-node *matTreeNodeDef="let node" >
                           <div
                             [id]="node.item.id"
@@ -75,24 +71,19 @@
                                 
                                 </td>
                                 <td>
-                                  <!--<span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>-->
-                                  <span class="name">67 {{node.item.name}}</span>
-                                  <table class="tree">
-                                    <tr>
-                                      <td>
-                                        <ul>
-                                          @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
-                                            <li>
-                                              {{ getTransformationText(t) }}
-                                            </li>
-                                          }
-                                          @empty{
-                                            no transformations found
-                                          }
-                                          </ul>
-                                      </td>
-                                    </tr>
-                                  </table>
+                                  <div class="name">{{node.item.name}}</div>
+                                  <ul>
+                                    @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
+                                      @if( i>1){
+                                        <li>
+                                          {{ getTransformationText(t) }}
+                                        </li>
+                                      }
+                                    }
+                                    @empty{
+                                      no transformations found
+                                    }
+                                  </ul>
                                 </td>
                               </tr>
                             </table> 
@@ -108,7 +99,6 @@
                             </mat-menu>
                           }              
                         </mat-tree-node>
-                        <!-- This is the tree node template for expandable nodes -->
                         <mat-nested-tree-node
                             *matTreeNodeDef="let node; when: hasChild"
                             
@@ -128,7 +118,6 @@
                             (cdkDropListDropped)="onDrop($event)"
                             [cdkDropListEnterPredicate]="acceptPredicate"
                             >
-                                <!--hasChild:-->
                                 <table class="tree">
                                   <tr>
                                     <td>
@@ -136,22 +125,21 @@
                                       <span class="criteria">{{getJoinCriteriaText(node.item) }}</span> 
                                     </td>
                                     <td>
-                                      <span class="table">{{node.item.name == node.item.tableName? "" : node.item.tableName + ' ' }}</span>
-                                      <span class="name">{{node.item.name}}</span>
-                                      <table class="tree">
+                                      <table>
+                                        <tr><div class="name">{{node.item.name}}</div></tr>
                                         <tr>
-                                          <td>
-                                            <ul>
-                                              @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
-                                                <li>
-                                                  {{ getTransformationText(t) }}
-                                                </li>
+                                          <ul>
+                                            @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
+                                              @if( i>1){
+                                              <li>
+                                                {{ getTransformationText(t) }}
+                                              </li>
                                               }
-                                              @empty{
-                                                no transformations found
-                                              }
-                                            </ul>
-                                          </td>
+                                            }
+                                            @empty{
+                                              no transformations found
+                                            }
+                                          </ul>
                                         </tr>
                                       </table>
                                     </td>
@@ -170,8 +158,6 @@
                             }                    
                           </div>  
             
-                          <!-- There is inline padding applied to this div using styles.
-                              This padding value depends on the mat-icon-button width.  -->
                           <div [class.example-tree-invisible]="!tree.isExpanded(node)"
                               role="group">
                             <ng-container matTreeNodeOutlet></ng-container>
@@ -186,9 +172,6 @@
                       (cdkDropListDropped)="onDrop($event)"
                       [cdkDropListEnterPredicate]="acceptPredicate"
                       > 
-                      <!--          
-                        <button mat-icon-button (click)="Add(null)"><mat-icon>create_new_folder</mat-icon></button>
-                      -->
                       <mat-icon>create_new_folder</mat-icon>
                       </div>  
                 
@@ -201,7 +184,7 @@
           </as-split-area>
           <as-split-area [size]="40">
                 <as-split direction="horizontal">
-                  <as-split-area [size]="70">  
+                  <as-split-area class="scroll" [size]="70">  
                     @if( selectedJoinNodeObj() ){
                       @if(isLoading == true){
                         Loading....
@@ -209,39 +192,48 @@
                       @else{                                      
                         @if( result() ){
                           result().records: {{ result() }}
-                          <div class="view">
-                              <div class="gridbody">
-                                  <table  *ngIf="result() && result()!.columns && result()!.resultSet">
-                                    <thead class="gridheather">
-                                      <tr class="gridheather">
-                                        <th class="sticky-col index_heather"> idx </th>
-                                        @for( h of result()!.columns ; track h; let i = $index ){
-                                        <th [formGroup]="selectedColumns[i]"> 
-                                            <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)">
-                                              @if( selectedColumns[i].controls["selected"].value ){
-                                                <mat-form-field class="name" appearance="fill">
-                                                  <mat-label>Name</mat-label>
-                                                  <input matInput formControlName="rename">
-                                                </mat-form-field> 
-                                                <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
-                                              }
-                                              @else{
-                                                {{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}
-                                              }
-                                            </mat-checkbox>   <!---->
-                                        </th>
-                                        }
-                                      </tr>
-                                    </thead>
-                                    <tbody >                
-                                        <tr *ngFor="let row of result()!.resultSet; index as i">
-                                            <td  class="sticky-col index-col">{{ i + 1 }}</td>
-                                            <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
-                                        </tr>
-                                    </tbody>                
-                                  </table>  
-                              </div>
-                          </div>
+                          <table  *ngIf="result() && result()!.columns && result()!.resultSet">
+                            <thead class="gridheather">
+                              <tr class="gridheather">
+                                <th class="sticky-col index_heather"> idx </th>
+                                @for( h of result()!.columns ; track h; let i = $index ){
+                                <th [formGroup]="selectedColumns[i]">
+                                  <table>
+                                    <tr>
+                                      <td>
+                                        <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
+                                      </td>
+                                      @if( selectedColumns[i].controls["selected"].value ){
+                                        <td>
+                                        <mat-form-field class="name" appearance="fill">
+                                          <mat-label>Name</mat-label>
+                                          <input matInput formControlName="rename">
+                                        </mat-form-field> 
+                                        </td>
+                                        <td>
+                                          <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
+                                        </td>  
+                                      }
+                                      @else{
+                                        <td>
+                                        {{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}
+                                        </td>
+                                      }
+                                            
+                                    </tr>
+                                  </table> 
+                                  
+                                </th>
+                                }
+                              </tr>
+                            </thead>
+                            <tbody >                
+                                <tr *ngFor="let row of result()!.resultSet; index as i">
+                                    <td  class="sticky-col index-col">{{ i + 1 }}</td>
+                                    <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
+                                </tr>
+                            </tbody>                
+                          </table>  
                         }
                         @else{
                           No result found
@@ -321,5 +313,4 @@
         </as-split>
       </as-split-area>
     </as-split>
-  </div>
 }

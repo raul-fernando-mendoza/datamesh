@@ -1,3 +1,29 @@
+<div class="flexcontainer">
+  
+<mat-toolbar class="header" color="primary">
+  <button [routerLink]="['/']" mat-icon-button><mat-icon>home</mat-icon></button>
+  <span class="spacer"></span>
+  @if( isLoggedIn() ){
+    <button (click)="onLogOut()" mat-button><mat-icon>logout</mat-icon>logout</button>        
+  }
+  @else{
+    <button [routerLink]="['/loginForm']" mat-button><mat-icon>login</mat-icon>login</button>        
+  }
+  <button *ngIf="!(isHandset$ | async)">
+    <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
+    <mat-menu #menu="matMenu">
+      <a href='/loginForm' mat-menu-item>Item 1</a>
+    </mat-menu>        
+  </button>
+</mat-toolbar>
+
+<router-outlet class="outlet"></router-outlet>
+
+</div>
+
+<!--
+
+
 <div class="container">
   <mat-toolbar class="header" color="primary">
     <button mat-button (click)="sidenav.toggle()">
@@ -49,3 +75,4 @@
   </mat-drawer-container>    
     
 </div>
+-->

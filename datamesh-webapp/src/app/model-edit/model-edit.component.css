@@ -1,5 +1,10 @@
+.name-form{
+  width:80%;
+}
+
+
 .name{
-  width:60%;
+  text-transform: uppercase;
 }
 
 .example-tree-invisible {
@@ -9,7 +14,7 @@
 .example-tree ul,
 .example-tree li {
   margin-top: 0;
-  margin-bottom: 0;
+  margin-bottom: 0.5em;
   list-style-type: none;
 }
 
@@ -31,66 +36,21 @@
   display: block;
 }
 
-mat-drawer-content{
-  height: 100%;
-}
 .tables-container{
-  height:40em;
-  overflow: scroll;
-  padding: 1em;
   background-color: coral;
 }
 
 table .tree{
-  border:none;
-  border-collapse: collapse;
-  background-color: yellow;
-}
-
-/*
-.view {
-  margin: auto;
-  width: 100%;
-
-}
-
-.wrapper {
-  position: relative;
-  overflow: auto;
-  border: 1px solid black;
-  white-space: nowrap;   
-}
-
-
-table, th, td {
-  border: 1px solid black;
-  border-collapse: collapse;
-  padding: 2px;
-  font-size: small;
-}
-
-table tr th:first-child {
-  z-index: 11;
+  background-color: magenta;
   
 }
 
-table tr th {
-  position: sticky;
-  top: 0;
-  z-index: 9;
-  background: #fff;
-}
-*/
 
 .transformationGrp{
-  height: 20em;
-  overflow: scroll;
   background-color: yellowgreen;
 }
 
 .gridbody{
-  height: 20em;
-  overflow: scroll;
   background-color: yellowgreen;
 }
 
@@ -126,16 +86,10 @@ table tr th {
 .number{
   text-align: right;
 }
-/*
-.flexcontainer{
-  display:flex;
-  flex-wrap: nowrap;
-  align-items: stretch;
-  align-content: stretch;
-  width: 100%;
-  height: 700px;
-  border: solid 3px red;
+as-split .top{
+  background-color: green;
 }
-
-*/
-
+as-split-area .scroll{
+  overflow: scroll;
+  background-color: grey;
+}

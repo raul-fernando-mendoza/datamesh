@@ -88,6 +88,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     table:['',[Validators.required]]
   })  
 
+  arr:Array<{id:string}> = []        
+
 
   childrenAccessor = (node: TreeNode) => node.childrenNodes ?? [];
 
@@ -161,6 +163,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
          this.groupId = res["groupId"]
        }
      }) 
+     for( let i=0; i<100; i++){
+      let n = { "id":String(i) }
+      this.arr.push( n )
+    }      
   }  
   ngAfterViewInit(): void {
     console.log("after view init")

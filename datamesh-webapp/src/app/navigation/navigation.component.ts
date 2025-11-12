@@ -19,6 +19,7 @@ import { MatListModule } from '@angular/material/list';
 import { AuthService } from 'app/auth.service';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from 'environments/environment';
+import { AngularSplitModule } from 'angular-split';
 
 @Component({
     selector: 'app-navigation',
@@ -36,7 +37,9 @@ import { auth } from 'environments/environment';
         DatasetTreeComponent,
         MatMenuModule,
         OverlayModule,
-        MatListModule
+        MatListModule,
+        AngularSplitModule
+
     ]
 })
 export class NavigationComponent implements OnInit, OnDestroy {
@@ -77,12 +80,15 @@ export class NavigationComponent implements OnInit, OnDestroy {
       shareReplay()
     );
 
+
+
   constructor(private breakpointObserver: BreakpointObserver, 
     private _overlay: Overlay, 
     private _viewContainerRef: ViewContainerRef,
     private authService:AuthService,
     private router:Router
-    ) {   
+    ) { 
+ 
   }
   ngOnInit(): void {
 
