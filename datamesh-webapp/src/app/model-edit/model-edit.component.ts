@@ -634,7 +634,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   }
   isNumber(datatype:any){
     
-    if(datatype.startsWith("decimal") ){
+    if(datatype.startsWith("decimal") || 
+       datatype.startsWith("bigint") ){
       return true
     }
     return false

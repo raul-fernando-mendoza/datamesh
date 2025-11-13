@@ -1,6 +1,6 @@
 @if( id == 'new'){
   <div [formGroup]="FG" class="header">
-    <mat-form-field class="name" appearance="fill">
+    <mat-form-field class="name-form" appearance="fill">
         <mat-label>Name</mat-label>
         <input matInput formControlName="label" >
     </mat-form-field>  
@@ -20,7 +20,7 @@
         <as-split direction="vertical">
           <as-split-area  [size]="60">      
             <div class="header">
-              <button mat-icon-button routerLink="/model/list"><mat-icon>arrow_back</mat-icon></button> 
+              <button mat-icon-button routerLink="/model"><mat-icon>arrow_back</mat-icon></button> 
               <span>Model Edit</span>
               @if( model() ){
                   <span class="spacer"></span>
