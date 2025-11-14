@@ -63,6 +63,7 @@ import { FirebaseService } from 'app/firebase.service';
     ngOnInit(): void {
       let node = this.data.node
       let idx = this.data.currentTransactionIndex
+
       if( this.data.action == ActionOption.edit){
         let t = this.data.node.transformations[idx] as NewColumnTransformation
         this.FG.controls.columnName.setValue( t.columnName )
@@ -86,9 +87,14 @@ import { FirebaseService } from 'app/firebase.service';
       }      
 
       if( this.data.action == ActionOption.add){
-
-        joinNodeUpdate.transformations = [ ...this.data.node.transformations , f]
-
+        let idx = this.data.currentTransactionIndex
+        if(  idx == this.data.node.transformations.length-1){
+          //is adding at the end
+          joinNodeUpdate.transformations!.push( f )
+        }
+        else{
+          joinNodeUpdate.transformations!.splice(idx+1, 0, f)
+        }
       }
       else if( this.data.action == ActionOption.edit){
         joinNodeUpdate.transformations!.splice(this.data.currentTransactionIndex,1,f)

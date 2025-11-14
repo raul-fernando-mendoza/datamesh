@@ -92,13 +92,15 @@ import { FirebaseService } from 'app/firebase.service';
     ngOnInit(): void {
 
       let node = this.data.node
+      let idx = this.data.currentTransactionIndex
+      let tId = node.transformations[idx-1].id      
 
-      let previousTransactionId = node.transformations[node.transformations.length-1].id
-      if( this.data.action == ActionOption.edit ){
-        previousTransactionId = node.transformations[this.data.currentTransactionIndex-1].id
+      if( this.data.action == ActionOption.add ){
+        tId = node.transformations[idx].id
       }
 
-      this.firebaseService.getdoc( this.data.collectionPath + "/" + node.id + "/sampledata" , previousTransactionId).then( doc =>{
+
+      this.firebaseService.getdoc( this.data.collectionPath + "/" + node.id + "/sampledata" , tId).then( doc =>{
         if(doc.exists()){
           let result = doc.data() as SqlResultGeneric
           this.columns = result.columns
@@ -125,10 +127,7 @@ import { FirebaseService } from 'app/firebase.service';
           })
           this.groupByColumns.push( newFG)
         })    
-      } 
-      else if( this.data.action == ActionOption.add ){
-        //do nothing
-      }     
+      }      
     }
 
     onAddFunction(){
@@ -189,18 +188,20 @@ import { FirebaseService } from 'app/firebase.service';
         groupByColumns: columns
       } 
 
-      let newJoinNode:JoinNode = {
+      let joinNodeUpdate:JoinNode = {
         transformations: [...this.data.node.transformations]
+      } 
+      
+      if( this.data.action == ActionOption.add){
+        let idx = this.data.currentTransactionIndex
+        joinNodeUpdate.transformations!.splice(idx+1, 0, groupByTransformation)
       }      
-      if( this.data.action == ActionOption.edit ){     
-        newJoinNode.transformations!.splice(this.data.currentTransactionIndex,1,groupByTransformation) 
-      }
-      else{
-        newJoinNode.transformations = [...this.data.node.transformations, groupByTransformation]
+      else if( this.data.action == ActionOption.edit){
+        joinNodeUpdate.transformations?.splice(this.data.currentTransactionIndex,1, groupByTransformation)
       }
 
       
-      this.firebaseService.updateDoc( this.data.collectionPath , this.data.node.id , newJoinNode).then( ()=>{
+      this.firebaseService.updateDoc( this.data.collectionPath , this.data.node.id , joinNodeUpdate).then( ()=>{
         console.log("update joinnode add groupBy")
       },
       reason=>{

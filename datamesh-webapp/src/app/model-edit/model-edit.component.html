@@ -10,307 +10,309 @@
   </div>      
 }
 @else{
-    <as-split class="top" direction="horizontal" cdkDropListGroup>
-      <as-split-area class="top" [size]="30">
-        <div class="tables-container">
-          <app-tables-tree></app-tables-tree>
-        </div>
-      </as-split-area>
-      <as-split-area [size]="70">
-        <as-split direction="vertical">
-          <as-split-area  [size]="60">      
-            <div class="header">
-              <button mat-icon-button routerLink="/model"><mat-icon>arrow_back</mat-icon></button> 
-              <span>Model Edit</span>
-              @if( model() ){
-                  <span class="spacer"></span>
-                  <span >{{id}}</span>
+  <as-split class="top" direction="horizontal" cdkDropListGroup>
+    <as-split-area class="top" [size]="30">
+      <div class="tables-container">
+        <app-tables-tree></app-tables-tree>
+      </div>
+    </as-split-area>
+    <as-split-area [size]="70">
+      <as-split direction="vertical">
+        <as-split-area  [size]="60">      
+          <div class="header">
+            <button mat-icon-button routerLink="/model"><mat-icon>arrow_back</mat-icon></button> 
+            <span>Model Edit</span>
+              <span class="spacer"></span>
+              <span >{{id}}</span>
 
-                  <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
-                    <mat-icon>more_vert</mat-icon>
-                </button>
-                <mat-menu #filterActions="matMenu">
-                    <button mat-menu-item (click)="onDuplicate()"><mat-icon>control_point_duplicate</mat-icon></button>
-                    <button mat-menu-item (click)="onDelete()"><mat-icon>delete</mat-icon></button>
-                </mat-menu>                   
-                  
-              }
-            </div>
-            @if(isLoading == true){
-              Loading....
-            }
-            @else{
+              <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #filterActions="matMenu">
+                <button mat-menu-item (click)="onDuplicate()"><mat-icon>control_point_duplicate</mat-icon></button>
+                <button mat-menu-item (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+              </mat-menu>                   
+          </div>
+          @if(isLoading == true){
+            Loading....
+          }
+          @else{
             <div [formGroup]="FG">
-                <p>
-                    <mat-form-field class="name-form" appearance="fill">
-                        <mat-label>Name</mat-label>
-                        <input matInput formControlName="label" (change)="firebaseService.onChange($event,'Model',id,'label')">
-                    </mat-form-field>
-                <p>
-                    @if( isLoading ){
-                      <mat-progress-bar mode="determinate" value="40"></mat-progress-bar>
-                    }
-                    <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" class="example-tree">
-                        <mat-tree-node *matTreeNodeDef="let node" >
-                          <div
-                            [id]="node.item.id"
-                            cdkDropList
-                            #doneList="cdkDropList"
-                            class="example-list"
-                            (cdkDropListDropped)="onDrop($event)"
-                            [cdkDropListEnterPredicate]="acceptPredicate"
-                            (click)="onJoinNodeSelected(node.item)"
-                          >
-                            <table class="tree">
-                              <tr>
-                                <td><mat-icon>table</mat-icon></td>
-                                <td>
-                                  <div>{{node.item.id}}</div>
-                                  
-                                  <span class="criteria">{{getJoinCriteriaText(node.item) }}</span> 
-                                
-                                </td>
-                                <td>
-                                  <div class="name">{{node.item.name}}</div>
-                                  <ul>
-                                    @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
-                                      @if( i>1){
-                                        <li>
-                                          {{ getTransformationText(t) }}
-                                        </li>
-                                      }
-                                    }
-                                    @empty{
-                                      no transformations found
-                                    }
-                                  </ul>
-                                </td>
-                              </tr>
-                            </table> 
-                          </div>
-            
-                          @if( !isAdding ){
-                            <button mat-icon-button [matMenuTriggerFor]="modelMenu" aria-label="menu">
-                              <mat-icon>more_vert</mat-icon>
-                            </button>
-                            <mat-menu #modelMenu="matMenu">
-                              <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>join_inner</mat-icon></button>
-                              <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
-                            </mat-menu>
-                          }              
-                        </mat-tree-node>
-                        <mat-nested-tree-node
-                            *matTreeNodeDef="let node; when: hasChild"
-                            
-                            >
-                          <div class="mat-tree-node" (click)="onJoinNodeSelected(node.item)">
-                            <button mat-icon-button matTreeNodeToggle
-                                    [attr.aria-label]="'Toggle ' + node.name">
-                              <mat-icon class="mat-icon-rtl-mirror">
-                                {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
-                              </mat-icon>
-                            </button>
-                            <div
-                            [id]="node.item.id"
-                            cdkDropList
-                            #doneList="cdkDropList"
-                            class="example-list"
-                            (cdkDropListDropped)="onDrop($event)"
-                            [cdkDropListEnterPredicate]="acceptPredicate"
-                            >
-                                <table class="tree">
-                                  <tr>
-                                    <td>
-                                      <div>{{node.item.id}}</div>
-                                      <span class="criteria">{{getJoinCriteriaText(node.item) }}</span> 
-                                    </td>
-                                    <td>
-                                      <table>
-                                        <tr><div class="name">{{node.item.name}}</div></tr>
-                                        <tr>
-                                          <ul>
-                                            @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
-                                              @if( i>1){
-                                              <li>
-                                                {{ getTransformationText(t) }}
-                                              </li>
-                                              }
-                                            }
-                                            @empty{
-                                              no transformations found
-                                            }
-                                          </ul>
-                                        </tr>
-                                      </table>
-                                    </td>
-                                </tr>
-                                </table>
-              
-                            </div>
-                            @if( !isAdding ){
+              <p>
+                <mat-form-field class="name-form" appearance="fill">
+                  <mat-label>Name</mat-label>
+                  <input matInput formControlName="label" (change)="firebaseService.onChange($event,'Model',id,'label')">
+                </mat-form-field>
+              <p>
+              <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" class="example-tree">
+                <mat-tree-node *matTreeNodeDef="let node" >
+                  <div
+                    [id]="node.item.id"
+                    cdkDropList
+                    #doneList="cdkDropList"
+                    class="example-list"
+                    (cdkDropListDropped)="onDrop($event)"
+                    [cdkDropListEnterPredicate]="acceptPredicate"
+                    (click)="onJoinNodeSelected(node.item)"
+                  >
+                    <div class="node">
+                      <div class="col">
+                        <div>{{node.item.id}}</div>
+                        @if( !isRootNode(node.item) ){
+                          @if( getJoinCriteriaText(node.item) ){
+                            <span class="criteria" (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)">{{getJoinCriteriaText(node.item) }}</span> 
+                          }
+                          @else{
+                            <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>join_inner</mat-icon></button>
+                          }
+                        }
+                      </div>
+                      <div class="col">
+                        <div class="row">
+                          <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
+                            <mat-icon>more_vert</mat-icon>
+                          </button>  
+                          <mat-menu #menu="matMenu">
+                            <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
+                          </mat-menu> 
+                          <div class="name">{{node.item.name}}</div> 
+                        </div>
+                        <ul>
+                          @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
+                            @if( i>0){
+                            <li [ngClass]="{'transformation':true, 'mat-elevation-z8':i==selectedTransactionIdx() }" (click)="onTranformation(node.item,i)">
+
                               <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
                                 <mat-icon>more_vert</mat-icon>
-                              </button>
+                              </button><span>{{i}} {{ getTransformationText(t) }}</span>
                               <mat-menu #menu="matMenu">
-                                <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>join_inner</mat-icon></button>
-                                <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
-                              </mat-menu>
-                            }                    
-                          </div>  
-            
-                          <div [class.example-tree-invisible]="!tree.isExpanded(node)"
-                              role="group">
-                            <ng-container matTreeNodeOutlet></ng-container>
-                          </div> 
-                        </mat-nested-tree-node>
-                      </mat-tree>
-                      <div
-                      id="root"
-                      cdkDropList
-                      #doneList="cdkDropList"
-                      class="example-list"
-                      (cdkDropListDropped)="onDrop($event)"
-                      [cdkDropListEnterPredicate]="acceptPredicate"
-                      > 
-                      <mat-icon>create_new_folder</mat-icon>
-                      </div>  
-                
-                @if(!model()){
-                    <button mat-raised-button (click)="onCancel()">Cancelar</button>     
-                    <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onSubmit()">Submit</button>
-                }
-            </div>
-            }
-          </as-split-area>
-          <as-split-area [size]="40">
-                <as-split direction="horizontal">
-                  <as-split-area class="scroll" [size]="70">  
-                    @if( selectedJoinNodeObj() ){
-                      @if(isLoading == true){
-                        Loading....
-                      }
-                      @else{                                      
-                        @if( result() ){
-                          result().records: {{ result() }}
-                          <table  *ngIf="result() && result()!.columns && result()!.resultSet">
-                            <thead class="gridheather">
-                              <tr class="gridheather">
-                                <th class="sticky-col index_heather"> idx </th>
-                                @for( h of result()!.columns ; track h; let i = $index ){
-                                <th [formGroup]="selectedColumns[i]">
-                                  <table>
-                                    <tr>
-                                      <td>
-                                        <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
-                                      </td>
-                                      @if( selectedColumns[i].controls["selected"].value ){
-                                        <td>
-                                        <mat-form-field class="name" appearance="fill">
-                                          <mat-label>Name</mat-label>
-                                          <input matInput formControlName="rename">
-                                        </mat-form-field> 
-                                        </td>
-                                        <td>
-                                          <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
-                                        </td>  
-                                      }
-                                      @else{
-                                        <td>
-                                        {{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}
-                                        </td>
-                                      }
-                                            
-                                    </tr>
-                                  </table> 
-                                  
-                                </th>
-                                }
-                              </tr>
-                            </thead>
-                            <tbody >                
-                                <tr *ngFor="let row of result()!.resultSet; index as i">
-                                    <td  class="sticky-col index-col">{{ i + 1 }}</td>
-                                    <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
-                                </tr>
-                            </tbody>                
-                          </table>  
-                        }
-                        @else{
-                          No result found
-                        }
-                      }
-                    }
-                    @else{
-                      <span>Please click over a node</span>
-                    }  
-                  </as-split-area>                
-                  <as-split-area [size]="30">
-                    @if(isLoading == true){
-                      Loading....
-                    }
-                    @else{                    
-                      @if( selectedJoinNodeObj() ){
-                        <mat-tab-group class="transformationGrp">
-                        <mat-tab label="transformations">
-                          here transformations
-                          <button mat-icon-button [matMenuTriggerFor]="menuActions" aria-label="menu">
-                            <mat-icon>more_vert</mat-icon>
-                          </button>
-                          <mat-menu #menuActions="matMenu">
-                            <button mat-menu-item (click)="onAddFilter()">Add new filter</button>
-                            <button mat-menu-item (click)="onAddGroupBy()">Add new GroupBy</button>
-                            <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
-                            <button mat-menu-item (click)="onUpdateSampleData()">Update Sample Data</button>
-                            <button mat-menu-item (click)="onNewColumn()">Add New Column</button>
-                          </mat-menu> 
-                          selectedJoinNodeObj()!.transformations: {{selectedJoinNodeObj()!.transformations.length }}                    
-                          <mat-list>
-                          @for( t of selectedJoinNodeObj()!.transformations!;track t.id;let i = $index){
-                            <mat-list-item (click)="onTranformation(i)">
-                              <button mat-icon-button [matMenuTriggerFor]="filterActions" aria-label="menu">
-                                  <mat-icon>more_vert</mat-icon>
-                              </button>
-                              <mat-menu #filterActions="matMenu">
-                                  @if( i > 1){
-                                    <button mat-icon-button (click)="onEditTransformation(i)"><mat-icon>edit</mat-icon></button>  
-                                    <button mat-icon-button (click)="onTransactionRemove(i)"><mat-icon>delete</mat-icon></button>
-                                  }
-                                  
-                              </mat-menu> 
-                              <span >
-                                {{i}} : {{getTransformationText(t)}}
-                              </span>                         
-                            </mat-list-item>
+                                <button mat-menu-item (click)="onEditTransformation(i)"><mat-icon>edit</mat-icon></button>  
+                                <button mat-menu-item (click)="onTransactionRemove(i)"><mat-icon>delete</mat-icon></button>
+                                <button mat-menu-item (click)="onAddFilter()">Add new filter</button>
+                                <button mat-menu-item (click)="onAddGroupBy()">Add new GroupBy</button>
+                                <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
+                                <button mat-menu-item (click)="onUpdateSampleData()">Update Sample Data</button>
+                                <button mat-menu-item (click)="onNewColumn()">Add New Column</button>                                  
+                              </mat-menu>                                                
+                            </li>
+                            }
                           }
                           @empty{
                             no transformations found
-                          }   
-                          </mat-list>                 
-                        </mat-tab>
-                        <mat-tab label="Joins"> 
-                          List of joins:
-                          <mat-list>
-                          @for( j of selectedJoinNodeObj()!.joinCriteria; track j.id){
-                            <mat-list-item>
-                              {{ j.leftValue }} {{ j.comparator }} {{ j.rightValue }}
-                            </mat-list-item>
                           }
-                          @empty{
-                            no joins found
+                        </ul>
+                      </div>
+                    </div>  
+                  </div>
+              </mat-tree-node>
+                <mat-nested-tree-node
+                    *matTreeNodeDef="let node; when: hasChild"
+                    >
+                  <div class="mat-tree-node" (click)="onJoinNodeSelected(node.item)">
+                    <button mat-icon-button matTreeNodeToggle
+                            [attr.aria-label]="'Toggle ' + node.name">
+                      <mat-icon class="mat-icon-rtl-mirror">
+                        {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+                      </mat-icon>
+                    </button>
+                    <div
+                    [id]="node.item.id"
+                    cdkDropList
+                    #doneList="cdkDropList"
+                    class="example-list"
+                    (cdkDropListDropped)="onDrop($event)"
+                    [cdkDropListEnterPredicate]="acceptPredicate"
+                    >
+                      <div class="node">
+                        <div class="col">
+                          <div>{{node.item.id}}</div>
+                          @if( !isRootNode(node.item) ){
+                            @if( node.item.joinCriteria.length ){
+                              <span class="criteria" (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)">{{getJoinCriteriaText(node.item) }}</span> 
+                            }
+                            @else{
+                              <button mat-icon-button (click)="onEditJoinNode(node.parentTreeNode?.item, node.item)"><mat-icon>join</mat-icon></button>
+                            }
                           }
-                          </mat-list>
 
-                        </mat-tab>
-                        </mat-tab-group>
+                        </div>
+                        <div class="col">
+                          <div class="row">
+                            <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
+                              <mat-icon>more_vert</mat-icon>
+                            </button>  
+                            <mat-menu #menu="matMenu">
+                              <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
+                            </mat-menu> 
+                            <div class="name">{{node.item.name}}</div> 
+                          </div>
+                          <ul>
+                            @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
+                              @if( i>0){
+                              <li [ngClass]="{'transformation':true, 'mat-elevation-z8':i==selectedTransactionIdx() }" (click)="onTranformation(node.item,i)">
+
+                                <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
+                                  <mat-icon>more_vert</mat-icon>
+                                </button><span>{{i}} {{ getTransformationText(t) }}</span>
+                                <mat-menu #menu="matMenu">
+                                  <button mat-menu-item (click)="onEditTransformation(i)"><mat-icon>edit</mat-icon></button>  
+                                  <button mat-menu-item (click)="onTransactionRemove(i)"><mat-icon>delete</mat-icon></button>
+                                  <button mat-menu-item (click)="onAddFilter()">Add new filter</button>
+                                  <button mat-menu-item (click)="onAddGroupBy()">Add new GroupBy</button>
+                                  <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
+                                  <button mat-menu-item (click)="onUpdateSampleData()">Update Sample Data</button>
+                                  <button mat-menu-item (click)="onNewColumn()">Add New Column</button>                                  
+                                </mat-menu>                                                
+                              </li>
+                              }
+                            }
+                            @empty{
+                              no transformations found
+                            }
+                          </ul>
+                        </div>
+                      </div>  
+                    </div>
+                  </div>  
+                  <div [class.example-tree-invisible]="!tree.isExpanded(node)"
+                      role="group">
+                    <ng-container matTreeNodeOutlet></ng-container>
+                  </div> 
+                </mat-nested-tree-node>
+              </mat-tree>
+              <div
+              id="root"
+              cdkDropList
+              #doneList="cdkDropList"
+              class="example-list"
+              (cdkDropListDropped)="onDrop($event)"
+              [cdkDropListEnterPredicate]="acceptPredicate"
+              > 
+              <mat-icon>create_new_folder</mat-icon>
+              </div>  
+          </div>
+        }
+        </as-split-area>
+        <as-split-area [size]="40">
+              <as-split direction="horizontal">
+                <as-split-area class="scroll" [size]="70">  
+                  @if( selectedJoinNodeObj() ){
+                    @if(isLoading == true){
+                      Loading....
+                    }
+                    @else{                                      
+                      @if( result() ){
+                        result().records: {{ result() }}
+                        <table  *ngIf="result() && result()!.columns && result()!.resultSet">
+                          <thead class="gridheather">
+                            <tr class="gridheather">
+                              <th class="sticky-col index_heather"> idx </th>
+                              @for( h of result()!.columns ; track h; let i = $index ){
+                              <th [formGroup]="selectedColumns[i]">
+                                <table>
+                                  <tr>
+                                    <td>
+                                      <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
+                                    </td>
+                                    @if( selectedColumns[i].controls["selected"].value ){
+                                      <td>
+                                      <mat-form-field class="name" appearance="fill">
+                                        <mat-label>Name</mat-label>
+                                        <input matInput formControlName="rename">
+                                      </mat-form-field> 
+                                      </td>
+                                      <td>
+                                        <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
+                                      </td>  
+                                    }
+                                    @else{
+                                      <td>
+                                      {{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}
+                                      </td>
+                                    }
+                                          
+                                  </tr>
+                                </table> 
+                                
+                              </th>
+                              }
+                            </tr>
+                          </thead>
+                          <tbody >                
+                              <tr *ngFor="let row of result()!.resultSet; index as i">
+                                  <td  class="sticky-col index-col">{{ i + 1 }}</td>
+                                  <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
+                              </tr>
+                          </tbody>                
+                        </table>  
                       }
                       @else{
-                        please select a join node
-                      }     
-                    }                                    
-                  </as-split-area>
-                </as-split>
-          </as-split-area>
-        </as-split>
-      </as-split-area>
-    </as-split>
+                        No result found
+                      }
+                    }
+                  }
+                  @else{
+                    <span>Please click over a node</span>
+                  }  
+                </as-split-area>                
+                <as-split-area [size]="30">
+                  @if(isLoading == true){
+                    Loading....
+                  }
+                  @else{                    
+                    @if( selectedJoinNodeObj() ){
+                      <mat-tab-group class="transformationGrp">
+                      <mat-tab label="transformations">
+                        here transformations
+                        <button mat-icon-button [matMenuTriggerFor]="menuActions" aria-label="menu">
+                          <mat-icon>more_vert</mat-icon>
+                        </button>
+                        <mat-menu #menuActions="matMenu">
+                          <button mat-menu-item (click)="onAddFilter()">Add new filter</button>
+                          <button mat-menu-item (click)="onAddGroupBy()">Add new GroupBy</button>
+                          <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
+                          <button mat-menu-item (click)="onUpdateSampleData()">Update Sample Data</button>
+                          <button mat-menu-item (click)="onNewColumn()">Add New Column</button>
+                        </mat-menu> 
+                        selectedJoinNodeObj()!.transformations: {{selectedJoinNodeObj()!.transformations.length }}                    
+                        <mat-list>
+                        @for( t of selectedJoinNodeObj()!.transformations!;track t.id;let i = $index){
+                          <mat-list-item>
+
+                            <span [ngClass]="{'transformationSelected':i==selectedTransactionIdx() }">
+                              {{i}} : {{getTransformationText(t)}}
+                            </span>                         
+                          </mat-list-item>
+                        }
+                        @empty{
+                          no transformations found
+                        }   
+                        </mat-list>                 
+                      </mat-tab>
+                      <mat-tab label="Joins"> 
+                        List of joins:
+                        <mat-list>
+                        @for( j of selectedJoinNodeObj()!.joinCriteria; track j.id){
+                          <mat-list-item>
+                            {{ j.leftValue }} {{ j.comparator }} {{ j.rightValue }}
+                          </mat-list-item>
+                        }
+                        @empty{
+                          no joins found
+                        }
+                        </mat-list>
+
+                      </mat-tab>
+                      </mat-tab-group>
+                    }
+                    @else{
+                      please select a join node
+                    }     
+                  }                                    
+                </as-split-area>
+              </as-split>
+        </as-split-area>
+      </as-split>
+    </as-split-area>
+  </as-split>
 }

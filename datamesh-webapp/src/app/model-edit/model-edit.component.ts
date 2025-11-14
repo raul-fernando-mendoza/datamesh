@@ -103,16 +103,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     return node.item ==  this.newInfoNodeAdding
   };
 
-  isNew = (_: number, node: TreeNode) => {
-    if( this.isAdding && node.item.name == "" ){
-      return true
-    }
-    else{
-      return false
-    }
-  };
-
-  isAdding = false
   parentInfoNodeAdding:JoinNode | null = null
   newInfoNodeAdding:JoinNode | null = null
 
@@ -226,6 +216,15 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       }
     }
     return []    
+  }
+
+  isRootNode( infoNode:InfoNode ){
+    let isRoot = false
+    let idx = this.infoNodes.findIndex( e => infoNode.id == e.id)
+    if( idx >= 0){
+      isRoot = true
+    }
+    return isRoot
   }
 
   getCollection( infoNode:InfoNode ){
@@ -535,7 +534,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
     let joinNode:JoinNodeObj = this.flatJoinNodeMap.get( infoNode.id ) as JoinNodeObj
 
-    
     joinNode.joinCriteria.forEach( e =>{
       str += e.leftValue + e.comparator + e.rightValue + "\n"
     })
@@ -656,10 +654,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
     //if( !this.selectedJoinNodeObj() || this.selectedJoinNodeObj()!.id != node.id ){
       let joinNodeObj = this.flatJoinNodeMap.get( node.id )
-      if( joinNodeObj ){
-        this.selectedJoinNodeObj.set(joinNodeObj)
-        let lastIdx = joinNodeObj.transformations.length - 1
-        this.onTranformation(lastIdx)    
+      if( !this.selectedJoinNodeObj() || this.selectedJoinNodeObj()!=joinNodeObj ){
+        this.selectedJoinNodeObj.set(joinNodeObj!)
+        let lastIdx = joinNodeObj!.transformations.length - 1
+        this.onTranformation(node, lastIdx)    
       }
     //}
   }
@@ -859,12 +857,16 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     })
   }
 
-  onTranformation(i:number){
+  onTranformation(node:InfoNode, i:number){
 
     //if( this.selectedTransactionIdx() != i ){
 
+      let joinNodeObj = this.flatJoinNodeMap.get( node.id )!
+      if( !this.selectedJoinNodeObj() || this.selectedJoinNodeObj()!=joinNodeObj ){ 
+        this.selectedJoinNodeObj.set( joinNodeObj! ) 
+      }  
+
       this.selectedTransactionIdx.set( i )
-      let joinNodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
       let collection = this.getCollection( joinNodeObj )
 
       let transformationId = joinNodeObj.transformations[i].id
@@ -963,8 +965,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   }
 
   selectColumns(){
-    let idx:number = this.selectedTransactionIdx()!
     let nodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
+    let idx:number = this.selectedTransactionIdx()!
+    
     if( (idx + 1) < nodeObj.transformations.length ){
       let nextTransaction = nodeObj.transformations[idx+1]
       

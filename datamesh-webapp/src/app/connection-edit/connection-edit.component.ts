@@ -152,7 +152,7 @@ export class ConnectionEditComponent implements OnInit, OnDestroy{
     let id:string = this.id()
     if( confirm("are you sure to delete:" + this.connection().label) ){
       this.firebaseService.deleteDoc(ConnectionCollection.collectionName, id ).then( ()=>{
-        this.router.navigate(["/connection/list"])
+        this.router.navigate(["/connection"])
       },
       reason =>{
         alert("Error removing connection:" + reason)

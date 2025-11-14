@@ -84,8 +84,9 @@ import { FirebaseService } from 'app/firebase.service';
       let tId = node.transformations[idx-1].id
 
       if( this.data.action == ActionOption.add){
-        idx = node.transformations.length-1
+        //we are adding at the end to bring the columns from the last transformation result
         tId = node.transformations[idx].id
+
       }
       else{
         let t = node.transformations[idx] as FilterTransformation
@@ -125,7 +126,14 @@ import { FirebaseService } from 'app/firebase.service';
       }      
 
       if( this.data.action == ActionOption.add){
-        joinNodeUpdate.transformations!.push( f )
+        let idx = this.data.currentTransactionIndex
+        if(  idx == this.data.node.transformations.length-1){
+          //is adding at the end
+          joinNodeUpdate.transformations!.push( f )
+        }
+        else{
+          joinNodeUpdate.transformations!.splice(idx+1, 0, f)
+        }
       }
       else if( this.data.action == ActionOption.edit){
         joinNodeUpdate.transformations?.splice(this.data.currentTransactionIndex,1, f)

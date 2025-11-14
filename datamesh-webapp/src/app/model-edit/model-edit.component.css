@@ -93,3 +93,25 @@ as-split-area .scroll{
   overflow: scroll;
   background-color: grey;
 }
+.node{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: nowrap;  
+}
+.row{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: nowrap;  
+}
+.col{
+  display:flex;
+  flex-direction: column;
+}
+.transformation{
+  display:flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+.transformationSelected{
+  background-color: gray;
+}
