@@ -111,6 +111,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   
 
   infoNodes:InfoNode[] = []
+  infoNodesSignal = signal<InfoNode[]>([])
   flatJoinNodeMap = new Map<string,JoinNodeObj>()
   flatInfoNodes = new Map<string, InfoNode>()  
 
@@ -247,6 +248,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   loadRawModel():Promise<void>{
     return new Promise((resolve, reject) =>{ 
       this.infoNodes.length = 0
+      this.infoNodesSignal.set(this.infoNodes)
       this.flatJoinNodeMap.clear()
       this.flatInfoNodes.clear()
 
@@ -268,6 +270,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
             this.flatJoinNodeMap.set( joinNode.id, joinNode)
             this.flatInfoNodes.set( joinNode.id, joinNode)
             this.infoNodes.push( root )
+            this.infoNodesSignal.set(this.infoNodes)
 
             
             
@@ -572,24 +575,6 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       })
     }
   }
-  /*
-  onPlay(node:JoinNode | null){
-    if( this.model  && node ){      
-      console.log(this.model()!.id)
-      this.isLoading= true
-      this.dao.getModelResult(this.model()!.id).then( result =>{
-        this.isLoading =false
-        console.log( result )
-        this.result = result
-      },
-      error=>{
-        this.isLoading=false
-        alert("onPlay Error:" + error)
-        this.result = null
-      })
-    } 
-  }    
-  */
   getDataType( datatype:any):string{
     switch ( datatype ){
       case 2:return "String"
