@@ -225,7 +225,7 @@ def getInitialRead( joinNode ):
     result = df.select("*") 
     return result 
 
-def toSqlGeneric( df , max = 100):
+def toSqlGeneric( df , max = 10):
     sqlGeneric = {
         "columns":[],
         "resultSet":[]
@@ -237,6 +237,7 @@ def toSqlGeneric( df , max = 100):
             "columnType":col[1]
         }
         sqlGeneric["columns"].append( colGeneric )
+    
                 
     collected = df.limit(max).collect()
     for row in collected:
@@ -268,6 +269,7 @@ def toSqlGeneric( df , max = 100):
                rowGeneric[property] = None         
                 
         sqlGeneric["resultSet"].append( rowGeneric )
+    
     return sqlGeneric
 
 def applyTransformation( df, t):
@@ -398,7 +400,7 @@ def updateModelSamplesRecursive(collection, modelId):
     for i in range(2, len(joinNode["transformations"])):
         t = joinNode["transformations"][i]
         df = applyTransformation( df , t)
-        sqlResultGeneric = toSqlGeneric( df, 100 )
+        sqlResultGeneric = toSqlGeneric( df, 10 )
         doc_ref = firestore.client().collection(collection + "/" + modelId + "/sampledata").document(joinNode["transformations"][i]["id"])
         doc_ref.set(sqlResultGeneric)
 

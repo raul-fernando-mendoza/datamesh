@@ -115,3 +115,7 @@ as-split-area .scroll{
 .transformationSelected{
   background-color: gray;
 }
+
+.nodeSelected{
+  border:2px solid red;
+}
