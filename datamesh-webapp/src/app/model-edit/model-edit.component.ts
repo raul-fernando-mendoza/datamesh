@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric, RenameColumnTransformation, NewColumnTransformation, SqlColumnGeneric, SnowFlakeDataset } from 'app/datatypes/datatypes.module';
+import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric, RenameColumnTransformation, NewColumnTransformation, SqlColumnGeneric, SnowFlakeDataset, LocalFilterTransformation } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -34,6 +34,8 @@ import { GroupByDialog } from './groupby-dlg';
 import { JoinDialog } from './join-dlg';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { NewColumnDialog } from './newcolumn-dlg';
+import { uuidv4 } from '@firebase/util';
+import {MatButtonToggleModule} from '@angular/material/button-toggle';
 
 
 @Component({
@@ -61,7 +63,8 @@ import { NewColumnDialog } from './newcolumn-dlg';
         MatSidenavModule,
         MatTabsModule,
         MatListModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        MatButtonToggleModule
     ],
     providers: [JoinDataSource],
     templateUrl: './model-edit.component.html',
@@ -123,7 +126,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     this.fb.group({
       id:[""],
       rename:['',[Validators.required]],
-      selected:[false]
+      selected:[false],
+
+      isFiltered:[false],
+      filterValues:[""]
     })  
   ]
   
@@ -686,6 +692,17 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       let nct = t as NewColumnTransformation
       str = nct.columnName + "=" + nct.expression
     }    
+    else if( t.type == TransformationType.localfilter){
+      let lft = t as LocalFilterTransformation
+      if( lft.listValues ){
+        lft.listValues.forEach(e => {
+          if(str){
+            str += ";"
+          }
+          str += e.columnName + " in (" + e.filterValues + ")"
+        });
+      }
+    }     
     return str
   }
 
@@ -822,6 +839,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   onRenameColumn(i:number){
     let columnName:string = this.result()!.columns[i].columnName
     let newColumnName:string = this.selectedColumns[i].controls["rename"].value!
+    let localfilter:string = this.selectedColumns[i].controls["localfilter"].value!
     let node:JoinNodeObj = this.selectedJoinNodeObj()!
     let infoNode:InfoNode =  this.flatInfoNodes.get(node.id)!
     
@@ -829,8 +847,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       type: TransformationType.renameColumn,
       id: uuid.v4(),
       columnName: columnName,
-      newColumnName: newColumnName
-    }
+      newColumnName: newColumnName    }
 
     let transformationUpdate: JoinNode = {
       transformations: [...node!.transformations!, renameColumnTransformation]
@@ -859,12 +876,28 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         if( doc.exists() ){
           let result = doc.data() as SqlResultGeneric
           this.selectedColumns.length = 0
-          for( let i =0; i<result.columns.length; i++){
+          for( let c =0; c<result.columns.length; c++){
             let t = this.fb.group({
-              id:[result.columns[i].columnName],
+              id:[result.columns[c].columnName],
               selected:[false],
-              rename:[result.columns[i].columnName]
+              rename:[result.columns[c].columnName],
+              isFiltered:[""],
+              filterValues:[""]
             })
+
+            if( joinNodeObj.transformations[i].type == TransformationType.localfilter ){
+              let tft:LocalFilterTransformation = joinNodeObj.transformations[i] as LocalFilterTransformation
+              if( tft.listValues ){
+                let idx = tft.listValues.findIndex( e =>
+                  e.columnName == result.columns[c].columnName
+                ) 
+                if( idx >= 0){
+                  t.controls.isFiltered.setValue( 'true' )
+                  t.controls.filterValues.setValue( tft.listValues[idx].filterValues )
+                }
+              }
+              
+            }
             
             this.selectedColumns.push(t)
           }
@@ -1008,6 +1041,53 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         alert("Error ModelDuplicate:" + reason.error.error)
       }
     }) 
+  }
+
+  onLocalFilterColumn(i:number){
+    let columnName = this.result()!.columns[i]['columnName']
+    let idx = this.selectedTransactionIdx()!
+    let node = this.selectedJoinNodeObj()!
+
+    let transformationUpdate: JoinNode = {
+      transformations: [...node!.transformations]
+    }       
+
+    //if the current transformation is a local filter add it to it
+    if( node.transformations[idx].type == TransformationType.localfilter){
+      let currentTransformation = transformationUpdate.transformations![idx] as LocalFilterTransformation
+       
+      let filterValues = this.selectedColumns[i].controls["filterValues"].value
+      
+      //if there is previous filter for this column update it
+      let colIdx = currentTransformation.listValues!.findIndex( e => e.columnName == columnName )
+      if( colIdx>=0 ){ //update the current filter
+        currentTransformation.listValues![colIdx].filterValues = filterValues
+      }
+      else{
+        //there was not an existing filter add it to the list
+        currentTransformation.listValues?.push({"columnName":columnName, "filterValues":filterValues})
+      }
+    }
+    else{
+      let newTransformation:LocalFilterTransformation = {
+        type: TransformationType.localfilter,
+        id: uuidv4(),
+        listValues: []
+      }
+      let filterValues = this.selectedColumns[i].controls["filterValues"].value
+
+      newTransformation.listValues!.push({"columnName":columnName, "filterValues":filterValues})
+
+      transformationUpdate.transformations!.push( newTransformation )
+    }
+
+    let infoNode:InfoNode = this.flatInfoNodes.get( node.id )!
+    let collection = this.getCollection( infoNode )
+    
+    this.firebaseService.updateDoc( collection, node.id, transformationUpdate).then( ()=>{
+      this.updateAll()
+    })    
+    
   }
 
 }

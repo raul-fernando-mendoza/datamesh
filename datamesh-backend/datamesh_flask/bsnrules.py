@@ -330,7 +330,13 @@ def applyTransformation( df, t):
             colsSelected.append( field.name )         
   
         result =  df.select_expr(*colsSelected, expression + " as " + columnName)
-        return result           
+        return result   
+    if t["type"] == 'localFilter':
+        for f in t["listValues"]:
+            columnName = f["columnName"]
+            filterValues = f["filterValues"]
+            df = df.filter( columnName + " in (" + filterValues + ")" )
+        return df             
        
 def findColumnInColumnList(col, columns):
     for c in columns:

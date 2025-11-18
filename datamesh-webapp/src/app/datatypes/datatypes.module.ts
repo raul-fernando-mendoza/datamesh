@@ -218,7 +218,8 @@ export enum TransformationType{
   groupBy = "groupBy",
   selectColumns = "selectColumns",
   renameColumn = "renameColumn",
-  newColumn = "newColumn"
+  newColumn = "newColumn",
+  localfilter = "localFilter"
 }
 
 export class SqlColumnGeneric{
@@ -285,6 +286,19 @@ export class RenameColumnTransformation implements Transformation{
   newColumnName!:string
 }
 
+//this transformation is not apply when running on batch mode
+//is added from the filter on the result set
+//in the form of columnName in ('str','str2')
+export class LocalFilterTransformation implements Transformation{
+  type=TransformationType.filter
+  id!:string
+  listValues?:Array<{
+    columnName:string
+    filterValues:string
+  }>
+  sampleData?:SqlResultGeneric
+}
+
 export interface JoinNode{
   id?:string
   name?: string
@@ -328,7 +342,6 @@ export interface JoinNodeActionData {
   
   currentTransactionIndex:number
   action:ActionOption
-
 }
 
 export interface Model{

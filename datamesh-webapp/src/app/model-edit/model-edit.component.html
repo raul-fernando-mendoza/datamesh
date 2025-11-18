@@ -34,13 +34,14 @@
                 <mat-icon>more_vert</mat-icon>
               </button><span>{{i}} {{ getTransformationText(t) }}</span>
               <mat-menu #menu="matMenu">
-                <button mat-menu-item (click)="onEditTransformation(i)"><mat-icon>edit</mat-icon></button>  
-                <button mat-menu-item (click)="onTransactionRemove(i)"><mat-icon>delete</mat-icon></button>
-                <button mat-menu-item (click)="onAddFilter()">Add new filter</button>
-                <button mat-menu-item (click)="onAddGroupBy()">Add new GroupBy</button>
-                <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
-                <button mat-menu-item (click)="onUpdateSampleData()">Update Sample Data</button>
-                <button mat-menu-item (click)="onNewColumn()">Add New Column</button>                                  
+                @if( i>1){
+                  <button mat-menu-item (click)="onEditTransformation(i)"><mat-icon>edit</mat-icon></button>  
+                  <button mat-menu-item (click)="onTransactionRemove(i)"><mat-icon>delete</mat-icon></button>
+                }
+                <button mat-menu-item (click)="onAddFilter()"><mat-icon>filter_alt</mat-icon>Add new filter</button>
+                <button mat-menu-item (click)="onAddGroupBy()"><mat-icon>group_work</mat-icon>Add new GroupBy</button>
+                <button mat-menu-item (click)="addSelectedColumns()"><mat-icon>check_box</mat-icon>Add SelectColumns</button>
+                <button mat-menu-item (click)="onNewColumn()"><mat-icon>add</mat-icon>Add New Column</button>                                  
               </mat-menu>                                                
             </li>
             }
@@ -98,14 +99,15 @@
                   <mat-icon>more_vert</mat-icon>
                 </button>
                 <mat-menu #filterActions="matMenu">
-                  <button mat-menu-item (click)="onDuplicate()"><mat-icon>control_point_duplicate</mat-icon></button>
-                  <button mat-menu-item (click)="onDelete()"><mat-icon>delete</mat-icon></button>
+                  <button mat-menu-item (click)="onUpdateSampleData()"><mat-icon>refresh</mat-icon>Update Sample Data</button>
+                  <button mat-menu-item (click)="onDuplicate()"><mat-icon>control_point_duplicate</mat-icon>Duplicar</button>
+                  <button mat-menu-item (click)="onDelete()"><mat-icon>delete</mat-icon>Borrar</button>
                 </mat-menu>                   
               <p>
               <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" class="example-tree">
-                <mat-tree-node *matTreeNodeDef="let node" >
-
-
+                <mat-nested-tree-node *matTreeNodeDef="let node" >
+                  <!--LEAF:{{node.item.name}}-->
+                  
                   <div
                     [id]="node.item.id"
                     cdkDropList
@@ -115,20 +117,26 @@
                     [cdkDropListEnterPredicate]="acceptPredicate"
                     (click)="onJoinNodeSelected(node.item)"
                   >
+                  
+               
                     <ng-container *ngTemplateOutlet="nodeTemplate; context: {node: node}" ></ng-container>
+                 
                   </div>
-                </mat-tree-node>
                 
+                </mat-nested-tree-node>
                 <mat-nested-tree-node
                     *matTreeNodeDef="let node; when: hasChild"
+                    
                     >
                   <div class="mat-tree-node" (click)="onJoinNodeSelected(node.item)">
                     <button mat-icon-button matTreeNodeToggle
-                            [attr.aria-label]="'Toggle ' + node.name">
+                            [attr.aria-label]="'Toggle ' + node.item.name">
                       <mat-icon class="mat-icon-rtl-mirror">
                         {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
                       </mat-icon>
                     </button>
+                    <!--HAS CHILD {{node.item.name}}-->
+                    
                     <div
                     [id]="node.item.id"
                     cdkDropList
@@ -139,11 +147,13 @@
                     >
                       <ng-container *ngTemplateOutlet="nodeTemplate; context: {node: node}"></ng-container> 
                     </div>  
+                    
                   </div>  
                   <div [class.example-tree-invisible]="!tree.isExpanded(node)"
                       role="group">
                      <ng-container matTreeNodeOutlet></ng-container> 
                   </div>
+                 
                 </mat-nested-tree-node> 
               </mat-tree>
               @if( infoNodesSignal().length == 0 ){
@@ -168,38 +178,46 @@
             }
             @else{                                      
               @if( result() ){
-                result().records: {{ result() }}
+                node[transaction]: {{ selectedJoinNodeObj()?.id }} {{ selectedTransactionIdx() }}
                 <table  *ngIf="result() && result()!.columns && result()!.resultSet">
                   <thead class="gridheather">
                     <tr class="gridheather">
                       <th class="sticky-col index_heather"> idx </th>
                       @for( h of result()!.columns ; track h; let i = $index ){
                       <th [formGroup]="selectedColumns[i]">
-                        <table>
-                          <tr>
-                            <td>
-                              <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
-                            </td>
+                        <div class="col">
+                          <div class="row">                          
+                            <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
                             @if( selectedColumns[i].controls["selected"].value ){
-                              <td>
                               <mat-form-field class="name" appearance="fill">
                                 <mat-label>Name</mat-label>
                                 <input matInput formControlName="rename">
                               </mat-form-field> 
-                              </td>
-                              <td>
-                                <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
-                              </td>  
+                              <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
                             }
                             @else{
-                              <td>
-                              {{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}
-                              </td>
+                              <span>{{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}</span>
                             }
-                                  
-                          </tr>
-                        </table> 
-                        
+                            <mat-button-toggle-group                            
+                            formControlName="isFiltered" 
+                            multiple
+                            [hideMultipleSelectionIndicator]="true"
+                            >                           
+                              <mat-button-toggle value="true" >
+                                <mat-icon>notifications</mat-icon>
+                              </mat-button-toggle>  
+                            </mat-button-toggle-group>                          
+                          </div> 
+                          <div>
+                            @if( selectedColumns[i].controls["isFiltered"].value == 'true' ){
+                              <mat-form-field class="name" appearance="fill">
+                                <mat-label>filter</mat-label>
+                                <input matInput formControlName="filterValues">
+                              </mat-form-field> 
+                              <button mat-icon-button (click)="onLocalFilterColumn(i)"><mat-icon>done</mat-icon></button>
+                            } 
+                          </div>
+                        </div>   
                       </th>
                       }
                     </tr>
@@ -207,7 +225,7 @@
                   <tbody >                
                       <tr *ngFor="let row of result()!.resultSet; index as i">
                           <td  class="sticky-col index-col">{{ i + 1 }}</td>
-                          <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
+                          <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }}</td> 
                       </tr>
                   </tbody>                
                 </table>  
