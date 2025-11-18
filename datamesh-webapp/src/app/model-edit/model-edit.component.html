@@ -5,7 +5,6 @@
 <ng-template #nodeTemplate let-node="node">
   <div class="node col" [ngClass]="{'nodeSelected': (node.item.id == selectedJoinNodeObj()?.id) ? true : false}">
     <div class="row">
-       
       <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
         <mat-icon>more_vert</mat-icon>
       </button>  
@@ -13,7 +12,6 @@
         <button mat-icon-button (click)="onDeleteNode(node.parentTreeNode?.item, node.item)"><mat-icon>delete</mat-icon></button>
       </mat-menu> 
       <div class="name">{{node.item.name}}</div>
-      
     </div>
     <div class="row">
       <div class="col">  
@@ -28,12 +26,10 @@
         }
       </div>
       <div class="col">
-
         <ul>
           @for( t of flatJoinNodeMap.get(node.item.id)!.transformations!;track t.id;let i = $index){
             @if( i>0){
             <li [ngClass]="{'transformation':true, 'mat-elevation-z8':(node.item.id == selectedJoinNodeObj()?.id) && i==selectedTransactionIdx() }" (click)="onTranformation(node.item,i)">
-
               <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="menu">
                 <mat-icon>more_vert</mat-icon>
               </button><span>{{i}} {{ getTransformationText(t) }}</span>
@@ -165,125 +161,65 @@
             </div>
         }
         </as-split-area>
-        <as-split-area [size]="40">
-              <as-split direction="horizontal">
-                <as-split-area class="scroll" [size]="70">  
-                  @if( selectedJoinNodeObj() ){
-                    @if(isLoading == true){
-                      <ng-container *ngTemplateOutlet="loading"></ng-container>
-                    }
-                    @else{                                      
-                      @if( result() ){
-                        result().records: {{ result() }}
-                        <table  *ngIf="result() && result()!.columns && result()!.resultSet">
-                          <thead class="gridheather">
-                            <tr class="gridheather">
-                              <th class="sticky-col index_heather"> idx </th>
-                              @for( h of result()!.columns ; track h; let i = $index ){
-                              <th [formGroup]="selectedColumns[i]">
-                                <table>
-                                  <tr>
-                                    <td>
-                                      <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
-                                    </td>
-                                    @if( selectedColumns[i].controls["selected"].value ){
-                                      <td>
-                                      <mat-form-field class="name" appearance="fill">
-                                        <mat-label>Name</mat-label>
-                                        <input matInput formControlName="rename">
-                                      </mat-form-field> 
-                                      </td>
-                                      <td>
-                                        <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
-                                      </td>  
-                                    }
-                                    @else{
-                                      <td>
-                                      {{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}
-                                      </td>
-                                    }
-                                          
-                                  </tr>
-                                </table> 
-                                
-                              </th>
-                              }
-                            </tr>
-                          </thead>
-                          <tbody >                
-                              <tr *ngFor="let row of result()!.resultSet; index as i">
-                                  <td  class="sticky-col index-col">{{ i + 1 }}</td>
-                                  <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
-                              </tr>
-                          </tbody>                
-                        </table>  
+        <as-split-area class="scroll" [size]="40">
+          @if( selectedJoinNodeObj() ){
+            @if(isLoading == true){
+              <ng-container *ngTemplateOutlet="loading"></ng-container>
+            }
+            @else{                                      
+              @if( result() ){
+                result().records: {{ result() }}
+                <table  *ngIf="result() && result()!.columns && result()!.resultSet">
+                  <thead class="gridheather">
+                    <tr class="gridheather">
+                      <th class="sticky-col index_heather"> idx </th>
+                      @for( h of result()!.columns ; track h; let i = $index ){
+                      <th [formGroup]="selectedColumns[i]">
+                        <table>
+                          <tr>
+                            <td>
+                              <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
+                            </td>
+                            @if( selectedColumns[i].controls["selected"].value ){
+                              <td>
+                              <mat-form-field class="name" appearance="fill">
+                                <mat-label>Name</mat-label>
+                                <input matInput formControlName="rename">
+                              </mat-form-field> 
+                              </td>
+                              <td>
+                                <button mat-icon-button (click)="onRenameColumn(i)"><mat-icon>done</mat-icon></button>                                       
+                              </td>  
+                            }
+                            @else{
+                              <td>
+                              {{ result()!.columns[i]["columnName"] + "-" +  result()!.columns[i]["columnType"] }}
+                              </td>
+                            }
+                                  
+                          </tr>
+                        </table> 
+                        
+                      </th>
                       }
-                      @else{
-                        No result found
-                      }
-                    }
-                  }
-                  @else{
-                    <span>Please click over a node</span>
-                  }  
-                </as-split-area>                
-                <as-split-area [size]="30">
-                  @if(isLoading == true){
-                    <ng-container *ngTemplateOutlet="loading"></ng-container>
-                  }
-                  @else{                    
-                    @if( selectedJoinNodeObj() ){
-                      <mat-tab-group class="transformationGrp">
-                      <mat-tab label="transformations">
-                        here transformations
-                        <button mat-icon-button [matMenuTriggerFor]="menuActions" aria-label="menu">
-                          <mat-icon>more_vert</mat-icon>
-                        </button>
-                        <mat-menu #menuActions="matMenu">
-                          <button mat-menu-item (click)="onAddFilter()">Add new filter</button>
-                          <button mat-menu-item (click)="onAddGroupBy()">Add new GroupBy</button>
-                          <button mat-menu-item (click)="addSelectedColumns()">Add SelectColumns</button>
-                          <button mat-menu-item (click)="onUpdateSampleData()">Update Sample Data</button>
-                          <button mat-menu-item (click)="onNewColumn()">Add New Column</button>
-                        </mat-menu> 
-                        selectedJoinNodeObj():{{selectedJoinNodeObj()?.id}}
-                        transformations: {{selectedJoinNodeObj()!.transformations.length }}                    
-                        <mat-list>
-                        @for( t of selectedJoinNodeObj()!.transformations!;track t.id;let i = $index){
-                          <mat-list-item>
-
-                            <span [ngClass]="{'transformationSelected':i==selectedTransactionIdx() }">
-                              {{i}} : {{getTransformationText(t)}}
-                            </span>                         
-                          </mat-list-item>
-                        }
-                        @empty{
-                          no transformations found
-                        }   
-                        </mat-list>                 
-                      </mat-tab>
-                      <mat-tab label="Joins"> 
-                        List of joins:
-                        <mat-list>
-                        @for( j of selectedJoinNodeObj()!.joinCriteria; track j.id){
-                          <mat-list-item>
-                            {{ j.leftValue }} {{ j.comparator }} {{ j.rightValue }}
-                          </mat-list-item>
-                        }
-                        @empty{
-                          no joins found
-                        }
-                        </mat-list>
-
-                      </mat-tab>
-                      </mat-tab-group>
-                    }
-                    @else{
-                      please select a join node
-                    }     
-                  }                                    
-                </as-split-area>
-              </as-split>
+                    </tr>
+                  </thead>
+                  <tbody >                
+                      <tr *ngFor="let row of result()!.resultSet; index as i">
+                          <td  class="sticky-col index-col">{{ i + 1 }}</td>
+                          <td *ngFor="let column of result()!.columns; index as c" [ngClass]="{'number': isNumber(column['columnType']) }">{{ format(column['columnType'], row[padNumberWithZeros(c,3)]) }} </td> 
+                      </tr>
+                  </tbody>                
+                </table>  
+              }
+              @else{
+                No result found
+              }
+            }
+          }
+          @else{
+            <span>Please click over a node</span>
+          }  
         </as-split-area>
       </as-split>
     </as-split-area>
