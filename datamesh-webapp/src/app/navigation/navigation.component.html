@@ -4,7 +4,7 @@
   <button [routerLink]="['/']" mat-icon-button><mat-icon>home</mat-icon></button>
   <span class="spacer"></span>
   @if( isLoggedIn() ){
-    <button (click)="onLogOut()" mat-button><mat-icon>logout</mat-icon>logout</button>        
+    <button (click)="onLogOut()" mat-button><mat-icon>logout</mat-icon>{{userEmail()}}</button>        
   }
   @else{
     <button [routerLink]="['/loginForm']" mat-button><mat-icon>login</mat-icon>login</button>        
@@ -12,6 +12,7 @@
   <button mat-icon-button [matMenuTriggerFor]="menu"><mat-icon>menu</mat-icon></button>
   <mat-menu #menu="matMenu">
     <button mat-menu-item [routerLink]="['/connection']" >Connections</button>
+    <button mat-menu-item [routerLink]="['/SqlJupiterGroup']" >SqlJupiterGroup</button>
     <button mat-menu-item [routerLink]="['/model']" >Models</button>
   </mat-menu>        
 </mat-toolbar>

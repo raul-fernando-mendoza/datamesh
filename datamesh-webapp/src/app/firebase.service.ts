@@ -66,11 +66,11 @@ export class FirebaseService {
 
   onsnapShotQuery(
     collectionPath:string,
-    filterList:[{
+    filterList:Array<{
       fieldPath:string ,
       opStr:WhereFilterOp,
       value:string
-    }]|[],
+    }>|[],
     observer: {
       next?: (snapshot: QuerySnapshot) => void;
       error?: (error: FirestoreError) => void;

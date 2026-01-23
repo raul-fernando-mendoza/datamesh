@@ -5,6 +5,7 @@ import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
 import { Timestamp } from 'firebase/firestore';
 import { ModelEditComponent } from 'app/model-edit/model-edit.component';
 import { MatTabBodyPortal } from '@angular/material/tabs';
+import { NodeWithI18n } from '@angular/compiler';
 
 
 
@@ -126,6 +127,15 @@ export class SqlJupiterCollection{
   static readonly collectionName:string = "SqlJupiterCollection"
 }
 
+export interface SqlJupiterGroup{
+  id:string
+  label:string
+  owner:string
+  deleted:boolean
+  createon:Date
+  updateon:Date
+}
+
 export interface SqlJupiter{
   className?:string
   sql?:string 
@@ -181,6 +191,9 @@ export class JupiterDoc{
   label:string=""
   groupId:string=""
   itemList:Array<{className:string, id:string}> = []
+  owner=""
+  createon:Date=new Date()
+  updateon:Date= new Date()
 }
 
 export interface Connection{

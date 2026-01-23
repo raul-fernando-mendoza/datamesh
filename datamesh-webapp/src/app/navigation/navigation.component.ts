@@ -24,12 +24,15 @@ import { auth } from 'environments/environment';
 })
 export class NavigationComponent implements OnInit, OnDestroy {
   isLoggedIn = signal(false)
+  userEmail = signal<String|null>(null)
   authUnsubscribe = onAuthStateChanged( auth, (user) => {
     if( auth.currentUser ){
       this.isLoggedIn.set(true);
+      this.userEmail.set(auth.currentUser.email)
     }
     else{
       this.isLoggedIn.set(false);
+      this.userEmail.set(null)
     }
   })        
 

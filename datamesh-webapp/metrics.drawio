@@ -1,0 +1,238 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.8 Chrome/140.0.7339.240 Electron/38.4.0 Safari/537.36" version="28.2.8" pages="2">
+  <diagram name="Page-1" id="Bf11zpGhM9dvYlHnS1Y1">
+    <mxGraphModel dx="1081" dy="507" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-40" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="241" y="250" width="369" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-38" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="150" width="370" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="q4Amim1XiDvmP7dZ8aBL-34" target="q4Amim1XiDvmP7dZ8aBL-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="q4Amim1XiDvmP7dZ8aBL-1" target="q4Amim1XiDvmP7dZ8aBL-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-29" value="+" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="q4Amim1XiDvmP7dZ8aBL-14">
+          <mxGeometry x="0.0541" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-33" value="union_all" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="q4Amim1XiDvmP7dZ8aBL-14">
+          <mxGeometry y="2" relative="1" as="geometry">
+            <mxPoint x="50" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-1" value="usages_sum" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="90" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-2" value="usages_by_slice&lt;div&gt;last 180 days&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" vertex="1" parent="1">
+          <mxGeometry x="260" y="160" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-18" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="q4Amim1XiDvmP7dZ8aBL-5" target="q4Amim1XiDvmP7dZ8aBL-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-5" value="FACT_MEMBER_USAGE_UNIQUE&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;fks{&lt;/span&gt;&lt;div&gt;entity=[fk1,fk2]&lt;/div&gt;&lt;div&gt;entity2=[fk2,fk2]&lt;/div&gt;&lt;div&gt;}&lt;/div&gt;&lt;/div&gt;" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="10" y="100" width="250" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="q4Amim1XiDvmP7dZ8aBL-10" target="q4Amim1XiDvmP7dZ8aBL-5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-10" value="&lt;span style=&quot;text-align: left;&quot;&gt;customers_with_no_usages&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" vertex="1" parent="1">
+          <mxGeometry x="270" y="260" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-15" value="member_checkins_0&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;shape=label;" vertex="1" parent="1">
+          <mxGeometry x="620" y="380" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-30" value="Entity&lt;div&gt;row level by id&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="30" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-31" value="entities&lt;br&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;after join filter and&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;groupings&lt;/span&gt;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="361" y="20" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-32" value="metricas&lt;div&gt;joining and adding substracting groups&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="640" y="20" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-35" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="q4Amim1XiDvmP7dZ8aBL-1" target="q4Amim1XiDvmP7dZ8aBL-34">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="680" y="150" as="sourcePoint" />
+            <mxPoint x="430" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-36" value="union_all" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="q4Amim1XiDvmP7dZ8aBL-35">
+          <mxGeometry x="-0.3448" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-34" value="cusrtomer_joined&lt;div&gt;in_last_180_days&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="150" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.66;entryY=1.017;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="q4Amim1XiDvmP7dZ8aBL-2" target="q4Amim1XiDvmP7dZ8aBL-5">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="175" y="190" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-39" value="cusrtomer_joined&lt;div&gt;in_last_180_days&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="250" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-42" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" target="q4Amim1XiDvmP7dZ8aBL-50" parent="1" source="q4Amim1XiDvmP7dZ8aBL-15">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="681" y="470" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-43" value="+" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="q4Amim1XiDvmP7dZ8aBL-42">
+          <mxGeometry x="0.0541" y="-2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-44" value="union_all" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="q4Amim1XiDvmP7dZ8aBL-42">
+          <mxGeometry y="2" relative="1" as="geometry">
+            <mxPoint x="50" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-45" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" target="q4Amim1XiDvmP7dZ8aBL-51" parent="1" source="q4Amim1XiDvmP7dZ8aBL-15">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="681" y="470" as="sourcePoint" />
+            <mxPoint x="431" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-46" value="union_all" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="q4Amim1XiDvmP7dZ8aBL-45">
+          <mxGeometry x="-0.3448" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-47" value="" style="rounded=0;whiteSpace=wrap;html=1;shape=swimlane;fontStyle=1;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="242" y="565" width="369" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-50" value="&lt;span style=&quot;text-align: left;&quot;&gt;customers_with_no_usages&lt;/span&gt;" style="rounded=0;whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" vertex="1" parent="q4Amim1XiDvmP7dZ8aBL-47">
+          <mxGeometry x="28" y="45" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-52" value="cusrtomer_joined&lt;div&gt;in_last_180_days&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="q4Amim1XiDvmP7dZ8aBL-47">
+          <mxGeometry x="238" y="35" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-48" value="&lt;div&gt;member_checking_0&lt;/div&gt;effective_date = join_date" style="rounded=0;whiteSpace=wrap;html=1;shape=swimlane;fontStyle=1;startSize=23;" vertex="1" parent="1">
+          <mxGeometry x="240" y="430" width="370" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-49" value="usages_by_slice&lt;div&gt;last 180 days&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;shape=ellipse;perimeter=ellipsePerimeter;" vertex="1" parent="q4Amim1XiDvmP7dZ8aBL-48">
+          <mxGeometry x="19" y="50" width="150" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-51" value="cusrtomer_joined&lt;div&gt;in_last_180_days&lt;/div&gt;" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="q4Amim1XiDvmP7dZ8aBL-48">
+          <mxGeometry x="220" y="40" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="q4Amim1XiDvmP7dZ8aBL-41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" source="q4Amim1XiDvmP7dZ8aBL-51" target="q4Amim1XiDvmP7dZ8aBL-49" parent="q4Amim1XiDvmP7dZ8aBL-48">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="6NkZKFVs_Yv3rszvpbQL" name="productivity_vw">
+    <mxGraphModel dx="2501" dy="1975" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-58" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-80" y="1670" width="1290" height="720" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-54" value="" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="10" y="1860" width="1170" height="510" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-50" value="" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="30" y="2080" width="1110" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-41" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="41" y="1070" width="1233.75" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="o9JQN4Meii_c3yAT7b8p-19" target="o9JQN4Meii_c3yAT7b8p-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-36" value="S.SUBSCRIPTION_SRC_NUM = ASG.SUBSCRIPTION_SRC_NUM AND&amp;nbsp;&lt;div&gt;S.CUSTOMER_SRC_NUM = ASG.CUSTOMER_SRC_NUM AND&amp;nbsp;&lt;/div&gt;&lt;div&gt;DATE_ID = MAX_DATE&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="o9JQN4Meii_c3yAT7b8p-35">
+          <mxGeometry x="-0.0933" y="-4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-19" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="20" y="40" width="960" height="210" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-12" value="CLIENTS_ASG" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="140" y="70" width="90" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-17" value="Subscriptions_Active&lt;div&gt;&lt;br&gt;&lt;div&gt;SUBSCRIPTION_STATUS) = &#39;active&#39;&lt;/div&gt;&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="540" y="130" width="250" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-18" value="&lt;div&gt;session_inventory_purchased&lt;/div&gt;&lt;div&gt;(MEMBER_SESSION_TYPE IN (&#39;SESSIONS CONSUMED&#39;)&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; OR (MEMBER_SESSION_TYPE IN (&#39;SESSIONS PURCHASED&#39;) AND SESSIONS_SERVICED = 0))&lt;/div&gt;&lt;div&gt;DATE_ID &amp;gt;= 20220101&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="130" width="460" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-23" value="&lt;div&gt;employee_master&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;employee_src_num&lt;div&gt;full_name,&lt;/div&gt;&lt;div&gt;hire_date&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&amp;nbsp;ROW_NUMBER() OVER (&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;PARTITION BY EMPLOYEE_SRC_NUM&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;ORDER BY&amp;nbsp;&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;CASE WHEN HIRE_DATE IS NULL THEN 1 ELSE 0 END,&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;UPDATE_DATE DESC&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; ) AS rn&lt;/div&gt;&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="10" y="1710" width="880" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-24" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="505" width="960" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="o9JQN4Meii_c3yAT7b8p-26" target="o9JQN4Meii_c3yAT7b8p-27">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-29" value="club_of_revenue" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="o9JQN4Meii_c3yAT7b8p-28">
+          <mxGeometry x="-0.0723" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-26" value="employee" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="152.5" y="550" width="175" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-27" value="&lt;div&gt;subscription&lt;/div&gt;dim_subscription_new&lt;div&gt;is_current_record&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="425" y="550" width="195" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-30" value="&lt;div&gt;ROW_NUMBER() OVER (&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;PARTITION BY dn.EMPLOYEE_ID&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp; ORDER BY dn.UPDATEDDATE_UTC DESC&amp;nbsp; &amp;nbsp;=&amp;nbsp; 1&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; )&amp;nbsp;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="620" width="890" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-31" value="employee_home_club" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="130" y="510" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-32" value="&lt;div&gt;EMPLOYEE_LAST_CLUB&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;fact_field_productivity&lt;div&gt;&lt;div&gt;ROW_NUMBER() OVER (&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&amp;nbsp;PARTITION BY FFP.EMPLOYEE_SRC_NUM&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;ORDER BY FFP.MONTH DESC&lt;/span&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;)&amp;nbsp; = 1&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="150" y="700" width="660" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-34" value="&lt;div&gt;CALCULATED_CL_ASG (number of clients assigned by month)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;SELECT CUSTOMER_SRC_NUM, SUBSCRIPTION_SRC_NUM, LEFT(DATE_ID,6) AS MONTH, MAX(DATE_ID) AS MAX_DATE" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="-110" y="-160" width="910" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-39" value="NEW_FITNESS_CLIENT&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;fact_agg_total_fitness&lt;br&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;IS_NEW_FITNESS_CLIENT = &#39;TRUE&#39;&amp;nbsp; AND IS_FITNESS_ADD = TRUE&amp;nbsp;&lt;/div&gt;&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="1250" width="520" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-40" value="REVENUE_SUMMARY_DATA&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;DATE_ID,&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;EMPLOYEE_SRC_NUM&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;CLUB_SRC_NUM,&lt;/span&gt;&lt;/div&gt;&lt;div&gt;&lt;div&gt;&lt;b&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp;SUBSCRIPTION_SRC_NUM,&lt;/b&gt;&lt;/div&gt;&lt;/div&gt;&lt;div&gt;transaction_amount&lt;/div&gt;&lt;div&gt;return_amount&lt;/div&gt;&lt;div&gt;sales_amount&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;fact_revenue_summary&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="90" y="1230" width="300" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-43" value="cl_assigned&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;date_month&lt;/div&gt;&lt;div&gt;employee_src_num&lt;/div&gt;&lt;div&gt;clients_assgined&lt;/div&gt;&lt;div&gt;club_src_num&lt;/div&gt;&lt;div&gt;new_fitness_clients&lt;/div&gt;&lt;div&gt;sum(NEW_CLIENTS_REVENUE_FOR_FITNESS)&lt;/div&gt;&lt;div&gt;MAX(LAST_UPDATED)&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="156" y="1120" width="60" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-45" value="CALCULATED_CL_ASG&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;month&lt;/div&gt;&lt;div&gt;club_src_num&lt;/div&gt;&lt;div&gt;employee_src_num&lt;/div&gt;&lt;div&gt;count(client_asig)&lt;/div&gt;&lt;div&gt;from CLIENTS_ASG&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;shape=trapezoid;perimeter=trapezoidPerimeter;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="425" y="1230" width="255" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-47" value="MEMBER_COUNT&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;month&lt;/div&gt;&lt;div&gt;club_src_num&lt;/div&gt;&lt;div&gt;employee_src_num&lt;/div&gt;&lt;div&gt;member_session_type&lt;/div&gt;&lt;div&gt;COUNT(DISTINCT CS.CUSTOMER_SRC_NUM))&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;fact_member_sessions&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;MEMBER_SESSION_TYPE IN (&#39;SESSIONS CONSUMED&#39;) AND PRODUCT_NAME NOT IN (&#39;Group Training&#39;)&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="110" y="1460" width="710" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-48" value="cancels_all_monthly&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;month&lt;/div&gt;&lt;div&gt;employee_src_num&lt;/div&gt;&lt;div&gt;club_src_num&lt;/div&gt;&lt;div&gt;employee_full_name&lt;/div&gt;&lt;div&gt;hire_date&lt;/div&gt;&lt;div&gt;SUM(fitness_charges)&lt;/div&gt;&lt;div&gt;COUNT( FITNESS_CHARGE)&lt;/div&gt;&lt;div&gt;MAX(jobs_bucket=&#39;N/A&#39;)&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;fact_subscription_cancellation_pt&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="720" y="2110" width="275" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-49" value="pv_roster_keys&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;month&lt;/div&gt;&lt;div&gt;club_src_num&lt;/div&gt;&lt;div&gt;employee_src_num&lt;/div&gt;&lt;div&gt;COALESCE(CJFC.JOB_FAMILY_SHORT_DESC, FFP.JOB_GROUP_SRC_ID)&lt;/div&gt;" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="2210" width="490" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-51" value="cancels_na_monthly&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;month&lt;/div&gt;&lt;div&gt;employee_src_num&lt;/div&gt;&lt;div&gt;club_src_num&lt;/div&gt;&lt;div&gt;not_in_roster&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="65" y="2090" width="230" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-56" value="keys&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;month&lt;/div&gt;&lt;div&gt;employee_src_num&lt;/div&gt;&lt;div&gt;cklub_src_num&lt;/div&gt;&lt;div&gt;employee_full_name&lt;/div&gt;&lt;div&gt;hire_date_bridge&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="41" y="1880" width="170" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-57" value="fact_field_productivity" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="170" y="2010" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="o9JQN4Meii_c3yAT7b8p-59" value="emp_from_keys" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="-35" y="1680" width="100" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

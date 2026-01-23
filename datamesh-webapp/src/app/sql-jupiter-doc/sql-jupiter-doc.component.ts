@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { SqlJupiter, JupiterDoc, TextJupiter, DatasetGroup, SqlJupiterObj } from '../datatypes/datatypes.module';
 import { FirebaseService } from '../firebase.service';
 import { collection, doc, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, DocumentSnapshot} from "firebase/firestore"; 
@@ -15,6 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { SqlJupiterEditComponent } from 'app/sql-jupiter-edit/sql-jupiter-edit.component';
 import { CommonModule } from '@angular/common';
 import { MatDividerModule } from '@angular/material/divider';
+import { AuthService } from 'app/auth.service';
 
 @Component({
     selector: 'app-sql-jupiter-doc',
@@ -29,8 +30,10 @@ import { MatDividerModule } from '@angular/material/divider';
         ReactiveFormsModule,
         MatFormFieldModule,
         MatInputModule,
-        SqlJupiterEditComponent,
-        MatDividerModule
+        
+        MatDividerModule,
+        RouterModule,
+        SqlJupiterEditComponent
     ]
 })
 export class SqlJupiterDocComponent {
@@ -54,16 +57,18 @@ export class SqlJupiterDocComponent {
     ,private activatedRoute: ActivatedRoute
     ,private fb:FormBuilder
     ,public firebaseService:FirebaseService
+    ,private authService:AuthService 
   ){
     this.activatedRoute.params.subscribe(res => {
-      if("id" in res){
+      if("groupId" in res){
+        this.groupId = res["groupId"]
+      }        
+      if("id" in res && res["id"] != 'new'){
         this.id = res["id"]
         this.parentCollection = "SqlJupiterDoc/" + this.id 
         this.update()
       }  
-      else if("groupId" in res){
-        this.groupId = res["groupId"]
-      }      
+    
     })      
   }
   update(){
@@ -96,7 +101,7 @@ export class SqlJupiterDocComponent {
     if( this.sqlJupiterDoc ){
       if( confirm("are you sure to delete:" + this.sqlJupiterDoc.label) ){
         this.firebaseService.deleteDoc("SqlJupiterDoc", this.sqlJupiterDoc.id ).then( ()=>{
-          this.router.navigate(["/"])
+          this.router.navigate(["/SqlJupiterGroup"])
         },
         reason=>{
           alert("error deleting doc:" + reason)
@@ -110,7 +115,10 @@ export class SqlJupiterDocComponent {
         id: uuid.v4(),
         label: this.FG.controls.label.value!,
         groupId: this.groupId,
-        itemList:[]
+        itemList:[],
+        owner:this.authService.getUserUid()!,
+        createon:new Date(),
+        updateon:new Date()
       }
       
       this.firebaseService.setDoc( "SqlJupiterDoc" , sqlJupiterDoc.id, sqlJupiterDoc).then( () =>{

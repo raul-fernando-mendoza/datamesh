@@ -1,0 +1,32 @@
+<span>sqlJupiterGroupList</span><button mat-icon-button (click)="onNewGroup()"><mat-icon>add</mat-icon></button>
+
+@if( !sqlJupiterGroupList() ){
+    loading...
+}
+@else{
+    <div>
+    @for( j of sqlJupiterGroupList(); track j.id){
+        @if( renamedId() == j.id){
+            <div [formGroup]="FG">
+                <mat-form-field appearance="fill">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="label" required >
+                </mat-form-field>
+                <button mat-icon-button (click)="onCancelEdit()"><mat-icon>close</mat-icon></button>
+                <button mat-icon-button [disabled]="!FG.controls.label.dirty" (click)="onUpdateGroupLabel(j)"><mat-icon>done</mat-icon></button>
+            </div>  
+            
+        }
+        @else{
+        <h2><span (click)="onRenameClick(j)">{{j.label}}</span><button mat-icon-button (click)="onDeleteSqlJupiterGroup(j)")><mat-icon>delete</mat-icon></button></h2>
+        <button mat-icon-button [routerLink]="['/SqlJupiterGroup/',j.id,'SqlJupiterDoc','new' ]"><mat-icon>add</mat-icon></button><div class="debug">{{j.id}}</div>
+        <div>
+            <sqljupiterdoc-list groupId={{j.id}}></sqljupiterdoc-list>
+            
+        </div>
+        }   
+    }
+    </div>
+    
+
+}

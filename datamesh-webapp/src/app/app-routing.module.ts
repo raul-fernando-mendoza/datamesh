@@ -3,17 +3,18 @@ import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterModule, RouterStat
 import { AuthService } from './auth.service';
 import { ComparisonEditComponent } from './comparison-edit/comparison-edit.component';
 import { ComparisonExecuteComponent } from './comparison-execute/comparison-execute.component';
-import { ComparisonGroupEditComponent } from './comparisongroup-edit/comparisongroup-edit.component';
 import { ConnectionEditComponent } from './connection-edit/connection-edit.component';
 import { ConnectionList } from './connection-list/connection-list';
 import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
+import { SqlJupiterDocList } from './sqljupiterdoc-list/sqljupiterdoc-list';
 import { LoginFormComponent } from './login-form/login-form.component';
 import { ModelEditComponent } from './model-edit/model-edit.component';
 import { ModelList } from './model-list/model-list';
 import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
-import { TablesTreeComponent } from './tables-tree/tables-tree.component';
+
 import { WelcomeComponent } from './welcome/welcome.component';
+import { SqlJupiterGroupList } from './sqljupitergroup-list/sqljupitergroup-list';
 
 export function loginGuard(
   redirectRoute: string
@@ -73,9 +74,14 @@ const routes: Routes = [
   { path: 'model/:id', pathMatch:'full', component:ModelEditComponent },
   
 
-  { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent }, 
+  { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent },
   
-  { path: 'SqlJupiterDoc/create/:groupId', component:SqlJupiterDocComponent },
+
+  { path: 'SqlJupiterGroup', component:SqlJupiterGroupList , canActivate: [loginGuard('/loginForm/SqlJupiterGroup')] },
+
+  { path: 'SqlJupiterGroup/:groupId/SqlJupiterDoc', component:SqlJupiterDocList },
+  
+  { path: 'SqlJupiterGroup/:groupId/SqlJupiterDoc/:id', component:SqlJupiterDocComponent },
   { path: 'SqlJupiterDoc/edit/:id', component:SqlJupiterDocComponent },
   
   { path: 'Dataset/create/:groupId', component:DatasetEditComponent },
