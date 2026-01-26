@@ -42,9 +42,13 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
   renamedId = signal<string|null>(null)
 
   FG = this.fb.group({
-    id:[''],
     label:['']
   })  
+
+  searchFG = this.fb.group({
+    term:['']
+  })  
+
 
   constructor(public firestore:FirebaseService,
     private authService:AuthService,
@@ -54,6 +58,13 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
     
   }
   ngOnInit(): void {
+    this.update()
+  }
+
+  update(){
+    if( this.unsubscribe ){
+      this.unsubscribe()
+    }
     console.log("getUserUid()" + this.authService.getUserUid())
     this.unsubscribe = this.firestore.onsnapShotQuery( this.collection, 
       [
@@ -144,5 +155,22 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
 
   onCancelEdit(){
     this.renamedId.set(null)
+  }
+
+  onSearch(){
+    console.log("search started")
+  }
+  onCancelSearch(){
+
+  }
+
+  isInSearch(jg:SqlJupiterGroup):boolean{
+    if( this.searchFG.controls.term.value ){
+      let term:string = this.searchFG.controls.term.value!
+      if( !jg.label.includes( term ) ){
+        return false
+      }
+    }
+    return true;
   }
 }
