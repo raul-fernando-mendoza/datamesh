@@ -5,7 +5,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
 import { AuthService } from 'app/auth.service';
-import { JupiterDoc } from 'app/datatypes/datatypes.module';
+import { JupiterDoc, QueryItem } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 
 @Component({
@@ -35,11 +35,14 @@ export class SqlJupiterDocList implements OnInit, OnDestroy {
   }
   ngOnInit(): void {
     console.log("getUserUid()" + this.authService.getUserUid())
+
+    let qry:Array<QueryItem> = [
+      {fieldPath:"groupId",opStr:"==",value:this.groupId},
+      {fieldPath:"owner",opStr:"==",value:this.authService.getUserUid()!}
+    ]
+
     this.unsubscribe = this.firestore.onsnapShotQuery( this.collection, 
-      [
-        {fieldPath:"groupId",opStr:"==",value:this.groupId},
-        {fieldPath:"owner",opStr:"==",value:this.authService.getUserUid()!}
-      ],
+      qry,
       {
       next: (snapshot) =>{
         var sqlJupiterList:Array<JupiterDoc> = []
@@ -48,6 +51,7 @@ export class SqlJupiterDocList implements OnInit, OnDestroy {
           j.id = doc.id
           sqlJupiterList.push( j )
         },)
+        sqlJupiterList.sort( (a,b)=> a.createon > b.createon ? -1: 1)
         this.jupiterDocList.set(sqlJupiterList)
       },
       error: (reason) =>{

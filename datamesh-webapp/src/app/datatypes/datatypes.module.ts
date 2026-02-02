@@ -2,7 +2,7 @@ import { NgModule, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
 import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp, WhereFilterOp } from 'firebase/firestore';
 import { ModelEditComponent } from 'app/model-edit/model-edit.component';
 import { MatTabBodyPortal } from '@angular/material/tabs';
 import { NodeWithI18n } from '@angular/compiler';
@@ -132,6 +132,7 @@ export interface SqlJupiterGroup{
   label:string
   owner:string
   deleted:boolean
+  indexWords:string[]
   createon:Date
   updateon:Date
 }
@@ -444,7 +445,11 @@ export interface SqlResultInFirebase{
   metadata:Array<SnowFlakeNativeColumn>
 }
 
-
+export type QueryItem = {
+  fieldPath:string ,
+  opStr:WhereFilterOp,
+  value:string
+}
 
 
 

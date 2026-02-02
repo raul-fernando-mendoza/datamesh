@@ -1,48 +1,45 @@
-<span>sqlJupiterGroupList</span><button mat-icon-button (click)="onNewGroup()"><mat-icon>add</mat-icon></button>
 
-<div [formGroup]="searchFG">
+<div class="heather">
+    <span>sqlJupiterGroupList</span>
+    <button matFab  (click)="onNewGroup()">
+        <mat-icon>add</mat-icon>
+    </button>
+</div>
+
+
+<div class="searchFG" [formGroup]="searchFG">
     <mat-form-field appearance="fill">
         <mat-label>search</mat-label>
-        <input matInput formControlName="term" required >
-        <mat-icon (click)="onSearch()" matSuffix>search</mat-icon>
+        <input matInput formControlName="term" (change)="onSearch()">
+        <mat-icon matPrefix>search</mat-icon>
     </mat-form-field>
     <button mat-icon-button (click)="onCancelSearch()"><mat-icon>close</mat-icon></button>
-    <button mat-icon-button [disabled]="!searchFG.controls.term.dirty" (click)="onSearch()"><mat-icon>done</mat-icon></button>
 </div>  
-
-
-
-
 @if( !sqlJupiterGroupList() ){
     loading...
 }
 @else{
     <div>
     @for( j of sqlJupiterGroupList(); track j.id){
-
-        @if( isInSearch(j) ){
-            @if( renamedId() == j.id){
-                <div [formGroup]="FG">
-                    <mat-form-field appearance="fill">
-                        <mat-label>Name</mat-label>
-                        <input matInput formControlName="label" required >
-                    </mat-form-field>
-                    <button mat-icon-button (click)="onCancelEdit()"><mat-icon>close</mat-icon></button>
-                    <button mat-icon-button [disabled]="!FG.controls.label.dirty" (click)="onUpdateGroupLabel(j)"><mat-icon>done</mat-icon></button>
-                </div>  
-                
-            }
-            @else{
-            <h2><span (click)="onRenameClick(j)">{{j.label}}</span><button mat-icon-button (click)="onDeleteSqlJupiterGroup(j)")><mat-icon>delete</mat-icon></button></h2>
-            <button mat-icon-button [routerLink]="['/SqlJupiterGroup/',j.id,'SqlJupiterDoc','new' ]"><mat-icon>add</mat-icon></button><div class="debug">{{j.id}}</div>
-            <div>
-                <sqljupiterdoc-list groupId={{j.id}}></sqljupiterdoc-list>
-                
-            </div>
-            }   
+        @if( renamedId() == j.id){
+            <div [formGroup]="FG">
+                <mat-form-field appearance="fill">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="label" required >
+                </mat-form-field>
+                <button mat-icon-button (click)="onCancelEdit()"><mat-icon>close</mat-icon></button>
+                <button mat-icon-button [disabled]="!FG.controls.label.dirty" (click)="onUpdateGroupLabel(j)"><mat-icon>done</mat-icon></button>
+            </div>  
+            
         }
+        @else{
+        <h2><span (click)="onRenameClick(j)">{{j.label}}</span><button mat-icon-button (click)="onDeleteSqlJupiterGroup(j)")><mat-icon>delete</mat-icon></button></h2>
+        <button mat-icon-button [routerLink]="['/SqlJupiterGroup/',j.id,'SqlJupiterDoc','new' ]"><mat-icon>add</mat-icon></button><div class="debug">{{j.id}}</div>
+        <div>
+            <sqljupiterdoc-list groupId={{j.id}}></sqljupiterdoc-list>
+            
+        </div>
+        }   
     }
     </div>
-    
-
 }

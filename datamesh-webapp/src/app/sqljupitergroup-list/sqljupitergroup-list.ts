@@ -9,10 +9,11 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
 import { AuthService } from 'app/auth.service';
-import { SqlJupiterGroup } from 'app/datatypes/datatypes.module';
+import { QueryItem, SqlJupiterGroup } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { DialogNameDialog } from 'app/name-dialog/name-dlg';
 import { SqlJupiterDocList } from 'app/sqljupiterdoc-list/sqljupiterdoc-list';
+import { StringUtilService } from 'app/string-util.service';
 import * as uuid from 'uuid';
 
 @Component({
@@ -53,7 +54,8 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
   constructor(public firestore:FirebaseService,
     private authService:AuthService,
     private dialog: MatDialog,
-    private fb:FormBuilder ){
+    private fb:FormBuilder,
+    private stringUtilService:StringUtilService ){
     
     
   }
@@ -66,10 +68,18 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
       this.unsubscribe()
     }
     console.log("getUserUid()" + this.authService.getUserUid())
+
+    let qry:Array<QueryItem> = [
+      {fieldPath:"owner",opStr:"==",value:this.authService.getUserUid()!}
+    ]
+    if( this.searchFG.controls.term.value ){
+      let term:string = this.searchFG.controls.term.value!
+      let termqry:QueryItem = {fieldPath:"indexWords",opStr:"array-contains",value:term.toLowerCase()}
+      qry.push( termqry )
+    }    
+
     this.unsubscribe = this.firestore.onsnapShotQuery( this.collection, 
-      [
-        {fieldPath:"owner",opStr:"==",value:this.authService.getUserUid()!}
-      ],
+      qry,
       {
       next: (snapshot) =>{
         var sqlJupiterGroupList:Array<SqlJupiterGroup> = []
@@ -105,14 +115,16 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
   
     dialogRef.afterClosed().subscribe(data => {
       console.log('The dialog was closed');
-      if( data != undefined ){
+      if( data ){
         console.debug( data )
         let id = uuid.v4()
+        let indexWordsArray = this.stringUtilService.getWordIndexArray( data.label )
         let g:SqlJupiterGroup = {
           id: id,
           label: data.label,
           owner: this.authService.getUserUid()!,
           deleted: false,
+          indexWords: indexWordsArray,
           createon: new Date,
           updateon: new Date
         }
@@ -143,8 +155,13 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
 
   onUpdateGroupLabel(jg:SqlJupiterGroup){
     let id:string = this.renamedId()!
-    let value:string = this.FG.controls.label.value!
-    this.firestore.updateDoc("SqlJupiterGroup", id , {label:value}).then( ()=>{
+    let label:string = this.FG.controls.label.value!
+    let indexWordsArray = this.stringUtilService.getWordIndexArray( label )
+    let obj = {
+      label:label,
+      indexWords: indexWordsArray
+    }
+    this.firestore.updateDoc("SqlJupiterGroup", id , obj).then( ()=>{
       console.log("update completed")
       this.renamedId.set(null)
     },
@@ -159,18 +176,12 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
 
   onSearch(){
     console.log("search started")
+    this.update()
   }
   onCancelSearch(){
-
+    this.searchFG.controls.term.setValue("")
+    this.update()
   }
 
-  isInSearch(jg:SqlJupiterGroup):boolean{
-    if( this.searchFG.controls.term.value ){
-      let term:string = this.searchFG.controls.term.value!
-      if( !jg.label.includes( term ) ){
-        return false
-      }
-    }
-    return true;
-  }
+
 }

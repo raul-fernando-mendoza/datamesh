@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { db } from '../environments/environment'
 import { Timestamp as FirebaseTimeStamp, collection, doc, limit, deleteDoc , getDoc,  onSnapshot, getDocs, query, setDoc, updateDoc, DocumentData, QuerySnapshot, Unsubscribe, DocumentSnapshot, FirestoreError, where, FieldPath, WhereFilterOp, orderBy, QueryConstraint, Query, QueryNonFilterConstraint, startAt, OrderByDirection, QueryFieldFilterConstraint} from "firebase/firestore"; 
-import { Directionality } from '@angular/cdk/bidi';
 import { MatSelectChange } from '@angular/material/select';
-
+import { QueryItem }  from 'app/datatypes/datatypes.module';
 
 export interface QryPar {
   collectionPath:string,
@@ -66,11 +65,7 @@ export class FirebaseService {
 
   onsnapShotQuery(
     collectionPath:string,
-    filterList:Array<{
-      fieldPath:string ,
-      opStr:WhereFilterOp,
-      value:string
-    }>|[],
+    filterList:Array<QueryItem>|[],
     observer: {
       next?: (snapshot: QuerySnapshot) => void;
       error?: (error: FirestoreError) => void;

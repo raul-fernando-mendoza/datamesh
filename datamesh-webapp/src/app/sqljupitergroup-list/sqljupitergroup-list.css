@@ -1,0 +1,8 @@
+.heather{
+    display:flex;
+    justify-content: space-between;
+}
+.searchFG{
+    display: flex;
+    justify-content:center;
+}
