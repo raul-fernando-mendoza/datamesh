@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 
 export interface DataName {
-  label:string
+  title:string
   name:string
 }
 
