@@ -16,8 +16,29 @@ import { SqlJupiterDocList } from 'app/sqljupiterdoc-list/sqljupiterdoc-list';
 import { StringUtilService } from 'app/string-util.service';
 import * as uuid from 'uuid';
 
+
+interface IReportGroup{
+  id?:string
+  label?:string
+  indexWords?:string[]
+  owner?:string
+  deleted?:boolean
+  createon?:Date
+  updateon?:Date  
+}
+class ReportGroup implements IReportGroup{
+  public static collection = "ReportGroup"
+  id!:string 
+  label!:string 
+  owner!:string
+  deleted:boolean = false
+  indexWords:string[] = []
+  createon:Date = new Date()
+  updateon:Date = new Date()
+}
+
 @Component({
-  selector: 'sqljupitergroup-list',
+  selector: 'reportgroup-list',
   imports: [
     MatButtonModule,
     MatIconModule,
@@ -26,18 +47,16 @@ import * as uuid from 'uuid';
     MatListModule,
     ReactiveFormsModule,
     MatFormFieldModule,
-    MatInputModule,
-
-    SqlJupiterDocList
+    MatInputModule
   ],
-  templateUrl: './sqljupitergroup-list.html',
-  styleUrl: './sqljupitergroup-list.css'
+  templateUrl: './reportgroup-list.html',
+  styleUrl: './reportgroup-list.css'
 })
-export class SqlJupiterGroupList implements OnInit, OnDestroy {
+export class ReportGroupList implements OnInit, OnDestroy {
 
+  collection = ReportGroup.collection
 
-  collection = "SqlJupiterGroup"
-  sqlJupiterGroupList = signal<Array<SqlJupiterGroup>|null>(null)
+  list = signal<Array<ReportGroup>|null>(null)
   unsubscribe:any
 
   renamedId = signal<string|null>(null)
@@ -70,7 +89,8 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
     console.log("getUserUid()" + this.authService.getUserUid())
 
     let qry:Array<QueryItem> = [
-      {fieldPath:"owner",opStr:"==",value:this.authService.getUserUid()!}
+      {fieldPath:"owner",opStr:"==",value:this.authService.getUserUid()!},
+      {fieldPath:"deleted",opStr:"==",value:false}
     ]
     if( this.searchFG.controls.term.value ){
       let term:string = this.searchFG.controls.term.value!
@@ -82,17 +102,17 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
       qry,
       {
       next: (snapshot) =>{
-        var sqlJupiterGroupList:Array<SqlJupiterGroup> = []
+        var list:Array<ReportGroup> = []
         snapshot.docs.map( doc =>{
-          let jg = doc.data() as SqlJupiterGroup
-          jg.id = doc.id
-          sqlJupiterGroupList.push( jg )
+          let d = doc.data() as ReportGroup
+          d.id = doc.id
+          list.push( d )
         },)
-        sqlJupiterGroupList.sort( (a,b) =>{ return a.createon > b.createon?-1:1})
-        this.sqlJupiterGroupList.set(sqlJupiterGroupList)
+        list.sort( (a,b) =>{ return a.createon > b.createon?-1:1})
+        this.list.set(list)
       },
       error: (reason) =>{
-        alert("Error retriving sqljupitergroups:" + reason)
+        alert("Error retriving recordset:" + reason)
       },
       complete: () =>{
         console.log("do nothing")
@@ -106,11 +126,11 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
     }
   }
 
-  onNewGroup(){
+  onNew(){
     const dialogRef = this.dialog.open(DialogNameDialog, {
       height: '400px',
       width: '250px',
-      data: { title:"new group", name:""}
+      data: { label:"New report Group", name:""}
     });
   
     dialogRef.afterClosed().subscribe(data => {
@@ -119,7 +139,7 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
         console.debug( data )
         let id = uuid.v4()
         let indexWordsArray = this.stringUtilService.getWordIndexArray( data.name )
-        let g:SqlJupiterGroup = {
+        let n:ReportGroup = {
           id: id,
           label: data.name,
           owner: this.authService.getUserUid()!,
@@ -128,32 +148,34 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
           createon: new Date,
           updateon: new Date
         }
-        this.firestore.setDoc("SqlJupiterGroup",id, g).then( ()=>{
+        this.firestore.setDoc(this.collection,id, n).then( ()=>{
           console.log("Completed")
           },
           error=>{
-            alert("Error creating group")
+            alert("Error creating new item")
           }
         )
       }
     })
   }  
-  onDeleteSqlJupiterGroup( jg:SqlJupiterGroup ){
-    if( confirm("are you sure to delete:" + jg.label) ){
-      this.firestore.deleteDoc("SqlJupiterGroup", jg.id ).then( ()=>{
+  onDelete( id:string, label:string ){
+    if( confirm("are you sure to delete:" + label) ){
+      this.firestore.deleteDoc(this.collection, id ).then( ()=>{
         console.log("completed")
       },
       error=>{
-        alert("there has been an error when deleting the SqlJupiterGroup")
+        alert("there has been an error when deleting the Item")
       })
     }
   }
-  onRenameClick( jg:SqlJupiterGroup ){
-    this.FG.controls.label.setValue(jg.label)
-    this.renamedId.set(jg.id)
+  onRenameClick( id:string, label:string ){
+    this.FG.controls.label.setValue(label)
+    this.renamedId.set(id)
+
+    
   }
 
-  onUpdateGroupLabel(jg:SqlJupiterGroup){
+  onUpdate(){
     let id:string = this.renamedId()!
     let label:string = this.FG.controls.label.value!
     let indexWordsArray = this.stringUtilService.getWordIndexArray( label )
@@ -161,7 +183,7 @@ export class SqlJupiterGroupList implements OnInit, OnDestroy {
       label:label,
       indexWords: indexWordsArray
     }
-    this.firestore.updateDoc("SqlJupiterGroup", id , obj).then( ()=>{
+    this.firestore.updateDoc(this.collection, id , obj).then( ()=>{
       console.log("update completed")
       this.renamedId.set(null)
     },

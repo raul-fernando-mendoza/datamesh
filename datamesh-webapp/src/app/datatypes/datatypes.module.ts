@@ -448,7 +448,7 @@ export interface SqlResultInFirebase{
 export type QueryItem = {
   fieldPath:string ,
   opStr:WhereFilterOp,
-  value:string
+  value:string|boolean
 }
 
 

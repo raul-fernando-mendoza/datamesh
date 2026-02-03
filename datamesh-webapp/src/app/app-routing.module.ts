@@ -15,6 +15,7 @@ import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.compon
 
 import { WelcomeComponent } from './welcome/welcome.component';
 import { SqlJupiterGroupList } from './sqljupitergroup-list/sqljupitergroup-list';
+import { ReportGroupList } from './reportgroup-list/reportgroup-list';
 
 export function loginGuard(
   redirectRoute: string
@@ -98,6 +99,9 @@ const routes: Routes = [
 
   { path: 'Model/create/:groupId', component: ModelEditComponent},
   { path: 'Model/edit/:id', component: ModelEditComponent},
+
+  { path: 'ReportGroup', component:ReportGroupList, canActivate: [loginGuard('/loginForm/ReportGroup')]},
+  
   
   //this should be the last one
   { path: '**', component: WelcomeComponent }
