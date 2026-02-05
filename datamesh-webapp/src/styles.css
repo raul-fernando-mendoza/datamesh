@@ -32,3 +32,47 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
   margin-right: 10px;
   color:silver;
 }  
+
+.form{
+  max-width: 80em;
+  margin-left: auto;
+  margin-right: auto;
+  
+  display: flex;
+  flex-direction: column;
+  padding: 1em;
+
+}
+
+.searchbar{
+  width: 80%;
+  margin: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.searchbar mat-form-field{
+  min-width: 20em;
+  max-width: 50em;
+}
+
+
+.deletesection{
+  max-width: 80em;
+  margin-left: auto;
+  margin-right: auto;    
+  display:flex;
+  justify-content:center;
+  
+}
+.deletebutton{
+  margin: 1em;
+}
+
+.list{
+  max-width: 80em;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1em;
+}

@@ -1,0 +1,45 @@
+
+
+<div class="bar">
+    <button mat-icon-button routerLink="/"><mat-icon>arrow_back</mat-icon></button>ReportGrops
+</div>
+
+
+
+
+<div class="searchbar" [formGroup]="searchFG">
+    <mat-form-field appearance="fill">
+        <mat-label>search</mat-label>
+        <input matInput formControlName="term" (change)="onSearch()">
+        <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+    <button mat-icon-button (click)="onCancelSearch()"><mat-icon>close</mat-icon></button>
+</div>
+@if( list() ){
+    <div class="list">
+
+        <div class="bar">
+            <span class="spacer"></span>
+            <button matFab  [routerLink]="['new']">
+                <mat-icon>add</mat-icon>
+            </button>
+        </div>
+    @for( j of list(); track j.id){
+
+        <button mat-button [routerLink]="[j.id]">{{j.label}}</button>
+        <div>
+        <button mat-icon-button [routerLink]="[j.id,'Report','new' ]"><mat-icon>add</mat-icon></button>
+        </div>
+        <div>
+            <report-list [groupId]="j.id"></report-list>
+        </div>
+           
+    }
+    @empty {
+        <li>There are no items click the add button in the upper corner.</li>
+    }
+    </div>
+}
+@else{
+    loading...
+}

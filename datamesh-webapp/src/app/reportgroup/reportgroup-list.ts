@@ -1,5 +1,5 @@
 import { Component,  OnDestroy, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,12 +9,12 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
 import { AuthService } from 'app/auth.service';
-import { QueryItem, SqlJupiterGroup } from 'app/datatypes/datatypes.module';
+import { QueryItem } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { DialogNameDialog } from 'app/name-dialog/name-dlg';
-import { SqlJupiterDocList } from 'app/sqljupiterdoc-list/sqljupiterdoc-list';
 import { StringUtilService } from 'app/string-util.service';
 import * as uuid from 'uuid';
+import { ReportList } from './report-list';
 
 
 interface IReportGroup{
@@ -47,7 +47,8 @@ class ReportGroup implements IReportGroup{
     MatListModule,
     ReactiveFormsModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    ReportList
   ],
   templateUrl: './reportgroup-list.html',
   styleUrl: './reportgroup-list.css'
@@ -58,12 +59,6 @@ export class ReportGroupList implements OnInit, OnDestroy {
 
   list = signal<Array<ReportGroup>|null>(null)
   unsubscribe:any
-
-  renamedId = signal<string|null>(null)
-
-  FG = this.fb.group({
-    label:['']
-  })  
 
   searchFG = this.fb.group({
     term:['']
@@ -158,44 +153,6 @@ export class ReportGroupList implements OnInit, OnDestroy {
       }
     })
   }  
-  onDelete( id:string, label:string ){
-    if( confirm("are you sure to delete:" + label) ){
-      this.firestore.deleteDoc(this.collection, id ).then( ()=>{
-        console.log("completed")
-      },
-      error=>{
-        alert("there has been an error when deleting the Item")
-      })
-    }
-  }
-  onRenameClick( id:string, label:string ){
-    this.FG.controls.label.setValue(label)
-    this.renamedId.set(id)
-
-    
-  }
-
-  onUpdate(){
-    let id:string = this.renamedId()!
-    let label:string = this.FG.controls.label.value!
-    let indexWordsArray = this.stringUtilService.getWordIndexArray( label )
-    let obj = {
-      label:label,
-      indexWords: indexWordsArray
-    }
-    this.firestore.updateDoc(this.collection, id , obj).then( ()=>{
-      console.log("update completed")
-      this.renamedId.set(null)
-    },
-    error=>{
-      alert("the group label can not be changed")
-    })
-  }
-
-  onCancelEdit(){
-    this.renamedId.set(null)
-  }
-
   onSearch(){
     console.log("search started")
     this.update()

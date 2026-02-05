@@ -1,0 +1,47 @@
+<div class="header">
+    <button mat-icon-button [routerLink]="['..']"><mat-icon>arrow_back</mat-icon></button> 
+    <span>ReportGroup</span>
+    <span class="spacer"></span>
+    <span class="debug">{{id}}</span>
+</div>
+@if( id=="new"){
+    <div class="form" [formGroup]="FG">
+        <mat-form-field appearance="fill">
+            <mat-label>label</mat-label>
+            <input matInput placeholder="label" formControlName="label" required>
+            <mat-error>{{getErrorMessage(FG.controls.label)}}</mat-error>
+        </mat-form-field>
+
+        <div>  
+        <button mat-raised-button routerLink="..">Cancelar</button>    
+        <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onNew()">Continuar</button>
+        </div>       
+    </div>    
+}
+@else{ 
+    @if( !reportGroup() ){
+        <mat-spinner></mat-spinner>
+    }
+    @else{
+        <div class="form" [formGroup]="FG">
+            <mat-form-field appearance="fill">
+                <mat-label>label</mat-label>
+                <input matInput placeholder="label" formControlName="label" required (change)="onRename()">
+                <mat-error>{{getErrorMessage(FG.controls.label)}}</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill">
+                <mat-label>description</mat-label>
+                <textarea matInput rows="10" formControlName="description" (change)="firestore.onChange($event, collection ,id, 'description')"></textarea> 
+                <mat-error>{{getErrorMessage(FG.controls.label)}}</mat-error>
+            </mat-form-field>        
+        </div>  
+
+        
+        <div class="deletesection">
+            <mat-divider></mat-divider>
+            <button class="deletebutton" mat-raised-button color="warn" (click)="onDelete()" >Delete</button>        
+        </div>
+    }
+}
+

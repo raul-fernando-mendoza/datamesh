@@ -1,5 +1,5 @@
 .list{
-    margin:10%;
+    margin-left:10%;
 }
 
 .heather{
@@ -10,3 +10,8 @@
     display: flex;
     justify-content:center;
 }
+ul.reports {
+    margin-left:2em;
+    list-style-type: none; 
+}
+

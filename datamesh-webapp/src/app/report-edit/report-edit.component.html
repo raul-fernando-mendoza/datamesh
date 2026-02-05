@@ -1,0 +1,94 @@
+<div class="bar">
+  <button mat-icon-button routerLink="/ReportGroup"><mat-icon>arrow_back</mat-icon></button>Report
+  <span class="spacer"></span>
+  <span>{{id}}</span>
+</div>
+
+<ng-template #treeTemplate>
+  <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor">
+    <!-- This is the tree node template for leaf nodes -->
+    <!-- This is the tree node template for expandable nodes -->
+    <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding matTreeNodeToggle
+                   [cdkTreeNodeTypeaheadLabel]="node.name">
+      <button matIconButton matTreeNodeToggle
+              [attr.aria-label]="'Toggle ' + node.name">
+        <mat-icon class="mat-icon-rtl-mirror">
+          {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+        </mat-icon>
+      </button>
+      
+      <div class="example-list" cdkDropListGroup>
+        <div
+          cdkDropList
+          [cdkDropListData]="[node.label]"
+          class="example-list"
+          (cdkDropListDropped)="dropTarget($event)"
+        >          
+          <div class="example-box" cdkDrag [cdkDragData]="node">{{ node.name }}</div> 
+        </div>
+      </div>       
+     
+    </mat-tree-node>
+  </mat-tree>
+</ng-template>
+
+@if( id == 'new'){
+  <div [formGroup]="FG" class="header">
+    <mat-form-field class="name-form" appearance="fill">
+        <mat-label>Name of Report</mat-label>
+        <input matInput formControlName="label" >
+    </mat-form-field>  
+    <div class="spacer"></div>
+    <button mat-icon-button (click)="onCreate()"><mat-icon>done</mat-icon></button>
+    <button mat-icon-button routerLink="/model"><mat-icon>cancel</mat-icon></button>
+  </div>      
+}
+@else{
+  <as-split class="top" direction="horizontal">
+    <as-split-area class="top" [size]="30">
+      <div>
+        <ng-container *ngTemplateOutlet="treeTemplate" ></ng-container>            
+
+        <div class="example-container" cdkDropListGroup>
+          <div
+            cdkDropList
+            [cdkDropListData]="todo"
+            class="example-list"
+            (cdkDropListDropped)="drop($event)"
+          >
+            @for (item of todo; track item) {
+              <div class="example-box" cdkDrag>{{ item }}</div>
+            }
+          </div>
+        </div> 
+
+      </div>
+    </as-split-area>
+    <as-split-area [size]="70">
+      <as-split direction="vertical">
+        <as-split-area  [size]="60"> 
+          detail
+            <div class="example-container" cdkDropListGroup>
+              <h2>Done</h2>
+              <div
+                cdkDropList
+                [cdkDropListData]="done"
+                class="example-list"
+                (cdkDropListDropped)="drop($event)" 
+              >
+                @for (item of done; track item) {
+                  <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+                  <div class="example-box" cdkDrag>{{ item }}</div>
+                }
+              </div> 
+            </div>
+                    
+        </as-split-area>
+        <as-split-area class="scroll" [size]="40">
+          result
+          
+        </as-split-area>
+      </as-split>
+    </as-split-area>
+  </as-split>
+}
