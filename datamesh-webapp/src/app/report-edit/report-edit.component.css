@@ -75,3 +75,16 @@ table, th, td {
   border-collapse: collapse;
 }
 
+.grid-heather{
+  display:flex;
+  flex-direction: row;
+}
+
+.grid-heather-columns{
+  background-color: lightgreen;
+}
+
+.grid-heather-aggcolumns{
+  background-color: lightsteelblue;
+}
+

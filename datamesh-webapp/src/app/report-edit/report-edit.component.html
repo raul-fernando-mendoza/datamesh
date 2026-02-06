@@ -66,12 +66,32 @@
                         </div>
                       }
                     </div>
-                    <div>
-                      <table class="grid">
-                      @for( c of getWidgetCols(w); track c){
-                        <td>{{c}}</td>
-                      }
-                      </table>
+                    <div class="grid-heather">
+                      <div class="grid-heather-columns"
+                        cdkDropList
+                        [cdkDropListData]="w.columns"
+                        
+                        cdkDropListOrientation="horizontal"
+                        (cdkDropListDropped)="dropColumns($event)" 
+                        [cdkDropListEnterPredicate]="acceptMetric"
+                        >
+                          @for( c of w.columns; track c){
+                            <td cdkDrag><mat-icon>visibility</mat-icon>{{c}}</td>
+                          }
+                      </div>
+                      <div class="grid-heather-aggcolumns"
+                        cdkDropList
+                        [cdkDropListData]="w.columns"
+                        
+                        cdkDropListOrientation="horizontal"
+                        (cdkDropListDropped)="dropColumns($event)" 
+                        [cdkDropListEnterPredicate]="acceptMetric"
+                        >
+                          @for( c of w.aggColumns; track c){
+                            <td cdkDrag><mat-icon>visibility</mat-icon>{{c}}</td>
+                          }
+                      </div>
+
                     </div>
                   }
                   

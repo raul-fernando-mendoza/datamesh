@@ -118,10 +118,10 @@ class Report implements IReport{
 
 //this is single metric
 class Metric{
-  id:String =  uuid.v4()
+  id:string =  uuid.v4()
   collection = "Metric"
-  label!:String
-  columns!:String[]
+  label!:string
+  columns!:string[]
   aggColumns!:string[]
 }
 //a widget contains a Metric or multiple metrics
@@ -129,8 +129,8 @@ class Metric{
 class Widget{
   id = uuid.v4()
   metrics:Metric[] = []
-  columns:String[] = []
-  aggColumns:String[] = []
+  columns:string[] = []
+  aggColumns:string[] = []
 }
 //a section can add more than one Widget
 class Section {
@@ -342,11 +342,50 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
       );
     }
   }
+  addMetricColumns(w:Widget, m:Metric){
+    m.columns.forEach( column => {
+      let idx = w.columns.findIndex( e => e == column)
+      if( idx < 0){
+        w.columns.push( column )
+      }
+    })
+    m.aggColumns.forEach( column => {
+      let idx = w.aggColumns.findIndex( e => e == column)
+      if( idx < 0){
+        w.aggColumns.push( column )
+      }
+    })
+  }  
+  dropColumns(event: CdkDragDrop<string[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    }   
+  }
+
+  findWidgetForMetric(m:Metric):Widget|null{
+    let widget:Widget|null = null 
+    this.sections().forEach(s => {
+      s.widgets.forEach( w =>{
+        w.metrics.forEach( e => {
+          if( e.id == m.id ){
+            widget = w
+          }
+        });
+      })
+    })
+    return widget
+  }
+
   dropMetric(event: CdkDragDrop<Metric[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
-      event.container.data.splice( event.currentIndex, 0, event.item.data)
+     event.container.data.splice( event.currentIndex, 0, event.item.data)
+      let w = this.findWidgetForMetric( event.item.data )  
+      if( w ){
+        let m:Metric = event.item.data as Metric
+        this.addMetricColumns( w, m)
+      }      
     } 
     //this.done.push( event.item.data )
   }
@@ -394,19 +433,5 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
     this.sections.set( sections )
   }
 
-  getWidgetCols(w:Widget){
-    // Final array to store all elements
-    const mergedArray: String[] = [];
 
-    // Append each array's elements using forEach
-    w.metrics.forEach(metric => {
-      mergedArray.push( ... metric.columns);
-    });    
-
-    // Append each array's elements using forEach
-    w.metrics.forEach(metric => {
-      mergedArray.push( ... metric.aggColumns);
-    });    
-    return [...new Set(mergedArray.flat())];
-  }
 }
