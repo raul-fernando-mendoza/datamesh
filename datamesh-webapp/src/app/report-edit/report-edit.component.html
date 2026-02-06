@@ -31,7 +31,7 @@
               </mat-icon>
             </button>
             <div cdkDropList >
-              <div class="example-box" cdkDrag [cdkDragData]="node">
+              <div class="metric-box" cdkDrag [cdkDragData]="node">
                 <div class="example-custom-drag" *cdkDragPreview matchSize="true">{{node.label}}</div>
                 <div class="example-custom-placeholder" *cdkDragPlaceholder>{{node.label}}</div>                 
                 {{node.label}} 
@@ -49,14 +49,15 @@
                   <div
                     cdkDropList
                     [cdkDropListData]="w.metrics"
-                    class="example-list"
+                    class="widget-list"
                     cdkDropListOrientation="horizontal"
                     (cdkDropListDropped)="dropMetric($event)" 
                     [cdkDropListEnterPredicate]="acceptMetric"
                   >
                     @for( m of w.metrics; track m.id){
-                      <div class="example-box" cdkDrag>
-                        <div class="example-box">{{m.label}}</div>
+                      <div class="metric-box" cdkDrag>
+                        <span cdkDragHandle>{{m.label}}</span>
+                        <button mat-icon-button (click)="deleteMetric(w,m)"><mat-icon>delete</mat-icon></button>                          
                       </div>
                     }
                   </div>

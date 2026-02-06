@@ -15,7 +15,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTreeModule} from '@angular/material/tree';
 import { MatMenuModule } from '@angular/material/menu';
-import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDragPreview, CdkDropList, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDragPlaceholder, CdkDragPreview, CdkDropList, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { DaoService } from 'app/dao.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -70,11 +70,13 @@ const EXAMPLE_DATA: FoodNode[] = [
             collection:"Entity",
             children:[
               {
-                label:"CustomersActiveCount",
+                id:uuid.v4(),
+                label:"SubscriptionsDuesActiveCount",
                 collection:"Metric"
               },
               {
-                label:"CustomersWithPTCount",
+                id:uuid.v4(),
+                label:"SubscriptionPTActiveCount",
                 collection:"Metric"
               },
             ]
@@ -144,7 +146,7 @@ class Section {
         MatSelectModule,
         MatTreeModule,
         MatMenuModule,
-        CdkDropListGroup, CdkDrag, CdkDropList,  CdkDragPlaceholder, CdkDragPreview,
+        CdkDropListGroup, CdkDrag, CdkDropList,  CdkDragPlaceholder, CdkDragPreview,  CdkDragHandle,
         MatProgressBarModule,
         MatExpansionModule,
         MatProgressSpinnerModule,
@@ -352,6 +354,11 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
       
     }
     return false //drag.data.startsWith("G") ;
-  }    
+  } 
+  
+  deleteMetric(w:Widget, m:Metric){
+    let idx = w.metrics.findIndex( e => e.id == m.id)
+    w.metrics.splice( idx, 1)
+  }
 
 }
