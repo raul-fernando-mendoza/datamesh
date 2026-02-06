@@ -23,18 +23,18 @@
           <!-- This is the tree node template for leaf nodes -->
           <!-- This is the tree node template for expandable nodes -->
           <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding matTreeNodeToggle
-                         [cdkTreeNodeTypeaheadLabel]="node.name">
+                         [cdkTreeNodeTypeaheadLabel]="node.label">
             <button matIconButton matTreeNodeToggle
-                    [attr.aria-label]="'Toggle ' + node.name">
+                    [attr.aria-label]="'Toggle ' + node.label">
               <mat-icon class="mat-icon-rtl-mirror">
                 {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
               </mat-icon>
             </button>
-            <div cdkDropList>
-              <div class="example-box" cdkDrag [cdkDragData]="node.name">
-                <div class="example-custom-drag" *cdkDragPreview matchSize="true">{{node.name}}</div>
-                <div class="example-custom-placeholder" *cdkDragPlaceholder>{{node.name}}</div>                 
-                {{node.name}} 
+            <div cdkDropList >
+              <div class="example-box" cdkDrag [cdkDragData]="node">
+                <div class="example-custom-drag" *cdkDragPreview matchSize="true">{{node.label}}</div>
+                <div class="example-custom-placeholder" *cdkDragPlaceholder>{{node.label}}</div>                 
+                {{node.label}} 
               </div>  
             </div>         
           </mat-tree-node>
@@ -43,19 +43,25 @@
     <as-split-area [size]="70">
       <as-split direction="vertical">
         <as-split-area  [size]="60"> 
-              <h2>Done</h2>
-              <div
-                cdkDropList
-                [cdkDropListData]="done"
-                class="example-list"
-                cdkDropListOrientation="horizontal"
-                (cdkDropListDropped)="dropTarget($event)" 
-              >
-                @for (item of done; track item) {
-                  <div class="example-box" cdkDrag>{{ item }}</div>
+              <h2>Sections</h2>
+              @for( s of sections(); track s.id){
+                @for( w of s.widgets; track w.id ){
+                  <div
+                    cdkDropList
+                    [cdkDropListData]="w.metrics"
+                    class="example-list"
+                    cdkDropListOrientation="horizontal"
+                    (cdkDropListDropped)="dropMetric($event)" 
+                    [cdkDropListEnterPredicate]="acceptMetric"
+                  >
+                    @for( m of w.metrics; track m.id){
+                      <div class="example-box" cdkDrag>
+                        <div class="example-box">{{m.label}}</div>
+                      </div>
+                    }
+                  </div>
                 }
-              </div> 
-                    
+              }
         </as-split-area>
         <as-split-area class="scroll" [size]="40">
           result          

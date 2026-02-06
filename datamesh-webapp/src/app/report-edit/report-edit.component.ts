@@ -1,11 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnInit, signal, ViewChild } from '@angular/core';
-import {  FormBuilder,  FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder,  FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinNode,    InfoNode, JoinNodeObj } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -14,7 +13,7 @@ import { db } from '../../environments/environment'
 import * as uuid from 'uuid';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatTree, MatTreeModule} from '@angular/material/tree';
+import { MatTreeModule} from '@angular/material/tree';
 import { MatMenuModule } from '@angular/material/menu';
 import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDragPreview, CdkDropList, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { DaoService } from 'app/dao.service';
@@ -24,37 +23,61 @@ import { MatExpansionModule} from '@angular/material/expansion';
 import { MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { AuthService } from 'app/auth.service';
 import { AngularSplitModule, SplitAreaComponent, SplitComponent } from 'angular-split';
-import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTabsModule} from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { uuidv4 } from '@firebase/util';
-import {MatButtonToggleModule} from '@angular/material/button-toggle';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 
 
 interface FoodNode {
-  name: string;
+  label: string;
   collection: string
-  children?: FoodNode[];
+  children?: any[];
 }
 const EXAMPLE_DATA: FoodNode[] = [
   {
-    name: 'Entities',
-    collection:"EntityGroup",
+    label: 'report',
+    collection:"Report",
     children: [
       { 
-        name: 'Subscription', 
-        collection:"Entity",
+        label: 'Metrics', 
+        collection:"ReportComponent",
         children:[
           {
-            name:"Active",
-            collection:"Slice"
+            label:"Customer",
+            collection:"Entity",
+            children:[
+              {
+                id:uuid.v4(),
+                label:"CustomersActiveCount",
+                collection:"Metric",
+                dimensions: [],
+                value: '250'                
+              },
+              {
+                id:uuid.v4(),
+                label:"CustomersWithPTCount",
+                collection:"Metric",
+                dimensions: [],
+                value: '250'                  
+              },
+            ]
           },
           {
-            name:"Unpaid",
-            collection:"Slice"
+            label:"Subscription",
+            collection:"Entity",
+            children:[
+              {
+                label:"CustomersActiveCount",
+                collection:"Metric"
+              },
+              {
+                label:"CustomersWithPTCount",
+                collection:"Metric"
+              },
+            ]
           }          
         ]  
       }, 
@@ -87,6 +110,25 @@ class Report implements IReport{
   updateon:Date = new Date()
 }
 
+//this is single metric
+class Metric{
+  id:String =  uuid.v4()
+  collection = "Metric"
+  label!:String
+  dimensions!:String[]
+  value!:string
+}
+//a widget contains a Metric or multiple metrics
+//when adding more than one metric to a widget the metrics are merged
+class Widget{
+  id = uuid.v4()
+  metrics:Metric[] = []
+}
+//a section can add more than one Widget
+class Section {
+  id = uuid.v4()
+  widgets:Widget[] = [] 
+}
 
 
 @Component({
@@ -142,22 +184,32 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
 
   hasChild = (_: number, node: FoodNode) => !!node.children && node.children.length > 0;
 
-  todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];
-  done = ['Get up', 'Brush teeth', 'Take a shower', 'Check e-mail', 'Walk dog'];
+  m1:Metric = {
+    id: uuid.v4(),
+    collection:"Metric",
+    label: "TotalClubs",
+    dimensions: [],
+    value: '250'
+  }
+  m2:Metric = {
+    id: uuid.v4(),
+    collection:"Metric",
+    label: "TotalCurrentMembers",
+    dimensions: [],
+    value: '3,500,000'
+  }
   
+  w:Widget = {
+    id: uuid.v4(),
+    metrics:[this.m1, this.m2]
+  }
 
-  movies = [
-    'Episode I - The Phantom Menace',
-    'Episode II - Attack of the Clones',
-    'Episode III - Revenge of the Sith',
-    'Episode IV - A New Hope',
-    'Episode V - The Empire Strikes Back',
-    'Episode VI - Return of the Jedi',
-    'Episode VII - The Force Awakens',
-    'Episode VIII - The Last Jedi',
-    'Episode IX - The Rise of Skywalker',
-  ];
-
+  s:Section = {
+    id: uuid.v4(),
+    widgets: [this.w]
+  }
+  sections = signal<Section[]>([this.s]); 
+  
   constructor( 
     private fb:FormBuilder 
    ,private stringUtilService:StringUtilService
@@ -279,8 +331,7 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
       );
     }
   }
-  dropTarget(event: CdkDragDrop<string[]>) {
-
+  dropMetric(event: CdkDragDrop<Metric[]>) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
@@ -290,8 +341,17 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
   }
 
 
-  acceptPredicate(drag: CdkDrag, drop: CdkDropList) {
-    return true //drag.data.startsWith("G") ;
+  acceptMetric(drag: CdkDrag, drop: CdkDropList) {
+    let item = drag.data
+    if( item["collection"] == "Metric"){
+      let arr:Metric[] = drop.data as Metric[] 
+      let i = arr.findIndex( e => item.id == e.id)
+      if( i < 0  ){
+        return true  
+      }
+      
+    }
+    return false //drag.data.startsWith("G") ;
   }    
 
 }
