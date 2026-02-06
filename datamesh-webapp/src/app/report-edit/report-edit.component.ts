@@ -46,22 +46,22 @@ const EXAMPLE_DATA: FoodNode[] = [
         collection:"ReportComponent",
         children:[
           {
-            label:"Customer",
+            label:"CustomerChargeback",
             collection:"Entity",
             children:[
               {
                 id:uuid.v4(),
-                label:"CustomersActiveCount",
+                label:"CustomersChargeback",
                 collection:"Metric",
-                dimensions: [],
-                value: '250'                
+                columns: ["customer_id",],
+                aggColumns: ["chargeback_date"]                
               },
               {
                 id:uuid.v4(),
                 label:"CustomersWithPTCount",
                 collection:"Metric",
-                dimensions: [],
-                value: '250'                  
+                columns: ["customer_id","customer_name"],
+                aggColumns:["cnt_pts"]                  
               },
             ]
           },
@@ -71,13 +71,17 @@ const EXAMPLE_DATA: FoodNode[] = [
             children:[
               {
                 id:uuid.v4(),
-                label:"SubscriptionsDuesActiveCount",
-                collection:"Metric"
+                label:"SubscriptionCurrentStatus",
+                collection:"Metric",
+                columns:["subscription_id"],
+                aggColumns:["last_status"]                
               },
               {
                 id:uuid.v4(),
-                label:"SubscriptionPTActiveCount",
-                collection:"Metric"
+                label:"SubscriptionLastCheckin",
+                collection:"Metric",
+                columns:["subscription_id"],
+                aggColumns:["last_checkin"]
               },
             ]
           }          
@@ -117,14 +121,16 @@ class Metric{
   id:String =  uuid.v4()
   collection = "Metric"
   label!:String
-  dimensions!:String[]
-  value!:string
+  columns!:String[]
+  aggColumns!:string[]
 }
 //a widget contains a Metric or multiple metrics
 //when adding more than one metric to a widget the metrics are merged
 class Widget{
   id = uuid.v4()
   metrics:Metric[] = []
+  columns:String[] = []
+  aggColumns:String[] = []
 }
 //a section can add more than one Widget
 class Section {
@@ -189,22 +195,25 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
   m1:Metric = {
     id: uuid.v4(),
     collection:"Metric",
-    label: "TotalClubs",
-    dimensions: [],
-    value: '250'
+    label: "Clubs",
+    columns: ["club_id","club_name"],
+    aggColumns: ["cnt"]
   }
   m2:Metric = {
     id: uuid.v4(),
     collection:"Metric",
-    label: "TotalCurrentMembers",
-    dimensions: [],
-    value: '3,500,000'
+    label: "Members",
+    columns: ["member_id","club_id"],
+    aggColumns: ["cnt"]
   }
   
   w:Widget = {
     id: uuid.v4(),
-    metrics:[this.m1, this.m2]
+    metrics: [this.m1, this.m2],
+    columns: [],
+    aggColumns: []
   }
+  
 
   s:Section = {
     id: uuid.v4(),
@@ -365,7 +374,9 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
 
     let w:Widget = {
       id: uuid.v4(),
-      metrics: []
+      metrics: [],
+      columns: [],
+      aggColumns: []
     } 
     let s:Section = {
       id: uuid.v4(),
@@ -383,4 +394,19 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
     this.sections.set( sections )
   }
 
+  getWidgetCols(w:Widget){
+    // Final array to store all elements
+    const mergedArray: String[] = [];
+
+    // Append each array's elements using forEach
+    w.metrics.forEach(metric => {
+      mergedArray.push( ... metric.columns);
+    });    
+
+    // Append each array's elements using forEach
+    w.metrics.forEach(metric => {
+      mergedArray.push( ... metric.aggColumns);
+    });    
+    return [...new Set(mergedArray.flat())];
+  }
 }
