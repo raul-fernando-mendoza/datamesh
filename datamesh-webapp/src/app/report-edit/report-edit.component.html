@@ -45,24 +45,36 @@
         <as-split-area  [size]="60"> 
               <h2>Sections</h2>
               @for( s of sections(); track s.id){
-                @for( w of s.widgets; track w.id ){
-                  <div
-                    cdkDropList
-                    [cdkDropListData]="w.metrics"
-                    class="widget-list"
-                    cdkDropListOrientation="horizontal"
-                    (cdkDropListDropped)="dropMetric($event)" 
-                    [cdkDropListEnterPredicate]="acceptMetric"
-                  >
-                    @for( m of w.metrics; track m.id){
-                      <div class="metric-box" cdkDrag>
-                        <span cdkDragHandle>{{m.label}}</span>
-                        <button mat-icon-button (click)="deleteMetric(w,m)"><mat-icon>delete</mat-icon></button>                          
-                      </div>
-                    }
+                <div class="section">
+                  <div class="bar">
+                    <span class="spacer"></span>
+                    <button mat-icon-button (click)="deleteSection(s)"><mat-icon>delete</mat-icon></button>
                   </div>
-                }
+                  @for( w of s.widgets; track w.id ){
+                    <div
+                      cdkDropList
+                      [cdkDropListData]="w.metrics"
+                      class="widget-list"
+                      cdkDropListOrientation="horizontal"
+                      (cdkDropListDropped)="dropMetric($event)" 
+                      [cdkDropListEnterPredicate]="acceptMetric"
+                    >
+                      @for( m of w.metrics; track m.id){
+                        <div class="metric-box" cdkDrag>
+                          <span cdkDragHandle>{{m.label}}</span>
+                          <button mat-icon-button (click)="deleteMetric(w,m)"><mat-icon>delete</mat-icon></button>                          
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
               }
+              <div class="bar">
+                <span class="spacer"></span>
+                <button mat-icon-button (click)="onAddSection()"><mat-icon>add</mat-icon></button>  
+                <span class="spacer"></span>
+              </div>
+              
         </as-split-area>
         <as-split-area class="scroll" [size]="40">
           result          

@@ -345,7 +345,7 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
 
   acceptMetric(drag: CdkDrag, drop: CdkDropList) {
     let item = drag.data
-    if( item["collection"] == "Metric"){
+    if( item && item["collection"] == "Metric"){
       let arr:Metric[] = drop.data as Metric[] 
       let i = arr.findIndex( e => item.id == e.id)
       if( i < 0  ){
@@ -359,6 +359,28 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
   deleteMetric(w:Widget, m:Metric){
     let idx = w.metrics.findIndex( e => e.id == m.id)
     w.metrics.splice( idx, 1)
+  }
+
+  onAddSection(){
+
+    let w:Widget = {
+      id: uuid.v4(),
+      metrics: []
+    } 
+    let s:Section = {
+      id: uuid.v4(),
+      widgets: [w]
+    }
+
+    let sections:Section[] = this.sections()
+    sections.push(s)
+    this.sections.set(sections)
+  }
+  deleteSection(s:Section){
+    let sections:Section[] = this.sections()
+    let idx = sections.findIndex( e => e.id = s.id)
+    sections.splice( idx, 1)
+    this.sections.set( sections )
   }
 
 }

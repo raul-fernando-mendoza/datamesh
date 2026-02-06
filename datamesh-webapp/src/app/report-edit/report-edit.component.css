@@ -7,7 +7,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: row; 
-  justify-content:space-between; 
+  justify-content:flex-start; 
   align-items:stretch;
 }
 .metric-box {
@@ -66,4 +66,7 @@ metric-box:active {
   transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 }
 
+.section{
+  border:1px solid black
+}
 
