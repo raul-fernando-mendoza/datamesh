@@ -16,7 +16,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTree, MatTreeModule} from '@angular/material/tree';
 import { MatMenuModule } from '@angular/material/menu';
-import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDropList, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragPlaceholder, CdkDragPreview, CdkDropList, CdkDropListGroup, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { DaoService } from 'app/dao.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -87,6 +87,8 @@ class Report implements IReport{
   updateon:Date = new Date()
 }
 
+
+
 @Component({
     selector: 'app-report-edit',
     imports: [
@@ -100,7 +102,7 @@ class Report implements IReport{
         MatSelectModule,
         MatTreeModule,
         MatMenuModule,
-        CdkDropListGroup, CdkDrag, CdkDropList,  CdkDragPlaceholder,
+        CdkDropListGroup, CdkDrag, CdkDropList,  CdkDragPlaceholder, CdkDragPreview,
         MatProgressBarModule,
         MatExpansionModule,
         MatProgressSpinnerModule,
@@ -143,6 +145,19 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
   todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];
   done = ['Get up', 'Brush teeth', 'Take a shower', 'Check e-mail', 'Walk dog'];
   
+
+  movies = [
+    'Episode I - The Phantom Menace',
+    'Episode II - Attack of the Clones',
+    'Episode III - Revenge of the Sith',
+    'Episode IV - A New Hope',
+    'Episode V - The Empire Strikes Back',
+    'Episode VI - Return of the Jedi',
+    'Episode VII - The Force Awakens',
+    'Episode VIII - The Last Jedi',
+    'Episode IX - The Rise of Skywalker',
+  ];
+
   constructor( 
     private fb:FormBuilder 
    ,private stringUtilService:StringUtilService
@@ -203,18 +218,7 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
       )
     }
   }
-
-
-
-
-
-
-
-  
-  
-  
-
-      
+   
   onDelete(){
     if(this.id && this.report()){
       if( confirm("are you sure to delete:" + this.report()!.label) ){
@@ -226,13 +230,13 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
   }  
   onSubmit(){
     if( this.id == 'new' ){
-      this.onCreate()
+      this.onNew()
     }
     else{
       this.save()
     }
   }
-  onCreate():Promise<void>{
+  onNew():Promise<void>{
     //create new
     let report:Report = {
       id: uuid.v4(),
@@ -276,7 +280,13 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
     }
   }
   dropTarget(event: CdkDragDrop<string[]>) {
-    this.done.push( event.item.data["name"])
+
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      event.container.data.splice( event.currentIndex, 0, event.item.data)
+    } 
+    //this.done.push( event.item.data )
   }
 
 
