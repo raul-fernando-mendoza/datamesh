@@ -53,14 +53,14 @@ const EXAMPLE_DATA: FoodNode[] = [
                 id:uuid.v4(),
                 label:"CustomersChargeback",
                 collection:"Metric",
-                columns: ["customer_id",],
+                columns: ["club_id", "customer_id",],
                 aggColumns: ["chargeback_date"]                
               },
               {
                 id:uuid.v4(),
                 label:"CustomersWithPTCount",
                 collection:"Metric",
-                columns: ["customer_id","customer_name"],
+                columns: ["club_id","club_name"],
                 aggColumns:["cnt_pts"]                  
               },
             ]
@@ -124,12 +124,19 @@ class Metric{
   columns!:string[]
   aggColumns!:string[]
 }
+
+class Column{
+  id!:string
+  selected:boolean = false
+}
+
 //a widget contains a Metric or multiple metrics
 //when adding more than one metric to a widget the metrics are merged
 class Widget{
   id = uuid.v4()
   metrics:Metric[] = []
   columns:string[] = []
+  columnsSelected:string[] = []
   aggColumns:string[] = []
 }
 //a section can add more than one Widget
@@ -196,21 +203,22 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
     id: uuid.v4(),
     collection:"Metric",
     label: "Clubs",
-    columns: ["club_id","club_name"],
-    aggColumns: ["cnt"]
+    columns: [],
+    aggColumns: []
   }
   m2:Metric = {
     id: uuid.v4(),
     collection:"Metric",
     label: "Members",
-    columns: ["member_id","club_id"],
-    aggColumns: ["cnt"]
+    columns: [],
+    aggColumns: []
   }
   
   w:Widget = {
     id: uuid.v4(),
     metrics: [this.m1, this.m2],
     columns: [],
+    columnsSelected: [],
     aggColumns: []
   }
   
@@ -343,18 +351,26 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
     }
   }
   addMetricColumns(w:Widget, m:Metric){
-    m.columns.forEach( column => {
-      let idx = w.columns.findIndex( e => e == column)
-      if( idx < 0){
-        w.columns.push( column )
-      }
-    })
-    m.aggColumns.forEach( column => {
-      let idx = w.aggColumns.findIndex( e => e == column)
-      if( idx < 0){
-        w.aggColumns.push( column )
-      }
-    })
+    if (w.metrics.length === 1) {
+      // m is the first metric: copy all its columns and aggColumns
+      w.columns = [...m.columns];
+      w.aggColumns = [...m.aggColumns];
+    } else {
+      // Multiple metrics: keep only columns shared by all metrics in the widget
+      w.columns = w.metrics.reduce((shared, metric) => {
+        return shared.filter(col => metric.columns.includes(col));
+      }, [...w.metrics[0].columns]);
+
+      const allAggColumns: string[] = [];
+      w.metrics.forEach(metric => {
+        metric.aggColumns.forEach(col => {
+          if (!allAggColumns.includes(col)) {
+            allAggColumns.push(col);
+          }
+        });
+      });
+      w.aggColumns = allAggColumns;
+    }
   }  
   dropColumns(event: CdkDragDrop<string[]>) {
     if (event.previousContainer === event.container) {
@@ -407,6 +423,15 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
   deleteMetric(w:Widget, m:Metric){
     let idx = w.metrics.findIndex( e => e.id == m.id)
     w.metrics.splice( idx, 1)
+
+    if (w.metrics.length === 0) {
+      w.columns = [];
+      w.columnsSelected = [];
+      w.aggColumns = [];
+    } else {
+      this.addMetricColumns(w, w.metrics[0]);
+      w.columnsSelected = w.columnsSelected.filter(col => w.columns.includes(col));
+    }
   }
 
   onAddSection(){
@@ -415,8 +440,9 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
       id: uuid.v4(),
       metrics: [],
       columns: [],
+      columnsSelected: [],
       aggColumns: []
-    } 
+    }
     let s:Section = {
       id: uuid.v4(),
       widgets: [w]
