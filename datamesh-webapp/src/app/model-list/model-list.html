@@ -1,13 +1,51 @@
-@if( !models() ){
+@if( !models() || !folders() ){
     loading...
 }
 @else{
-    Models<button mat-icon-button [routerLink]="['/model/new']"><mat-icon>add</mat-icon></button> 
-    <mat-list>
-    @for( m of models(); track m.id){
-        <mat-list-item>
-            <button [routerLink]="['/model',m.id]" mat-button>{{m.label}}</button> <span class="debug">{{m.id}}</span>
-        </mat-list-item>
+    <div class="bar">
+        Models
+        <span class="spacer"></span>
+        <button mat-icon-button (click)="addFolder()"><mat-icon>create_new_folder</mat-icon></button>
+    </div>
+
+    @if(defaultModels().length > 0){
+        <div class="folder">
+            <div class="folder-header">
+                <mat-icon>folder</mat-icon>
+                <span>Default</span>
+            </div>
+            <mat-list>
+                @for( m of defaultModels(); track m.id){
+                    <mat-list-item>
+                        <button [routerLink]="['/model', m.id]" mat-button>{{m.label}}</button>
+                        <span class="debug">{{m.id}}</span>
+                    </mat-list-item>
+                }
+            </mat-list>
+        </div>
     }
-</mat-list>
+
+    @for( folder of folders(); track folder.id ){
+        <div class="folder">
+            <div class="folder-header">
+                <mat-icon>folder</mat-icon>
+                <span>{{folder.label}}</span>
+                <span class="spacer"></span>
+                <button mat-icon-button [routerLink]="['/model/new']" [queryParams]="{folderId: folder.id}">
+                    <mat-icon>add</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteFolder(folder)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+            <mat-list>
+                @for( m of modelsInFolder(folder.id!); track m.id ){
+                    <mat-list-item>
+                        <button [routerLink]="['/model', m.id]" mat-button>{{m.label}}</button>
+                        <span class="debug">{{m.id}}</span>
+                    </mat-list-item>
+                }
+            </mat-list>
+        </div>
+    }
 }

@@ -358,11 +358,24 @@ export interface JoinNodeActionData {
   action:ActionOption
 }
 
+export interface ModelFolder{
+  id?:string
+  label?:string
+  owner?:string
+  deleted?:boolean
+  createon?:string
+  updateon?:string
+}
+export class ModelFolderCollection{
+  static collectionName = "ModelFolder"
+}
+
 export interface Model{
   id?:string
   label?:string
   description?:string
   owner?:string
+  folderId?:string
   updateon?:string
   createon?:string
 }
@@ -379,6 +392,7 @@ export class ModelObj implements Model{
   label!:string
   description:string = ""
   owner!:string
+  folderId?:string
   updateon:string = getCurrentTimeStamp()
   createon:string = getCurrentTimeStamp()
 }

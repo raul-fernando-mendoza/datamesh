@@ -78,7 +78,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   model = signal<ModelObj>(new ModelObj())
   id:string | null = null
-  groupId:string|null = 'default'
+  folderId:string|null = null
 
   unsubscribe:Unsubscribe | null = null
 
@@ -155,9 +155,12 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         else{
           this.id = res["id"]
         }
-       }  
-       else if("groupId" in res){
-         this.groupId = res["groupId"]
+       }
+
+     })
+     this.activatedRoute.queryParams.subscribe(params => {
+       if("folderId" in params){
+         this.folderId = params["folderId"]
        }
      }) 
      for( let i=0; i<100; i++){
@@ -357,8 +360,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       label: this.FG.controls.label.value!,
       description: '',
       owner: this.authService.getUserUid()!,
+      folderId: this.folderId ?? undefined,
       updateon: getCurrentTimeStamp(),
-      createon: getCurrentTimeStamp()      
+      createon: getCurrentTimeStamp()
     }
     return this.firebaseService.setDoc( ModelObj.collectionName, model.id, model).then( () =>{
       this.id = model.id
