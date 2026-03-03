@@ -67,7 +67,7 @@
                       }
                     </div>
                     <div class="grid-heather">
-                      <td><mat-icon>edit</mat-icon></td>
+                      <td (click)="toggleFilter(w)"><mat-icon>{{w.filterActive ? 'filter_list' : 'edit'}}</mat-icon></td>
                       <div class="grid-heather-columns"
                         cdkDropList
                         [cdkDropListData]="w.columns"
@@ -76,8 +76,10 @@
                         (cdkDropListDropped)="dropColumns($event)" 
                         [cdkDropListEnterPredicate]="acceptMetric"
                         >
-                          @for( c of w.columns; track c){
-                            <td cdkDrag><mat-icon>visibility</mat-icon>{{c}}</td>
+                          @for( c of visibleColumns(w); track c){
+                            <td cdkDrag (click)="toggleColumn(w, c)">
+                              <mat-icon>{{w.columnsSelected.includes(c) ? 'visibility' : 'visibility_off'}}</mat-icon>{{c}}
+                            </td>
                           }
                       </div>
                       <div class="grid-heather-aggcolumns"
@@ -88,8 +90,10 @@
                         (cdkDropListDropped)="dropColumns($event)" 
                         [cdkDropListEnterPredicate]="acceptMetric"
                         >
-                          @for( c of w.aggColumns; track c){
-                            <td cdkDrag><mat-icon>visibility</mat-icon>{{c}}</td>
+                          @for( c of visibleAggColumns(w); track c){
+                            <td cdkDrag (click)="toggleColumn(w, c)">
+                              <mat-icon>{{w.columnsSelected.includes(c) ? 'visibility' : 'visibility_off'}}</mat-icon>{{c}}
+                            </td>
                           }
                       </div>
 

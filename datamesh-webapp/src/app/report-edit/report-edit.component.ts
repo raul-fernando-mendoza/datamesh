@@ -97,11 +97,11 @@ interface IReport{
   label?:string
   description?:string
   indexWords?:string[]
-  
+  sections?:any[]
   owner?:string
   deleted?:boolean
   createon?:Date
-  updateon?:Date  
+  updateon?:Date
 }
 class Report implements IReport{
   public static collection = "Report"
@@ -138,6 +138,7 @@ class Widget{
   columns:string[] = []
   columnsSelected:string[] = []
   aggColumns:string[] = []
+  filterActive:boolean = false
 }
 //a section can add more than one Widget
 class Section {
@@ -219,7 +220,8 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
     metrics: [this.m1, this.m2],
     columns: [],
     columnsSelected: [],
-    aggColumns: []
+    aggColumns: [],
+    filterActive: false
   }
   
 
@@ -227,7 +229,8 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
     id: uuid.v4(),
     widgets: [this.w]
   }
-  sections = signal<Section[]>([this.s]); 
+  sections = signal<Section[]>([]);
+  private sectionsLoaded = false;
   
   constructor( 
     private fb:FormBuilder 
@@ -270,22 +273,28 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
     if( this.unsubscribe ){
       this.unsubscribe()
     }
-    
+    this.sectionsLoaded = false;
+
     if( this.id && this.id != 'new' ){
       this.unsubscribe = onSnapshot( doc( db, this.collection, this.id ),
           (docRef) =>{
                 if( docRef.exists()){
-                  let report=docRef.data() as Report
+                  let report = docRef.data() as IReport
 
-                  this.report.set(report)
-
+                  this.report.set(report as Report)
                   this.FG.controls.label.setValue( report.label!)
-                  
+
+                  if (!this.sectionsLoaded) {
+                    this.sectionsLoaded = true;
+                    if (report.sections && report.sections.length > 0) {
+                      this.sections.set(report.sections as Section[]);
+                    }
+                  }
                 }
           },
           (reason:any) =>{
               alert("ERROR update comparison list:" + reason)
-          }  
+          }
       )
     }
   }
@@ -355,6 +364,7 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
       // m is the first metric: copy all its columns and aggColumns
       w.columns = [...m.columns];
       w.aggColumns = [...m.aggColumns];
+      w.columnsSelected = [...m.columns, ...m.aggColumns];
     } else {
       // Multiple metrics: keep only columns shared by all metrics in the widget
       w.columns = w.metrics.reduce((shared, metric) => {
@@ -370,6 +380,37 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
         });
       });
       w.aggColumns = allAggColumns;
+      w.columnsSelected = [...w.columns, ...w.aggColumns];
+    }
+  }
+
+  toggleFilter(w: Widget) {
+    w.filterActive = !w.filterActive;
+    this.sections.set([...this.sections()]);
+  }
+
+  visibleColumns(w: Widget): string[] {
+    return w.filterActive ? w.columns.filter(c => w.columnsSelected.includes(c)) : w.columns;
+  }
+
+  visibleAggColumns(w: Widget): string[] {
+    return w.filterActive ? w.aggColumns.filter(c => w.columnsSelected.includes(c)) : w.aggColumns;
+  }
+
+  toggleColumn(w: Widget, col: string) {
+    const idx = w.columnsSelected.indexOf(col);
+    if (idx >= 0) {
+      w.columnsSelected.splice(idx, 1);
+    } else {
+      w.columnsSelected.push(col);
+    }
+    this.sections.set([...this.sections()]);
+    this.saveSections();
+  }
+
+  saveSections() {
+    if (this.id && this.id !== 'new') {
+      this.firebaseService.updateDoc(this.collection, this.id, { sections: this.sections() });
     }
   }  
   dropColumns(event: CdkDragDrop<string[]>) {
@@ -441,7 +482,8 @@ export class ReportEditComponent implements OnInit, AfterViewInit{
       metrics: [],
       columns: [],
       columnsSelected: [],
-      aggColumns: []
+      aggColumns: [],
+      filterActive: false
     }
     let s:Section = {
       id: uuid.v4(),
