@@ -4,25 +4,25 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule } from '@angular/router';
 import { AuthService } from 'app/auth.service';
-import { Model, ModelFolder, ModelFolderCollection, ModelObj, getCurrentTimeStamp } from 'app/datatypes/datatypes.module';
+import { Metric, MetricFolder, MetricFolderCollection, MetricObject, getCurrentTimeStamp } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import * as uuid from 'uuid';
 
 @Component({
-  selector: 'app-model-list',
+  selector: 'app-metrics-list',
   imports: [
     MatListModule,
     MatButtonModule,
     MatIconModule,
     RouterModule],
-  templateUrl: './model-list.html',
-  styleUrl: './model-list.css'
+  templateUrl: './metrics-list.html',
+  styleUrl: './metrics-list.css'
 })
-export class ModelList  implements OnInit, OnDestroy{
-  collection = ModelObj.collectionName
-  folderCollection = ModelFolderCollection.collectionName
-  models = signal<Array<Model>|null>(null)
-  folders = signal<Array<ModelFolder>|null>(null)
+export class MetricsList  implements OnInit, OnDestroy{
+  collection = MetricObject.collectionName
+  folderCollection = MetricFolderCollection.collectionName
+  models = signal<Array<Metric>|null>(null)
+  folders = signal<Array<MetricFolder>|null>(null)
   unsubscribe:any
   folderUnsubscribe:any
 
@@ -35,9 +35,9 @@ export class ModelList  implements OnInit, OnDestroy{
 
     this.unsubscribe = this.firestore.onsnapShotQuery( this.collection, [{fieldPath:"owner",opStr:"==",value:userid}],{
       next: (snapshot) =>{
-        const models:Array<Model> = []
+        const models:Array<Metric> = []
         snapshot.docs.forEach( doc =>{
-          const m = doc.data() as Model
+          const m = doc.data() as Metric
           m.id = doc.id
           models.push( m )
         })
@@ -49,9 +49,9 @@ export class ModelList  implements OnInit, OnDestroy{
 
     this.folderUnsubscribe = this.firestore.onsnapShotQuery( this.folderCollection, [{fieldPath:"owner",opStr:"==",value:userid}],{
       next: (snapshot) =>{
-        const folders:Array<ModelFolder> = []
+        const folders:Array<MetricFolder> = []
         snapshot.docs.forEach( doc =>{
-          const f = doc.data() as ModelFolder
+          const f = doc.data() as MetricFolder
           f.id = doc.id
           folders.push( f )
         })
@@ -67,18 +67,14 @@ export class ModelList  implements OnInit, OnDestroy{
     this.folderUnsubscribe?.()
   }
 
-  defaultModels(): Model[] {
-    return (this.models() ?? []).filter(m => !m.folderId)
-  }
-
-  modelsInFolder(folderId:string): Model[] {
+  modelsInFolder(folderId:string): Metric[] {
     return (this.models() ?? []).filter(m => m.folderId === folderId)
   }
 
   addFolder() {
     const label = prompt('Folder name:')
     if (!label?.trim()) return
-    const folder:ModelFolder = {
+    const folder:MetricFolder = {
       id: uuid.v4(),
       label: label.trim(),
       owner: this.authService.getUserUid()!,
@@ -89,7 +85,13 @@ export class ModelList  implements OnInit, OnDestroy{
     this.firestore.setDoc(this.folderCollection, folder.id!, folder)
   }
 
-  deleteFolder(folder:ModelFolder) {
+  renameFolder(folder:MetricFolder) {
+    const label = prompt('Rename folder:', folder.label)
+    if (!label?.trim() || label.trim() === folder.label) return
+    this.firestore.updateDoc(this.folderCollection, folder.id!, { label: label.trim() })
+  }
+
+  deleteFolder(folder:MetricFolder) {
     if (confirm(`Delete folder "${folder.label}"?`)) {
       this.firestore.deleteDoc(this.folderCollection, folder.id!)
     }

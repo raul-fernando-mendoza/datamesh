@@ -79,7 +79,7 @@
         <as-split-area  [size]="60">      
           <div class="header">
             <button mat-icon-button routerLink="/model"><mat-icon>arrow_back</mat-icon></button> 
-            <span>Model Edit</span>
+            <span>Metric Edit</span>
               <span class="spacer"></span>
               <span >{{id}}</span>
 
@@ -196,7 +196,9 @@
                       <th [formGroup]="selectedColumns[i]">
                         <div class="col">
                           <div class="row">                          
-                            <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
+                            @if( isFocusedTransformationSelectedColumn() ){
+                              <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>
+                            }
                             @if( selectedColumns[i].controls["selected"].value ){
                               <mat-form-field class="name" appearance="fill">
                                 <mat-label>Name</mat-label>

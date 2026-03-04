@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
 import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
 import { Timestamp, WhereFilterOp } from 'firebase/firestore';
-import { ModelEditComponent } from 'app/model-edit/model-edit.component';
+import { MetricsEditComponent } from 'app/metrics-edit/metrics-edit.component';
 import { MatTabBodyPortal } from '@angular/material/tabs';
 import { NodeWithI18n } from '@angular/compiler';
 
@@ -358,7 +358,7 @@ export interface JoinNodeActionData {
   action:ActionOption
 }
 
-export interface ModelFolder{
+export interface MetricFolder{
   id?:string
   label?:string
   owner?:string
@@ -366,11 +366,11 @@ export interface ModelFolder{
   createon?:string
   updateon?:string
 }
-export class ModelFolderCollection{
-  static collectionName = "ModelFolder"
+export class MetricFolderCollection{
+  static collectionName = "MetricFolder"
 }
 
-export interface Model{
+export interface Metric{
   id?:string
   label?:string
   description?:string
@@ -388,8 +388,8 @@ export function getCurrentTimeStamp(){
   let date = new Date()
   return date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2( date.getDate()) + pad2( date.getHours() ) + pad2( date.getMinutes() ) + pad2( date.getSeconds() )
 }
-export class ModelObj implements Model{
-  static collectionName = "Model"
+export class MetricObject implements Metric{
+  static collectionName = "Metric"
   id!:string
   label!:string
   description:string = ""

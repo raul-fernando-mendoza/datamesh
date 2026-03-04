@@ -14,8 +14,8 @@ class TestFireStore(unittest.TestCase):
 
     def test01(self):
         req = {
-            "collection":"Model/df4978e5-4336-42cf-af62-d30cc8aeacc9/JoinNode/194914ab-2893-45b7-87d8-6848ee285139/JoinNode",
-            "id":"c4d4bc3f-6303-423d-9a59-869fd55de3b6"
+            "collection":"Metric",
+            "id":"a3e88774-081e-4bef-924b-1ec08228f43f"
         }
         
         obj = updateModelSamples( req )

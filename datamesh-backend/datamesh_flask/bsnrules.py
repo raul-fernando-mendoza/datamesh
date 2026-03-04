@@ -1,4 +1,6 @@
 import json
+
+import firebase_admin
 import datamesh_flask.firestore_db as firestore_db
 import datamesh_flask.datamesh_base as datamesh_base
 import datamesh_flask.snowflake_odbc as snowflake_odbc
@@ -280,10 +282,13 @@ def applyTransformation( df, t):
         result = df.filter( leftValue + " " + comparator +  " " + rightValue )
         return result 
     elif t["type"] == 'selectColumns':
-        colsSelected = []
         columnsNames = t["columnsNames"]
-        for n in columnsNames:
-            colsSelected.append( col(n).alias(n) )
+        
+        if len(columnsNames) == 0:
+            colsSelected = df.columns
+        else:    
+            for n in columnsNames:
+                colsSelected.append( col(n).alias(n) )
         result = df.select( colsSelected )    
         return result
     elif t["type"] == 'groupBy':
@@ -416,7 +421,8 @@ def updateModelSamplesRecursive(collection, modelId):
 #will retrieve the first child and update all from there
 def updateModelSamples(req):
     collection = req['collection']
-    modelId = req["id"]        
+    modelId = req["id"]   
+    print("updateModelSamples called.\n")     
     print("collection:" + collection)
     print("modelId:" + modelId)
     
@@ -427,7 +433,7 @@ def updateModelSamples(req):
     if len(docs) > 0:
         data =  docs[0].to_dict()
         df = updateModelSamplesRecursive(childCollection, data["id"])
-        columns = df.columns.tolist()
+        columns = df.columns
         firestore.client().collection(collection).document(modelId).update({"columns": columns})
 
     obj ={

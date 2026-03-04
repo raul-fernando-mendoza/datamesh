@@ -9,8 +9,8 @@ import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
 import { SqlJupiterDocList } from './sqljupiterdoc-list/sqljupiterdoc-list';
 import { LoginFormComponent } from './login-form/login-form.component';
-import { ModelEditComponent } from './model-edit/model-edit.component';
-import { ModelList } from './model-list/model-list';
+import { MetricsEditComponent } from './metrics-edit/metrics-edit.component';
+import { MetricsList } from './metrics-list/metrics-list';
 import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
 
 import { WelcomeComponent } from './welcome/welcome.component';
@@ -73,8 +73,8 @@ const routes: Routes = [
   { path: 'connection/edit/:id', component:ConnectionEditComponent },
   
   
-  { path: 'model', component:ModelList, canActivate: [loginGuard('/loginForm/connection-list')] },
-  { path: 'model/:id', pathMatch:'full', component:ModelEditComponent },
+  { path: 'model', component:MetricsList, canActivate: [loginGuard('/loginForm/connection-list')] },
+  { path: 'model/:id', pathMatch:'full', component:MetricsEditComponent },
   
 
   { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent },
@@ -99,8 +99,8 @@ const routes: Routes = [
   { path: 'Connection/create/:groupId', component: ConnectionEditComponent},
   { path: 'Connection/edit/:id', component: ConnectionEditComponent},
 
-  { path: 'Model/create/:groupId', component: ModelEditComponent},
-  { path: 'Model/edit/:id', component: ModelEditComponent},
+  { path: 'Model/create/:groupId', component: MetricsEditComponent},
+  { path: 'Model/edit/:id', component: MetricsEditComponent},
 
   { path: 'ReportGroup', component:ReportGroupList, canActivate: [loginGuard('/loginForm/ReportGroup')]},
   { path: 'ReportGroup/:id', component:ReportGroupEdit, canActivate: [loginGuard('/loginForm/ReportGroup')]},
