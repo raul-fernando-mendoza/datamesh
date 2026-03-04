@@ -425,9 +425,11 @@ def updateModelSamples(req):
     docs = query.get()
 
     if len(docs) > 0:
-        data =  docs[0].to_dict() 
+        data =  docs[0].to_dict()
         df = updateModelSamplesRecursive(childCollection, data["id"])
-    
+        columns = df.columns.tolist()
+        firestore.client().collection(collection).document(modelId).update({"columns": columns})
+
     obj ={
         "result":"success",
     } 
