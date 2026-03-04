@@ -130,3 +130,34 @@ as-split-area .scroll{
 .nodeSelected{
   border:2px solid red;
 }
+
+.metric-column-section{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+}
+
+.metric-column-label{
+  font-size: 0.75em;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.column-chip{
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  border: 1px solid #aaa;
+  font-size: 0.8em;
+  cursor: pointer;
+  background: #f5f5f5;
+}
+
+.column-chip.metric-selected{
+  background: #1976d2;
+  color: white;
+  border-color: #1976d2;
+}

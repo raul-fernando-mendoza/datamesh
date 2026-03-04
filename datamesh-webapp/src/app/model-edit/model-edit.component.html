@@ -104,6 +104,15 @@
                   <button mat-menu-item (click)="onDelete()"><mat-icon>delete</mat-icon>Borrar</button>
                 </mat-menu>                   
               <p>
+              @if(columns.length > 0){
+                <div class="metric-column-section">
+                  <span class="metric-column-label">Dimension tables:</span>
+                  @for(col of columns; track col; let last = $last){
+                    @if(last){ <span class="metric-column-label">metric:</span> }
+                    <span class="column-chip" [class.metric-selected]="col === metricColumn" (click)="onMetricColumnSelect(col)">{{ col }}</span>
+                  }
+                </div>
+              }
               <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" class="example-tree">
                 <mat-nested-tree-node *matTreeNodeDef="let node" >
                   <!--LEAF:{{node.item.name}}-->

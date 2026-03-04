@@ -113,6 +113,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   
 
+  columns: string[] = []
+  metricColumn: string = ''
+
   infoNodes:InfoNode[] = []
   infoNodesSignal = signal<InfoNode[]>([])
   flatJoinNodeMap = new Map<string,JoinNodeObj>()
@@ -185,6 +188,8 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
                   let model=docRef.data() as ModelObj
 
                   this.model.set(model)
+                  this.columns = [...(model.columns ?? [])]
+                  this.metricColumn = model.metric_column ?? ''
 
                   this.FG.controls.label.setValue( model.label!)
                   
@@ -1045,6 +1050,16 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         alert("Error ModelDuplicate:" + reason.error.error)
       }
     }) 
+  }
+
+  onMetricColumnSelect(col: string) {
+    this.metricColumn = col
+    const idx = this.columns.indexOf(col)
+    if (idx !== -1) {
+      this.columns.splice(idx, 1)
+      this.columns.push(col)
+    }
+    this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { metric_column: col, columns: this.columns })
   }
 
   onLocalFilterColumn(i:number){

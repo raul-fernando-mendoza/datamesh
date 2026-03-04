@@ -378,13 +378,15 @@ export interface Model{
   folderId?:string
   updateon?:string
   createon?:string
+  columns?:string[]
+  metric_column?:string
 }
 
 function pad2(n:number) { return n < 10 ? '0' + n : n }
 
 export function getCurrentTimeStamp(){
   let date = new Date()
-  return date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2( date.getDate()) + pad2( date.getHours() ) + pad2( date.getMinutes() ) + pad2( date.getSeconds() ) 
+  return date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2( date.getDate()) + pad2( date.getHours() ) + pad2( date.getMinutes() ) + pad2( date.getSeconds() )
 }
 export class ModelObj implements Model{
   static collectionName = "Model"
@@ -395,6 +397,8 @@ export class ModelObj implements Model{
   folderId?:string
   updateon:string = getCurrentTimeStamp()
   createon:string = getCurrentTimeStamp()
+  columns?:string[]
+  metric_column?:string
 }
 
 export enum TreeOption {
