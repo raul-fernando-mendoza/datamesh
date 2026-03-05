@@ -285,11 +285,8 @@ def applyTransformation( df, t):
         columnsNames = t["columnsNames"]
         
         if len(columnsNames) == 0:
-            colsSelected = df.columns
-        else:    
-            for n in columnsNames:
-                colsSelected.append( col(n).alias(n) )
-        result = df.select( colsSelected )    
+            columnsNames = df.columns
+        result = df.select( columnsNames )    
         return result
     elif t["type"] == 'groupBy':
         aggs = []
