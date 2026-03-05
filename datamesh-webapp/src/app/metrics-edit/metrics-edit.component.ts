@@ -890,7 +890,7 @@ export class MetricsEditComponent implements OnInit, AfterViewInit{
           for( let c =0; c<result.columns.length; c++){
             let t = this.fb.group({
               id:[result.columns[c].columnName],
-              selected:[false],
+              selected:[ joinNodeObj.transformations[i].type == TransformationType.selectColumns && (joinNodeObj.transformations[i] as SelectColumnsTransformation).columnsNames?.includes(result.columns[c].columnName) ],
               rename:[result.columns[c].columnName],
               isFiltered:[""],
               filterValues:[""]
@@ -973,11 +973,14 @@ export class MetricsEditComponent implements OnInit, AfterViewInit{
       e.controls["id"].value == column.columnName
     )
     if( this.selectedColumns[i].controls["selected"].value  ){
-      t.columnsNames.push( column.columnName )
+      if( !t.columnsNames.includes( column.columnName ) ){
+        t.columnsNames.push( column.columnName )
+      }
       
     }
     else{
-      t.columnsNames.splice( i, 1)
+      let j = t.columnsNames.findIndex(e => e == column.columnName)
+      t.columnsNames.splice( j, 1)
     }
     let joinNodeUpdate:JoinNode = {
       transformations:[ ...nodeObj.transformations ]
@@ -989,6 +992,7 @@ export class MetricsEditComponent implements OnInit, AfterViewInit{
             
 
     this.firebaseService.updateDoc( collection, nodeObj.id, joinNodeUpdate).then( ()=>{
+      //only save the selection do not update the resultset
       this.updateAll()
     },
     reason =>{
