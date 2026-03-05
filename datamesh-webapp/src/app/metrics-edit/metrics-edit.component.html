@@ -191,12 +191,22 @@
                 <table  *ngIf="result() && result()!.columns && result()!.resultSet">
                   <thead class="gridheather">
                     <tr class="gridheather">
-                      <th class="sticky-col index_heather"> idx </th>
+                      <th class="sticky-col index_heather">
+                        @if(isFocusedTransformationSelectedColumn()){
+                          @if(isEditingSelectTransformation){
+                            <button mat-icon-button (click)="onDoneSelectTransformation()"><mat-icon>done</mat-icon></button>
+                          }@else{
+                            <button mat-icon-button (click)="onEditSelectTransformation()"><mat-icon>edit</mat-icon></button>
+                          }
+                        }@else{
+                          idx
+                        }
+                      </th>
                       @for( h of result()!.columns ; track h; let i = $index ){
                       <th [formGroup]="selectedColumns[i]">
                         <div class="col">
                           <div class="row">                          
-                            @if( isFocusedTransformationSelectedColumn() ){
+                            @if( isFocusedTransformationSelectedColumn() && isEditingSelectTransformation ){
                               <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>
                             }
                             @if( selectedColumns[i].controls["selected"].value ){

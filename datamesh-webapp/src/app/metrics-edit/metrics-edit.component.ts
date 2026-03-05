@@ -878,12 +878,8 @@ export class MetricsEditComponent implements OnInit, AfterViewInit{
       let t = joinNodeObj.transformations[i]
 
       let transformationId = t.id
-      let sampledataId = t.id
 
-      if( t.type == TransformationType.selectColumns ){
-        sampledataId = joinNodeObj.transformations[i-1]?.id
-      }
-      this.firebaseService.getdoc(collection + "/" + joinNodeObj.id + "/sampledata", sampledataId).then( doc =>{
+      this.firebaseService.getdoc(collection + "/" + joinNodeObj.id + "/sampledata", transformationId).then( doc =>{
         if( doc.exists() ){
           let result = doc.data() as SqlResultGeneric
           this.selectedColumns.length = 0
@@ -964,6 +960,44 @@ export class MetricsEditComponent implements OnInit, AfterViewInit{
     return false
   }
 
+  isEditingSelectTransformation = false
+
+  onDoneSelectTransformation(){
+    this.isEditingSelectTransformation = false
+    this.updateAll()
+  }
+
+  onEditSelectTransformation(){
+    this.isEditingSelectTransformation = true
+    let i:number = this.selectedTransactionIdx()!
+    let joinNodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
+    let collection = this.getCollection( joinNodeObj )
+
+    let sampledataId = joinNodeObj.transformations[i-1]?.id
+
+    this.firebaseService.getdoc(collection + "/" + joinNodeObj.id + "/sampledata", sampledataId).then( doc =>{
+      if( doc.exists() ){
+        let result = doc.data() as SqlResultGeneric
+        this.selectedColumns.length = 0
+        for( let c =0; c<result.columns.length; c++){
+          let t = this.fb.group({
+            id:[result.columns[c].columnName],
+            selected:[ joinNodeObj.transformations[i].type == TransformationType.selectColumns && (joinNodeObj.transformations[i] as SelectColumnsTransformation).columnsNames?.includes(result.columns[c].columnName) ],
+            rename:[result.columns[c].columnName],
+            isFiltered:[""],
+            filterValues:[""]
+          })
+          this.selectedColumns.push(t)
+        }
+        this.result.set(result)
+        this.selectColumns()
+      }
+      else{
+        this.result.set(undefined)
+      }
+    })
+  }
+
   onSelectColumn(column:SqlColumnGeneric){
     let idx:number = this.selectedTransactionIdx()!
     let nodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
@@ -993,7 +1027,7 @@ export class MetricsEditComponent implements OnInit, AfterViewInit{
 
     this.firebaseService.updateDoc( collection, nodeObj.id, joinNodeUpdate).then( ()=>{
       //only save the selection do not update the resultset
-      this.updateAll()
+      
     },
     reason =>{
       alert("Error: adding new column :" + reason.error)
