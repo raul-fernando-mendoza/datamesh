@@ -3,6 +3,11 @@ import json
 import logging
 import snowflake.connector
 
+import datamesh_flask.snowflake_odbc as snowflake_odbc
+import os
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
+
 odbcConnections ={}
 
 def getOdbcConnection( connectionId ):   
@@ -19,7 +24,33 @@ def setOdbcConnection( connectionId , credentials):
         return odbcConnections[connectionId]
     else:
         print("session not found")
-        if "authenticator" in credentials:
+        if "private_key" in credentials:
+
+            private_key_str = credentials["private_key"]
+            private_key_passphrase = credentials["private_key_passphrase"]
+
+            private_key_bytes = private_key_str.encode("utf-8")
+            private_key_object = serialization.load_pem_private_key(
+                private_key_bytes,
+                password=private_key_passphrase.encode("utf-8"),  # Use None if unencrypted
+                backend=default_backend()
+            )    
+
+            sess = snowflake.connector.connect(
+                type= credentials["type"],
+                account= credentials["account"],
+                user= credentials["user"],
+                role= credentials["role"],
+                private_key=private_key_object,
+                private_key_passphrase= private_key_passphrase,
+                database= credentials["database"],
+                warehouse= credentials["warehouse"],
+                schema= credentials["schema"],
+                threads= credentials["threads"],
+                client_session_keep_alive= credentials["client_session_keep_alive"],
+                query_tag= credentials["query_tag"] 
+            )
+        elif "authenticator" in credentials:
             sess = snowflake.connector.connect(
                         type= credentials["type"],
                         account= credentials["account"],
@@ -31,7 +62,7 @@ def setOdbcConnection( connectionId , credentials):
                         schema= credentials["schema"],
                         threads= credentials["threads"],
                         client_session_keep_alive= credentials["client_session_keep_alive"],
-                        query_tag= credentials["query_tag"]        
+                        query_tag= credentials["query_tag"]
                 )
         else:
             sess = snowflake.connector.connect(

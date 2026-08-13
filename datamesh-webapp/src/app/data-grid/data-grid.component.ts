@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input , AfterViewInit} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';

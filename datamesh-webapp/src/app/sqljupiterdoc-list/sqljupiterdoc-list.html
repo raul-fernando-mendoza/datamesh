@@ -1,0 +1,13 @@
+@if( !jupiterDocList() ){
+    loading...
+}
+@else{
+    <mat-list>
+    @for( j of jupiterDocList(); track j.id){
+        <mat-list-item>
+            <button [routerLink]="[groupId,'SqlJupiterDoc',j.id]" mat-button>{{j.label}}</button>
+            <!--<span class="debug">{{j.id}}</span>-->
+        </mat-list-item>        
+    }
+    </mat-list>
+}

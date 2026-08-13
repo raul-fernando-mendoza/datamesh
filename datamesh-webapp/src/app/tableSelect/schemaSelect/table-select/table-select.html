@@ -1,0 +1,14 @@
+<ul>
+    <mat-list>
+    @for( table of tableSig(); track table.id){
+        <mat-list-item>
+            
+        <div cdkDropList class="example-list">
+            <div class="example-box" cdkDrag [cdkDragData]="{connectionId:connection.id, schemaName:schema.id,tableName:table.name}" (click)="onTableSelect(table)" >
+                {{table.name}}
+            </div>
+        </div>              
+        </mat-list-item>
+    }
+    </mat-list>
+</ul>

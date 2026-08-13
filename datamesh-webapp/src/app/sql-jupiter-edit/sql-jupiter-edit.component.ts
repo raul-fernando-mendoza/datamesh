@@ -16,6 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import {MatSelectModule} from '@angular/material/select';
+import {MatMenuModule} from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import * as uuid from 'uuid';
 import { Timestamp } from 'firebase/firestore';
@@ -43,7 +44,8 @@ const SUFFIX = "_2"
         MatFormFieldModule,
         MatInputModule,
         SqlEditComponent,
-        MatSelectModule
+        MatSelectModule,
+        MatMenuModule
     ]
 })
 export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy{
@@ -63,8 +65,14 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
 
   displayedColumns = ['position', 'name', 'weight', 'symbol'];
   dataSource = [];
+  selectedRowIndex: number | null = null;
 
 
+
+  activeColMenuIndex: number = -1
+
+  hiddenColumns: Set<string> = new Set()
+  columnsHiddenActive: boolean = false
 
   submitting = false
   FG = this.fb.group({
@@ -88,6 +96,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     private fb:FormBuilder,
     public connectionsService:ConnectionsService,
     private dialog: MatDialog,
+    private urlService:UrlService,
   ) {
 
   }
@@ -115,9 +124,11 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       "next":( (doc) =>{
         if( doc.exists() ){
           this.sqlJupiter = doc.data() as SqlJupiterObj
-          //this.rows = this.sqlJupiter.sql.split('\n').length > this.MAX_ROWS ? this.MAX_ROWS : this.MIN_ROWS 
+          //this.rows = this.sqlJupiter.sql.split('\n').length > this.MAX_ROWS ? this.MAX_ROWS : this.MIN_ROWS
           this.FG.controls.sql.setValue( this.sqlJupiter.sql )
           this.FG.controls.connectionId.setValue( this.sqlJupiter.connectionId )
+          this.hiddenColumns = new Set( this.sqlJupiter.hidden_columns || [] )
+          this.columnsHiddenActive = this.sqlJupiter.columns_hidden_active || false
           this.displayedColumns = ["idx"]
           if( this.sqlJupiter.request_id && this.request_id != this.sqlJupiter.request_id){
             this.request_id = this.sqlJupiter.request_id
@@ -232,11 +243,27 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
     this.submitting = true
     this.firebaseService.updateDoc( this.parentCollection + "/" + this.collection , this.id, sqlJupiter).then( ()=>{
       console.log("request execution")
-      this.submitting = false
+      this.submitting = false     
     },
     reason =>{
       alert("ERROR request execution:" + reason)
     })
+    .then( ()=>{
+      let path = this.parentCollection + "/" + this.collection + "/" + this.id
+      return this.urlService.post("executeSqlByPath", {
+        path: path
+      }).subscribe({
+        'next':(obj)=>{
+            console.log("execute sql response:" + JSON.stringify(obj))          
+        },
+        'error':(error)=>{
+          alert("Error connection update:" + error.message)
+        }
+      })
+    })
+    .catch( reason =>{
+      alert("ERROR executing sql:" + reason)
+    })    
     return true
   }
 
@@ -384,7 +411,7 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
         result = Number(val).toFixed(2)
       }
       else{
-        result = Math.floor(Number(val)) + ".__"
+        result = Math.floor(Number(val)) 
       }      
     }              
 
@@ -396,6 +423,70 @@ export class SqlJupiterEditComponent implements OnInit, AfterViewInit, OnDestroy
       return true
     }
     return false
+  }
+
+  highlightRow(index: number): void {
+    this.selectedRowIndex = index;
+  }
+
+  isRowSelected(index: number): boolean {
+    return this.selectedRowIndex === index;
+  }
+
+  toggleColumnHidden(colName: string): void {
+    if (this.hiddenColumns.has(colName)) {
+      this.hiddenColumns.delete(colName)
+    } else {
+      this.hiddenColumns.add(colName)
+    }
+    this.saveColumnVisibility()
+  }
+
+  toggleHideActive(): void {
+    this.columnsHiddenActive = !this.columnsHiddenActive
+    this.saveColumnVisibility()
+  }
+
+  isColumnHidden(colName: string): boolean {
+    return this.hiddenColumns.has(colName)
+  }
+
+  isColumnVisible(colIndex: number): boolean {
+    if (!this.columnsHiddenActive) return true
+    const colName = this.sqlResult?.result_metadata?.[colIndex]?.['name']
+    if (!colName) return true
+    return !this.hiddenColumns.has(colName)
+  }
+
+  hideEmptyColumns(): void {
+    if (!this.sqlResult?.result_metadata || !this.sqlResult?.result_set) return
+    this.sqlResult.result_metadata.forEach((col, i) => {
+      const allEmpty = this.sqlResult!.result_set!.every(row => {
+        const val = row[i]
+        return val === null || val === undefined || val === ''
+      })
+      if (allEmpty) {
+        this.hiddenColumns.add(col['name'])
+      }
+    })
+    this.saveColumnVisibility()
+  }
+
+  copyColumnToClipboard(colIndex: number): void {
+    if (!this.sqlResult?.result_set) return
+    const text = this.sqlResult.result_set
+      .map(row => this.format(colIndex, row[colIndex]))
+      .filter(v => v !== null && v !== undefined && v !== '' && Number(v) !== 0)
+      .join('\n')
+    navigator.clipboard.writeText(text)
+  }
+
+  saveColumnVisibility(): void {
+    const obj: SqlJupiter = {
+      hidden_columns: Array.from(this.hiddenColumns),
+      columns_hidden_active: this.columnsHiddenActive
+    }
+    this.firebaseService.updateDoc(this.parentCollection + '/' + this.collection, this.id, obj)
   }
 
   fn_getTimeStamp(): Object {

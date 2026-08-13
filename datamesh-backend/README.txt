@@ -1,4 +1,8 @@
 ####deploye instructions
+#make the modules accesible to test folder
+#from the root folder
+pip install -e .
+
 #create the requirements.txt 
 python -m pip freeze > requirements.txt 
 

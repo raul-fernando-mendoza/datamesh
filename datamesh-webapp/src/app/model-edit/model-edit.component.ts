@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { JoinData, JoinNode, ModelObj,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric, RenameColumnTransformation, NewColumnTransformation, SqlColumnGeneric, SnowFlakeDataset, LocalFilterTransformation } from 'app/datatypes/datatypes.module';
+import { JoinData, JoinNode, modelObject,  SnowFlakeTable,    InfoNode, JoinNodeObj,  getCurrentTimeStamp, FilterTransformation, Transformation, JoinNodeActionData, ActionOption, TransformationType, GroupByTransformation, SelectColumnsTransformation, SqlResultGeneric, RenameColumnTransformation, NewColumnTransformation, SqlColumnGeneric, SnowFlakeDataset, LocalFilterTransformation } from 'app/datatypes/datatypes.module';
 import { FirebaseService } from 'app/firebase.service';
 import { StringUtilService } from 'app/string-util.service';
 import { UrlService } from 'app/url.service';
@@ -25,7 +25,7 @@ import { MatExpansionModule} from '@angular/material/expansion';
 import { MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import { AuthService } from 'app/auth.service';
 import { AngularSplitModule, SplitAreaComponent, SplitComponent } from 'angular-split';
-import { TablesTreeComponent } from 'app/tables-tree/tables-tree.component';
+import { ConnectionSelectComponent } from 'app/tableSelect/connectionSelect.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTabsModule} from '@angular/material/tabs';
 import { MatListModule } from '@angular/material/list';
@@ -59,7 +59,7 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
         AngularSplitModule,
         SplitComponent,
         SplitAreaComponent,
-        TablesTreeComponent,
+        ConnectionSelectComponent,
         MatSidenavModule,
         MatTabsModule,
         MatListModule,
@@ -70,15 +70,15 @@ import {MatButtonToggleModule} from '@angular/material/button-toggle';
     templateUrl: './model-edit.component.html',
     styleUrl: './model-edit.component.css'
 })
-export class ModelEditComponent implements OnInit, AfterViewInit{
+export class modelEditComponent implements OnInit, AfterViewInit{
   @ViewChild("tree") tree!: MatTree<TreeNode> ; 
 
   
   isLoading = false
 
-  model = signal<ModelObj>(new ModelObj())
+  model = signal<modelObject>(new modelObject())
   id:string | null = null
-  groupId:string|null = 'default'
+  folderId:string|null = null
 
   unsubscribe:Unsubscribe | null = null
 
@@ -112,6 +112,9 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   
 
   
+
+  columns: string[] = []
+  modelColumn: string = ''
 
   infoNodes:InfoNode[] = []
   infoNodesSignal = signal<InfoNode[]>([])
@@ -155,9 +158,12 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         else{
           this.id = res["id"]
         }
-       }  
-       else if("groupId" in res){
-         this.groupId = res["groupId"]
+       }
+
+     })
+     this.activatedRoute.queryParams.subscribe(params => {
+       if("folderId" in params){
+         this.folderId = params["folderId"]
        }
      }) 
      for( let i=0; i<100; i++){
@@ -169,19 +175,25 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     console.log("after view init")
   }
   ngOnInit() {
-
+    this.FG.controls.label.valueChanges.subscribe(val => {
+      if (val?.includes(' ')) {
+        this.FG.controls.label.setValue(val.replace(/ /g, '_'), { emitEvent: false })
+      }
+    })
     this.update()
-  }    
+  }
 
   update(){
     
     if( this.id && this.id != 'new' ){
-      this.unsubscribe = onSnapshot( doc( db,ModelObj.collectionName, this.id ),
+      this.unsubscribe = onSnapshot( doc( db,modelObject.collectionName, this.id ),
           (docRef) =>{
                 if( docRef.exists()){
-                  let model=docRef.data() as ModelObj
+                  let model=docRef.data() as modelObject
 
                   this.model.set(model)
+                  this.columns = [...(model.columns ?? [])]
+                  this.modelColumn = model.model_column ?? ''
 
                   this.FG.controls.label.setValue( model.label!)
                   
@@ -240,7 +252,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     
     var model = this.model()! 
 
-    var fullPath = ModelObj.collectionName + "/" + model.id + "/" + JoinNodeObj.className 
+    var fullPath = modelObject.collectionName + "/" + model.id + "/" + JoinNodeObj.className 
 
     if( path ){
       for(let i =0; i< path.length-1; i++){
@@ -253,18 +265,19 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   
   loadRawModel():Promise<void>{
     return new Promise((resolve, reject) =>{ 
-      this.infoNodes.length = 0
-      this.infoNodesSignal.set(this.infoNodes)
-      this.flatJoinNodeMap.clear()
-      this.flatInfoNodes.clear()
+
 
 
       //add the root
       let model = this.model()
 
-      let currentPath = [ModelObj.collectionName, model.id, JoinNodeObj.className].join("/")
+      let currentPath = [modelObject.collectionName, model.id, JoinNodeObj.className].join("/")
       this.firebaseService.getDocs( currentPath ).then( 
         docs =>{
+          this.infoNodes.length = 0
+          this.infoNodesSignal.set(this.infoNodes)
+          this.flatJoinNodeMap.clear()
+          this.flatInfoNodes.clear()          
           let transactions: Promise<void>[] = []
           docs.forEach( doc =>{
             let joinNode:JoinNodeObj = doc.data() as JoinNodeObj
@@ -336,7 +349,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   onDelete(){
     if(this.id && this.model){
       if( confirm("are you sure to delete:" + this.model()!.label) ){
-        this.firebaseService.deleteDoc(ModelObj.collectionName, this.id ).then( ()=>{
+        this.firebaseService.deleteDoc(modelObject.collectionName, this.id ).then( ()=>{
           this.router.navigate(["/"])
         })
       }
@@ -352,17 +365,18 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   }
   onCreate():Promise<void>{
     //create new
-    let model:ModelObj = {
+    let model:modelObject = {
       id: uuid.v4(),
       label: this.FG.controls.label.value!,
       description: '',
       owner: this.authService.getUserUid()!,
+      folderId: this.folderId ?? undefined,
       updateon: getCurrentTimeStamp(),
-      createon: getCurrentTimeStamp()      
+      createon: getCurrentTimeStamp()
     }
-    return this.firebaseService.setDoc( ModelObj.collectionName, model.id, model).then( () =>{
+    return this.firebaseService.setDoc( modelObject.collectionName, model.id, model).then( () =>{
       this.id = model.id
-      this.router.navigate([ModelObj.collectionName,"edit",this.id])
+      this.router.navigate([modelObject.collectionName,"edit",this.id])
     },
     error=>{
       alert("Error: model new" + error)
@@ -370,7 +384,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   }
   save(){
     if( this.model ){
-      this.firebaseService.updateDoc( ModelObj.collectionName, this.model()!.id, this.model)
+      this.firebaseService.updateDoc( modelObject.collectionName, this.model()!.id, this.model)
     }
   }
 
@@ -388,16 +402,16 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         path.forEach( e =>{
           pathWithNodes = pathWithNodes + "/" + JoinNodeObj.className + "/" + e.id
         })
-        let parentPath = ModelObj.collectionName + "/" + this.model()!.id + pathWithNodes
+        let parentPath = modelObject.collectionName + "/" + this.model()!.id + pathWithNodes
         this.firebaseService.deleteDoc(parentPath + "/" + JoinNodeObj.className,nodeInfo.id).then( () =>{
-          this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
+          this.firebaseService.updateDoc(modelObject.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() })
         })
       }
     }
     else{ //this is a root node
-      let parentPath = ModelObj.collectionName + "/" + this.model()!.id 
+      let parentPath = modelObject.collectionName + "/" + this.model()!.id 
       this.firebaseService.deleteDoc(parentPath + "/" + JoinNodeObj.className,nodeInfo.id).then( () =>{
-        this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
+        this.firebaseService.updateDoc(modelObject.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
           console.log("update completed")
         },
         reason=>{
@@ -414,7 +428,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     return new Promise(( resolve, reject ) => {
 
       var req = {
-        collection:ModelObj.collectionName,
+        collection:modelObject.collectionName,
         id: this.model()!.id  
       }
       this.isLoading = true
@@ -435,7 +449,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
   updateAll():Promise<void>{
     return this.updateSampleData().then( ()=>{
-      this.firebaseService.updateDoc(ModelObj.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
+      this.firebaseService.updateDoc(modelObject.collectionName, this.model()!.id, { updateon:getCurrentTimeStamp() }).then( ()=>{
         console.log("node onEditJoinNode updated")
       },
       reason=>{
@@ -477,7 +491,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
           path.forEach( e =>{
             pathWithNodes = pathWithNodes + "/" + JoinNodeObj.className + "/" + e.id
           })
-          let parentPath = ModelObj.collectionName + "/" + this.model()!.id + pathWithNodes
+          let parentPath = modelObject.collectionName + "/" + this.model()!.id + pathWithNodes
           let id = uuid.v4()
           var newJoin:JoinNodeObj = {
             id: id,
@@ -530,7 +544,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       }
       newJoin.transformations = [InitialTransformation,joinResultTransformation]
 
-      this.firebaseService.setDoc( [ ModelObj.collectionName , this.model()!.id , JoinNodeObj.className].join("/"), newJoin.id, newJoin  )
+      this.firebaseService.setDoc( [ modelObject.collectionName , this.model()!.id , JoinNodeObj.className].join("/"), newJoin.id, newJoin  )
       .then( ()=>{
         this.updateAll()
       })
@@ -642,15 +656,14 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
   
 
   onJoinNodeSelected(node:InfoNode){
-
-    //if( !this.selectedJoinNodeObj() || this.selectedJoinNodeObj()!.id != node.id ){
+    if( !this.selectedJoinNodeObj() || this.selectedJoinNodeObj()!.id != node.id ){
       let joinNodeObj = this.flatJoinNodeMap.get( node.id )
       if( !this.selectedJoinNodeObj() || this.selectedJoinNodeObj()!=joinNodeObj ){
         this.selectedJoinNodeObj.set(joinNodeObj!)
         let lastIdx = joinNodeObj!.transformations.length - 1
         this.onTranformation(node, lastIdx)    
       }
-    //}
+    }
   }
 
   getTransformationText(t:Transformation ):string{
@@ -798,19 +811,11 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
 
       let joinNode:JoinNodeObj = this.flatJoinNodeMap.get(infoNode.id)!
 
-      let columnsNames:Array<string> = Array<string>()
-
-      for(let i=0; i<this.selectedColumns.length; i++){
-        if(this.selectedColumns[i].controls["selected"].value ){
-          let name = this.result()!.columns[i]['columnName']
-          columnsNames.push( name )
-        } 
-      }
 
       let selectedColumnsTransformation:SelectColumnsTransformation = {
         type: TransformationType.selectColumns,
         id: uuid.v4(),
-        columnsNames: columnsNames
+        columnsNames: []
       }
       
       let nodeUpdate:JoinNode = {
@@ -871,7 +876,10 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
       this.selectedTransactionIdx.set( i )
       let collection = this.getCollection( joinNodeObj )
 
-      let transformationId = joinNodeObj.transformations[i].id
+      let t = joinNodeObj.transformations[i]
+
+      let transformationId = t.id
+
       this.firebaseService.getdoc(collection + "/" + joinNodeObj.id + "/sampledata", transformationId).then( doc =>{
         if( doc.exists() ){
           let result = doc.data() as SqlResultGeneric
@@ -879,7 +887,7 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
           for( let c =0; c<result.columns.length; c++){
             let t = this.fb.group({
               id:[result.columns[c].columnName],
-              selected:[false],
+              selected:[ joinNodeObj.transformations[i].type == TransformationType.selectColumns && (joinNodeObj.transformations[i] as SelectColumnsTransformation).columnsNames?.includes(result.columns[c].columnName) ],
               rename:[result.columns[c].columnName],
               isFiltered:[""],
               filterValues:[""]
@@ -943,43 +951,88 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
     }
   }
 
+  isFocusedTransformationSelectedColumn():boolean{
+    let idx:number = this.selectedTransactionIdx()!
+    let nodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
+    let t = nodeObj.transformations[idx]
+    if( t.type == TransformationType.selectColumns ){ 
+      return true   
+    }
+    return false
+  }
+
+  isEditingSelectTransformation = false
+
+  onDoneSelectTransformation(){
+    this.isEditingSelectTransformation = false
+    this.updateAll()
+  }
+
+  onEditSelectTransformation(){
+    this.isEditingSelectTransformation = true
+    let i:number = this.selectedTransactionIdx()!
+    let joinNodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
+    let collection = this.getCollection( joinNodeObj )
+
+    let sampledataId = joinNodeObj.transformations[i-1]?.id
+
+    this.firebaseService.getdoc(collection + "/" + joinNodeObj.id + "/sampledata", sampledataId).then( doc =>{
+      if( doc.exists() ){
+        let result = doc.data() as SqlResultGeneric
+        this.selectedColumns.length = 0
+        for( let c =0; c<result.columns.length; c++){
+          let t = this.fb.group({
+            id:[result.columns[c].columnName],
+            selected:[ joinNodeObj.transformations[i].type == TransformationType.selectColumns && (joinNodeObj.transformations[i] as SelectColumnsTransformation).columnsNames?.includes(result.columns[c].columnName) ],
+            rename:[result.columns[c].columnName],
+            isFiltered:[""],
+            filterValues:[""]
+          })
+          this.selectedColumns.push(t)
+        }
+        this.result.set(result)
+        this.selectColumns()
+      }
+      else{
+        this.result.set(undefined)
+      }
+    })
+  }
+
   onSelectColumn(column:SqlColumnGeneric){
     let idx:number = this.selectedTransactionIdx()!
     let nodeObj:JoinNodeObj = this.selectedJoinNodeObj()!
-    if( (idx + 1) < nodeObj.transformations.length ){
-      let nextTransaction = nodeObj.transformations[idx+1]
-      if( nextTransaction.type == TransformationType.selectColumns ){
-        let selectionTransaction:SelectColumnsTransformation = nextTransaction as  SelectColumnsTransformation
+    let t = nodeObj.transformations[idx] as SelectColumnsTransformation
 
-        let i:number = this.selectedColumns.findIndex( e => 
-          e.controls["id"].value == column.columnName
-        )
-        if( this.selectedColumns[i].controls["selected"].value  ){
-          selectionTransaction.columnsNames.push( column.columnName )
-          
-        }
-        else{
-          selectionTransaction.columnsNames.splice( i, 1)
-        }
-        let joinNodeUpdate:JoinNode = {
-          transformations:[ ...nodeObj.transformations ]
-        }
-        
-
-        let infoNode:InfoNode = this.flatInfoNodes.get( nodeObj.id )!
-        let collection:string = this.getCollection(infoNode)
-                
-   
-        this.firebaseService.updateDoc( collection, nodeObj.id, joinNodeUpdate).then( ()=>{
-          this.updateAll()
-        },
-        reason =>{
-          alert("Error: adding new column :" + reason.error)
-        })
-  
-        
+    let i:number = this.selectedColumns.findIndex( e => 
+      e.controls["id"].value == column.columnName
+    )
+    if( this.selectedColumns[i].controls["selected"].value  ){
+      if( !t.columnsNames.includes( column.columnName ) ){
+        t.columnsNames.push( column.columnName )
       }
+      
     }
+    else{
+      let j = t.columnsNames.findIndex(e => e == column.columnName)
+      t.columnsNames.splice( j, 1)
+    }
+    let joinNodeUpdate:JoinNode = {
+      transformations:[ ...nodeObj.transformations ]
+    }
+    
+
+    let infoNode:InfoNode = this.flatInfoNodes.get( nodeObj.id )!
+    let collection:string = this.getCollection(infoNode)
+            
+
+    this.firebaseService.updateDoc( collection, nodeObj.id, joinNodeUpdate).then( ()=>{
+      //only save the selection do not update the resultset
+      
+    },
+    reason =>{
+      alert("Error: adding new column :" + reason.error)
+    })
   }
 
   selectColumns(){
@@ -1041,6 +1094,16 @@ export class ModelEditComponent implements OnInit, AfterViewInit{
         alert("Error ModelDuplicate:" + reason.error.error)
       }
     }) 
+  }
+
+  onmodelColumnSelect(col: string) {
+    this.modelColumn = col
+    const idx = this.columns.indexOf(col)
+    if (idx !== -1) {
+      this.columns.splice(idx, 1)
+      this.columns.push(col)
+    }
+    this.firebaseService.updateDoc(modelObject.collectionName, this.model()!.id, { model_column: col, columns: this.columns })
   }
 
   onLocalFilterColumn(i:number){

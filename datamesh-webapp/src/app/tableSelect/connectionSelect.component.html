@@ -1,0 +1,15 @@
+@if( !connectionSelectedSig() ){
+  <ul>
+      <mat-list>
+      @for( c of connectionSig(); track c.id){
+          <mat-list-item>
+              <button mat-button (click)="onConnectionSelect(c)" >{{c.id}} - {{c.label}}</button>
+          </mat-list-item>
+      }
+      </mat-list>
+  </ul>
+}
+@else{
+  <button mat-button (click)="onConnectionDeselect()" >{{connectionSelectedSig()!.label}}</button>
+  <app-schema-select [connection]="connectionSelectedSig()!"></app-schema-select>
+}

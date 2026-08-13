@@ -25,8 +25,8 @@ import { FirebaseService } from 'app/firebase.service';
 
 @Component({
     selector: 'groupby-dlg',
-    templateUrl: 'groupBy-dlg.html',
-    styleUrl: 'groupBy-dlg.css',
+    templateUrl: './groupby-dlg.html',
+    styleUrl: './groupby-dlg.css',
     imports: [
         CommonModule,
         MatButtonModule,

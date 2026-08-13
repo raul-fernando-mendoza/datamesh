@@ -1,0 +1,15 @@
+
+@if( !list() ){
+    loading...
+}
+@else{
+    <ul class="reports">
+    @for( e of list(); track e.id){
+        
+        <li ><button mat-button [routerLink]="['/ReportGroup/',groupId,'Report',e.id ]">{{e.label}}</button></li>
+    }
+    @empty {
+        <li>No reports found.</li>
+    }
+    </ul>
+}

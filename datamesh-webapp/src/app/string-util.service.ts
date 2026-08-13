@@ -43,5 +43,17 @@ export class StringUtilService {
     // 
     return strEncoded
   }
+  getWordIndexArray(name: string): string[] {
+    const splitList = name.split(/[ _,]/);
+    const indexList: string[] = [];
+    
+    for (let i = 0; i < splitList.length; i++) {
+        for (let y = 1; y <= splitList[i].length; y++) {
+            indexList.push(splitList[i].substring(0, y).toLowerCase());
+        }
+    }
+    
+    return indexList;
+}
   
 }

@@ -1,13 +1,37 @@
-@if( !models() ){
+@if( !model() || !folders() ){
     loading...
 }
 @else{
-    Models<button mat-icon-button [routerLink]="['/model/new']"><mat-icon>add</mat-icon></button> 
-    <mat-list>
-    @for( m of models(); track m.id){
-        <mat-list-item>
-            <button [routerLink]="['/model',m.id]" mat-button>{{m.label}}</button> <span class="debug">{{m.id}}</span>
-        </mat-list-item>
+    <div class="bar">
+        model
+        <span class="spacer"></span>
+        <button mat-icon-button (click)="addFolder()"><mat-icon>create_new_folder</mat-icon></button>
+    </div>
+
+@for( folder of folders(); track folder.id ){
+        <div class="folder">
+            <div class="folder-header">
+                <mat-icon>folder</mat-icon>
+                <span>{{folder.label}}</span>
+                <span class="spacer"></span>
+                <button mat-icon-button [routerLink]="['/model/new']" [queryParams]="{folderId: folder.id}">
+                    <mat-icon>add</mat-icon>
+                </button>
+                <button mat-icon-button (click)="renameFolder(folder)">
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteFolder(folder)">
+                    <mat-icon>delete</mat-icon>
+                </button>
+            </div>
+            <mat-list>
+                @for( m of modelInFolder(folder.id!); track m.id ){
+                    <mat-list-item>
+                        <button [routerLink]="['/model', m.id]" mat-button>{{m.label}}</button>
+                        <span class="debug">{{m.id}}</span>
+                    </mat-list-item>
+                }
+            </mat-list>
+        </div>
     }
-</mat-list>
 }

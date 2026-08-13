@@ -71,7 +71,7 @@
   <as-split class="top" direction="horizontal" cdkDropListGroup>
     <as-split-area class="top" [size]="30">
       <div class="tables-container">
-        <app-tables-tree></app-tables-tree>
+        <connection-select></connection-select>
       </div>
     </as-split-area>
     <as-split-area [size]="70">
@@ -79,11 +79,9 @@
         <as-split-area  [size]="60">      
           <div class="header">
             <button mat-icon-button routerLink="/model"><mat-icon>arrow_back</mat-icon></button> 
-            <span>Model Edit</span>
-              <span class="spacer"></span>
-              <span >{{id}}</span>
-
-                
+            <span>model Edit</span>
+            <span class="spacer"></span>
+            <span >{{id}}</span>                
           </div>
           @if(isLoading == true){
             <ng-container *ngTemplateOutlet="loading"></ng-container>
@@ -104,6 +102,15 @@
                   <button mat-menu-item (click)="onDelete()"><mat-icon>delete</mat-icon>Borrar</button>
                 </mat-menu>                   
               <p>
+              @if(columns.length > 0){
+                <div class="model-column-section">
+                  <span class="model-column-label">Dimension tables:</span>
+                  @for(col of columns; track col; let last = $last){
+                    @if(last){ <span class="model-column-label">model:</span> }
+                    <span class="column-chip" [class.model-selected]="col === modelColumn" (click)="onmodelColumnSelect(col)">{{ col }}</span>
+                  }
+                </div>
+              }
               <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor" class="example-tree">
                 <mat-nested-tree-node *matTreeNodeDef="let node" >
                   <!--LEAF:{{node.item.name}}-->
@@ -182,12 +189,24 @@
                 <table  *ngIf="result() && result()!.columns && result()!.resultSet">
                   <thead class="gridheather">
                     <tr class="gridheather">
-                      <th class="sticky-col index_heather"> idx </th>
+                      <th class="sticky-col index_heather">
+                        @if(isFocusedTransformationSelectedColumn()){
+                          @if(isEditingSelectTransformation){
+                            <button mat-icon-button (click)="onDoneSelectTransformation()"><mat-icon>done</mat-icon></button>
+                          }@else{
+                            <button mat-icon-button (click)="onEditSelectTransformation()"><mat-icon>edit</mat-icon></button>
+                          }
+                        }@else{
+                          idx
+                        }
+                      </th>
                       @for( h of result()!.columns ; track h; let i = $index ){
                       <th [formGroup]="selectedColumns[i]">
                         <div class="col">
                           <div class="row">                          
-                            <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>    
+                            @if( isFocusedTransformationSelectedColumn() && isEditingSelectTransformation ){
+                              <mat-checkbox formControlName="selected" (click)="onSelectColumn(h)"></mat-checkbox>
+                            }
                             @if( selectedColumns[i].controls["selected"].value ){
                               <mat-form-field class="name" appearance="fill">
                                 <mat-label>Name</mat-label>
@@ -204,7 +223,7 @@
                             [hideMultipleSelectionIndicator]="true"
                             >                           
                               <mat-button-toggle value="true" >
-                                <mat-icon>notifications</mat-icon>
+                                <mat-icon>filter_list</mat-icon>
                               </mat-button-toggle>  
                             </mat-button-toggle-group>                          
                           </div> 

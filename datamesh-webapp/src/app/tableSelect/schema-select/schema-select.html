@@ -1,0 +1,15 @@
+@if( !schemaSelectedSig() ){
+  <ul>
+      <mat-list>
+      @for( schema of schemaSig(); track schema.id){
+          <mat-list-item>
+              <button mat-button (click)="onSchemaSelect(schema)" >{{schema.name}}</button>
+          </mat-list-item>
+      }
+      </mat-list>
+  </ul>
+}
+@else{
+  \ <button mat-button (click)="onSchemaDeselect()" >{{schemaSelectedSig()!.name}}</button>
+  <app-table-select [connection]="connection" [schema]="schemaSelectedSig()!"></app-table-select>
+}

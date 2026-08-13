@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { CommonModule } from '@angular/common';
 import {CurrencyPipe} from '@angular/common';
 import {MatTableModule} from '@angular/material/table';
+import { RouterModule } from '@angular/router';
 
 interface Transaction {
   item: string;
@@ -20,7 +21,8 @@ interface Transaction {
         MatCardModule,
         MatIconModule,
         MatButtonModule,
-        MatTableModule
+        MatTableModule,
+        RouterModule
     ]
 })
 export class WelcomeComponent {

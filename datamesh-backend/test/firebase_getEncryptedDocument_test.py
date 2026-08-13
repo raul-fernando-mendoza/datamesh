@@ -14,7 +14,7 @@ class TestFireStore(unittest.TestCase):
         
         req = {
             "collectionId":"Connection",
-            "id":"testABCD"            
+            "id":"6b81f387-0457-4a47-a44a-dd9d34e60e41"            
         }
         
         obj = bsnrules.getEncryptedDocument( req )

@@ -50,6 +50,11 @@ table tr th:first-child {
     z-index: 11;
 }
 
+thead .first-col {
+    top: 0;
+    z-index: 12;
+}
+
 table tr th {
     position: sticky;
     top: 0;
@@ -72,5 +77,36 @@ table tr th {
 
 .number{
     text-align: right;
+}
+
+.selected-row {
+    background-color: lightgray;
+}
+
+.selected-row .sticky-col {
+    background-color: lightgray;
+}
+
+.col-vis-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 2px;
+    line-height: 1;
+    vertical-align: middle;
+    opacity: 0.4;
+}
+
+.col-vis-btn:hover {
+    opacity: 1;
+}
+
+.col-vis-icon {
+    font-size: 13px !important;
+    width: 13px !important;
+    height: 13px !important;
+    line-height: 13px !important;
+    color: #333;
 }
 

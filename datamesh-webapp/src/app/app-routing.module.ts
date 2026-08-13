@@ -3,17 +3,21 @@ import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterModule, RouterStat
 import { AuthService } from './auth.service';
 import { ComparisonEditComponent } from './comparison-edit/comparison-edit.component';
 import { ComparisonExecuteComponent } from './comparison-execute/comparison-execute.component';
-import { ComparisonGroupEditComponent } from './comparisongroup-edit/comparisongroup-edit.component';
 import { ConnectionEditComponent } from './connection-edit/connection-edit.component';
 import { ConnectionList } from './connection-list/connection-list';
 import { DatasetEditComponent } from './dataset-edit/dataset-edit.component';
 import { DatasetgroupEditComponent } from './datasetgroup-edit/datasetgroup-edit.component';
+import { SqlJupiterDocList } from './sqljupiterdoc-list/sqljupiterdoc-list';
 import { LoginFormComponent } from './login-form/login-form.component';
-import { ModelEditComponent } from './model-edit/model-edit.component';
-import { ModelList } from './model-list/model-list';
+import { modelEditComponent } from './model-edit/model-edit.component';
+import { modelList } from './model-list/model-list';
 import { SqlJupiterDocComponent } from './sql-jupiter-doc/sql-jupiter-doc.component';
-import { TablesTreeComponent } from './tables-tree/tables-tree.component';
+
 import { WelcomeComponent } from './welcome/welcome.component';
+import { SqlJupiterGroupList } from './sqljupitergroup-list/sqljupitergroup-list';
+import { ReportGroupList } from './reportgroup/reportgroup-list';
+import { ReportEditComponent } from './report-edit/report-edit.component';
+import { ReportGroupEdit } from './reportgroup/reportgroup-edit';
 
 export function loginGuard(
   redirectRoute: string
@@ -69,13 +73,18 @@ const routes: Routes = [
   { path: 'connection/edit/:id', component:ConnectionEditComponent },
   
   
-  { path: 'model', component:ModelList, canActivate: [loginGuard('/loginForm/connection-list')] },
-  { path: 'model/:id', pathMatch:'full', component:ModelEditComponent },
+  { path: 'model', component:modelList, canActivate: [loginGuard('/loginForm/connection-list')] },
+  { path: 'model/:id', pathMatch:'full', component:modelEditComponent },
   
 
-  { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent }, 
+  { path: 'datasetgroup/:groupCollection/create', component:DatasetgroupEditComponent },
   
-  { path: 'SqlJupiterDoc/create/:groupId', component:SqlJupiterDocComponent },
+
+  { path: 'SqlJupiterGroup', component:SqlJupiterGroupList , canActivate: [loginGuard('/loginForm/SqlJupiterGroup')] },
+
+  { path: 'SqlJupiterGroup/:groupId/SqlJupiterDoc', component:SqlJupiterDocList },
+  
+  { path: 'SqlJupiterGroup/:groupId/SqlJupiterDoc/:id', component:SqlJupiterDocComponent },
   { path: 'SqlJupiterDoc/edit/:id', component:SqlJupiterDocComponent },
   
   { path: 'Dataset/create/:groupId', component:DatasetEditComponent },
@@ -90,8 +99,13 @@ const routes: Routes = [
   { path: 'Connection/create/:groupId', component: ConnectionEditComponent},
   { path: 'Connection/edit/:id', component: ConnectionEditComponent},
 
-  { path: 'Model/create/:groupId', component: ModelEditComponent},
-  { path: 'Model/edit/:id', component: ModelEditComponent},
+  { path: 'Model/create/:groupId', component: modelEditComponent},
+  { path: 'Model/edit/:id', component: modelEditComponent},
+
+  { path: 'ReportGroup', component:ReportGroupList, canActivate: [loginGuard('/loginForm/ReportGroup')]},
+  { path: 'ReportGroup/:id', component:ReportGroupEdit, canActivate: [loginGuard('/loginForm/ReportGroup')]},
+  { path: 'ReportGroup/:groupId/Report/:id', component: ReportEditComponent},
+  
   
   //this should be the last one
   { path: '**', component: WelcomeComponent }

@@ -2,9 +2,10 @@ import { NgModule, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UniqueSelectionDispatcher } from '@angular/cdk/collections';
 import { AnyCatcher } from 'rxjs/internal/AnyCatcher';
-import { Timestamp } from 'firebase/firestore';
-import { ModelEditComponent } from 'app/model-edit/model-edit.component';
+import { Timestamp, WhereFilterOp } from 'firebase/firestore';
+import { modelEditComponent } from 'app/model-edit/model-edit.component';
 import { MatTabBodyPortal } from '@angular/material/tabs';
+import { NodeWithI18n } from '@angular/compiler';
 
 
 
@@ -126,27 +127,41 @@ export class SqlJupiterCollection{
   static readonly collectionName:string = "SqlJupiterCollection"
 }
 
+export interface SqlJupiterGroup{
+  id:string
+  label:string
+  owner:string
+  deleted:boolean
+  indexWords:string[]
+  createon:Date
+  updateon:Date
+}
+
 export interface SqlJupiter{
   className?:string
-  sql?:string 
+  sql?:string
   connectionId?:string|null
 
   request_id?:  string | null
   request_status?:""|"requested"|"assigned"|"aborted"|"completed"|"error"
   request_start_time?: Timestamp | null
   request_completion_time?: Timestamp | null
-  request_error_message?:string 
+  request_error_message?:string
 
+  hidden_columns?: string[]
+  columns_hidden_active?: boolean
 }
 
 export class SqlJupiterObj implements SqlJupiter{
-  sql!:string 
+  sql!:string
   connectionId!:string|null
   request_id:string|null = null
   request_status:""|"requested"|"assigned"|"aborted"|"completed"|"error"=""
   request_start_time: Timestamp | null = null
   request_completion_time: Timestamp | null = null
-  request_error_message:string = "" 
+  request_error_message:string = ""
+  hidden_columns: string[] = []
+  columns_hidden_active: boolean = false
 }
 
 export class SqlResultCollection{
@@ -181,6 +196,9 @@ export class JupiterDoc{
   label:string=""
   groupId:string=""
   itemList:Array<{className:string, id:string}> = []
+  owner=""
+  createon:Date=new Date()
+  updateon:Date= new Date()
 }
 
 export interface Connection{
@@ -344,29 +362,47 @@ export interface JoinNodeActionData {
   action:ActionOption
 }
 
-export interface Model{
+export interface modelFolder{
+  id?:string
+  label?:string
+  owner?:string
+  deleted?:boolean
+  createon?:string
+  updateon?:string
+}
+export class modelFolderCollection{
+  static collectionName = "modelFolder"
+}
+
+export interface model{
   id?:string
   label?:string
   description?:string
   owner?:string
+  folderId?:string
   updateon?:string
   createon?:string
+  columns?:string[]
+  model_column?:string
 }
 
 function pad2(n:number) { return n < 10 ? '0' + n : n }
 
 export function getCurrentTimeStamp(){
   let date = new Date()
-  return date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2( date.getDate()) + pad2( date.getHours() ) + pad2( date.getMinutes() ) + pad2( date.getSeconds() ) 
+  return date.getFullYear().toString() + pad2(date.getMonth() + 1) + pad2( date.getDate()) + pad2( date.getHours() ) + pad2( date.getMinutes() ) + pad2( date.getSeconds() )
 }
-export class ModelObj implements Model{
-  static collectionName = "Model"
+export class modelObject implements model{
+  static collectionName = "model"
   id!:string
   label!:string
   description:string = ""
   owner!:string
+  folderId?:string
   updateon:string = getCurrentTimeStamp()
   createon:string = getCurrentTimeStamp()
+  columns?:string[]
+  model_column?:string
 }
 
 export enum TreeOption {
@@ -431,7 +467,11 @@ export interface SqlResultInFirebase{
   metadata:Array<SnowFlakeNativeColumn>
 }
 
-
+export type QueryItem = {
+  fieldPath:string ,
+  opStr:WhereFilterOp,
+  value:string|boolean
+}
 
 
 

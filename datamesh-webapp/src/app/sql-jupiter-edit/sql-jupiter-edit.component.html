@@ -81,17 +81,45 @@
                     <table *ngIf="sqlResult.result_set && sqlResult.result_metadata">
                         <thead>
                             <tr>
-                                <td class="sticky-col first-col"> idx </td>
-                                <th *ngFor="let h of sqlResult.result_metadata">{{ h["name"] }}</th>
+                                <td class="sticky-col first-col">
+                                    idx
+                                    <button class="col-vis-btn" (click)="toggleHideActive()" [title]="columnsHiddenActive ? 'Show all columns' : 'Apply hidden columns'">
+                                        <mat-icon class="col-vis-icon">{{ columnsHiddenActive ? 'visibility_off' : 'visibility' }}</mat-icon>
+                                    </button>
+                                    <button class="col-vis-btn" [matMenuTriggerFor]="tableMenu" title="Column options">
+                                        <mat-icon class="col-vis-icon">more_vert</mat-icon>
+                                    </button>
+                                    <mat-menu #tableMenu="matMenu">
+                                        <button mat-menu-item (click)="hideEmptyColumns()">
+                                            <mat-icon>visibility_off</mat-icon>
+                                            Hide all-empty columns
+                                        </button>
+                                    </mat-menu>
+                                </td>
+                                <th *ngFor="let h of sqlResult.result_metadata; index as i" [style.display]="isColumnVisible(i) ? '' : 'none'">
+                                    {{ h["name"] }}
+                                    <button class="col-vis-btn" (click)="toggleColumnHidden(h['name'])" [title]="isColumnHidden(h['name']) ? 'Marked as hidden' : 'Mark as hidden'">
+                                        <mat-icon class="col-vis-icon" [style.color]="isColumnHidden(h['name']) ? 'blue' : ''">{{ isColumnHidden(h['name']) ? 'visibility_off' : 'visibility' }}</mat-icon>
+                                    </button>
+                                    <button class="col-vis-btn" [matMenuTriggerFor]="colMenu" (click)="activeColMenuIndex = i" title="Column actions">
+                                        <mat-icon class="col-vis-icon">more_vert</mat-icon>
+                                    </button>
+                                </th>
                             </tr>
                         </thead>
-                        <tbody>                
-                            <tr *ngFor="let row of sqlResult.result_set; index as i">
+                        <tbody>
+                            <tr *ngFor="let row of sqlResult.result_set; index as i" [ngClass]="{'selected-row': isRowSelected(i)}" (click)="highlightRow(i)">
                                 <td class="sticky-col first-col">{{ i + 1 }}</td>
-                                <td *ngFor="let key of getKeys(row)" [ngClass]="{'number': isNumber(key) }">{{ format(key, row[key]) }}</td> 
+                                <td *ngFor="let key of getKeys(row); index as colIdx" [style.display]="isColumnVisible(colIdx) ? '' : 'none'" [ngClass]="{'number': isNumber(key) }">{{ format(key, row[key]) }}</td>
                             </tr>
-                        </tbody>                
-                    </table>  
+                        </tbody>
+                    </table>
+                    <mat-menu #colMenu="matMenu">
+                        <button mat-menu-item (click)="copyColumnToClipboard(activeColMenuIndex)">
+                            <mat-icon>content_copy</mat-icon>
+                            Copy column values
+                        </button>
+                    </mat-menu>
                 </div>
             </div>
         }

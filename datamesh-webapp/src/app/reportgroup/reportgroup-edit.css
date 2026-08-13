@@ -1,0 +1,17 @@
+.list{
+    margin-left:10%;
+}
+
+.heather{
+    display:flex;
+    justify-content: space-between;
+}
+.searchFG{
+    display: flex;
+    justify-content:center;
+}
+ul.reports {
+    margin-left:2em;
+    list-style-type: none; 
+}
+

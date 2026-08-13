@@ -1,0 +1,118 @@
+<div class="bar">
+  <button mat-icon-button routerLink="/ReportGroup"><mat-icon>arrow_back</mat-icon></button>Report
+  <span class="spacer"></span>
+  <span>{{id}}</span>
+</div>
+
+@if( id == 'new'){
+  <div [formGroup]="FG" class="form">
+    <mat-form-field class="name-form" appearance="fill">
+        <mat-label>Name of Report</mat-label>
+        <input matInput formControlName="label" >
+    </mat-form-field> 
+    <div>  
+      <button mat-raised-button routerLink="..">Cancel</button>    
+      <button mat-raised-button color="primary" [disabled]="!FG.valid" (click)="onNew()">Submit</button>
+    </div>       
+  </div>      
+}
+@else{
+  <as-split class="top" direction="horizontal" cdkDropListGroup>
+    <as-split-area class="top" [size]="30">
+        <mat-tree #tree [dataSource]="dataSource" [childrenAccessor]="childrenAccessor">
+          <!-- This is the tree node template for leaf nodes -->
+          <!-- This is the tree node template for expandable nodes -->
+          <mat-tree-node *matTreeNodeDef="let node;when: hasChild" matTreeNodePadding matTreeNodeToggle
+                         [cdkTreeNodeTypeaheadLabel]="node.label">
+            <button matIconButton matTreeNodeToggle
+                    [attr.aria-label]="'Toggle ' + node.label">
+              <mat-icon class="mat-icon-rtl-mirror">
+                {{tree.isExpanded(node) ? 'expand_more' : 'chevron_right'}}
+              </mat-icon>
+            </button>
+            <div cdkDropList >
+              <div class="model-box" cdkDrag [cdkDragData]="node">
+                <div class="example-custom-drag" *cdkDragPreview matchSize="true">{{node.label}}</div>
+                <div class="example-custom-placeholder" *cdkDragPlaceholder>{{node.label}}</div>                 
+                {{node.label}} 
+              </div>  
+            </div>         
+          </mat-tree-node>
+        </mat-tree>        
+    </as-split-area>
+    <as-split-area [size]="70">
+      <as-split direction="vertical">
+        <as-split-area  [size]="60"> 
+              <h2>Sections</h2>
+              @for( s of sections(); track s.id){
+                <div class="section">
+                  <div class="bar">
+                    <span class="spacer"></span>
+                    <button mat-icon-button (click)="deleteSection(s)"><mat-icon>delete</mat-icon></button>
+                  </div>
+                  @for( w of s.widgets; track w.id ){
+                    <div
+                      cdkDropList
+                      [cdkDropListData]="w.model"
+                      class="widget-list"
+                      cdkDropListOrientation="horizontal"
+                      (cdkDropListDropped)="dropmodel($event)" 
+                      [cdkDropListEnterPredicate]="acceptmodel"
+                    >
+                      @for( m of w.model; track m.id){
+                        <div class="model-box" cdkDrag>
+                          <span cdkDragHandle>{{m.label}}</span>
+                          <button mat-icon-button (click)="deletemodel(w,m)"><mat-icon>delete</mat-icon></button>                          
+                        </div>
+                      }
+                    </div>
+                    <div class="grid-heather">
+                      <td (click)="toggleFilter(w)"><mat-icon>{{w.filterActive ? 'filter_list' : 'edit'}}</mat-icon></td>
+                      <div class="grid-heather-columns"
+                        cdkDropList
+                        [cdkDropListData]="w.columns"
+                        
+                        cdkDropListOrientation="horizontal"
+                        (cdkDropListDropped)="dropColumns($event)" 
+                        [cdkDropListEnterPredicate]="acceptmodel"
+                        >
+                          @for( c of visibleColumns(w); track c){
+                            <td cdkDrag (click)="toggleColumn(w, c)">
+                              <mat-icon>{{w.columnsSelected.includes(c) ? 'visibility' : 'visibility_off'}}</mat-icon>{{c}}
+                            </td>
+                          }
+                      </div>
+                      <div class="grid-heather-aggcolumns"
+                        cdkDropList
+                        [cdkDropListData]="w.columns"
+                        
+                        cdkDropListOrientation="horizontal"
+                        (cdkDropListDropped)="dropColumns($event)" 
+                        [cdkDropListEnterPredicate]="acceptmodel"
+                        >
+                          @for( c of visibleAggColumns(w); track c){
+                            <td cdkDrag (click)="toggleColumn(w, c)">
+                              <mat-icon>{{w.columnsSelected.includes(c) ? 'visibility' : 'visibility_off'}}</mat-icon>{{c}}
+                            </td>
+                          }
+                      </div>
+
+                    </div>
+                  }
+                  
+                </div>
+              }
+              <div class="bar">
+                <span class="spacer"></span>
+                <button mat-icon-button (click)="onAddSection()"><mat-icon>add</mat-icon></button>  
+                <span class="spacer"></span>
+              </div>
+              
+        </as-split-area>
+        <as-split-area class="scroll" [size]="40">
+          result          
+        </as-split-area>
+      </as-split>
+    </as-split-area>
+  </as-split>
+}
